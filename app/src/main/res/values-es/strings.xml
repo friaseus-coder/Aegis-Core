@@ -1,0 +1,104 @@
+<resources>
+    <string name="app_name">Aegis Core</string>
+    
+    <!-- Main Menu -->
+    <string name="main_menu_title">Aegis Core</string>
+    <string name="select_module">Seleccione Módulo</string>
+    <string name="module_crm_title">Hub de Proyectos</string>
+    <string name="module_crm_subtitle">CRM y Gestión de Tareas</string>
+    <string name="module_field_title">Partes de Trabajo</string>
+    <string name="module_field_subtitle">Servicio de Campo y Firmas</string>
+    <string name="module_budgets_title">Presupuestos</string>
+    <string name="module_budgets_subtitle">Kanban y Presupuestos</string>
+    <string name="module_expenses_title">Gastos</string>
+    <string name="module_expenses_subtitle">Escaneo y Exportación</string>
+    <string name="module_inventory_title">Inventario</string>
+    <string name="module_inventory_subtitle">Control de Stock</string>
+    <string name="module_mileage_title">Kilometraje</string>
+    <string name="module_mileage_subtitle">Registro de Viajes</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Panel de Proyectos</string>
+    <string name="manage_clients">Gestionar Clientes</string>
+    <string name="active_projects">Proyectos Activos</string>
+    <string name="no_active_projects">No hay proyectos activos.</string>
+    <string name="status_label">Estado: %1$s</string>
+    <string name="deadline_label">Fecha límite: %1$s</string>
+
+    <!-- Auth -->
+    <string name="locked_title">Bloqueado</string>
+    <string name="enter_pin_label">Introducir PIN</string>
+    <string name="unlock_button">Desbloquear</string>
+
+    <!-- Clients -->
+    <string name="clients_title">Clientes</string>
+    <string name="export_csv">Exportar CSV</string>
+    <string name="import_csv">Importar CSV</string>
+    <string name="add_client_fab">Añadir Cliente</string>
+    <string name="no_clients">No hay clientes todavía.</string>
+    <string name="client_email_placeholder">Sin email</string>
+    
+    <!-- Add Client Dialog -->
+    <string name="add_client_dialog_title">Añadir Cliente</string>
+    <string name="name_label">Nombre</string>
+    <string name="email_label">Email</string>
+    <string name="phone_label">Teléfono</string>
+    <string name="notes_label">Notas</string>
+    <string name="add_button">Añadir</string>
+    <string name="cancel_button">Cancelar</string>
+
+    <!-- Import/Export -->
+    <string name="import_errors_title">Errores de Importación</string>
+    <string name="ok_button">Aceptar</string>
+    <string name="import_success">Importación Correcta</string>
+    <string name="import_error_prefix">Error: %1$s</string>
+    <!-- Setup -->
+    <string name="welcome_title">Bienvenido a Aegis Core</string>
+    <string name="recovery_kit_title">Tu Kit de Recuperación (Frase Semilla)</string>
+    <string name="recovery_kit_desc">Escribe estas palabras en orden. Son la ÚNICA forma de recuperar tus datos si olvidas tu PIN.</string>
+    <string name="create_pin_label">Crear PIN (6 dígitos)</string>
+    <string name="pin_hint">PIN</string>
+    <string name="init_vault_button">Inicializar Bóveda</string>
+    <!-- Reports -->
+    <string name="create_report_title">Nuevo Parte de Trabajo</string>
+    <string name="desc_work_label">Descripción del Trabajo</string>
+    <string name="attach_photo_button">Adjuntar Foto</string>
+    <string name="customer_signature_title">Firma del Cliente</string>
+    <string name="clear_signature_button">Borrar Firma</string>
+    <string name="finish_sign_button">Finalizar y Firmar</string>
+    <string name="photo_captured_toast">Foto capturada (simulada)</string>
+    <string name="desc_required_toast">Descripción requerida</string>
+    <!-- CRM Details -->
+    <string name="client_not_found">Cliente no encontrado o cargando...</string>
+    <string name="add_project_fab">Añadir Proyecto</string>
+    <string name="client_email_label">Email: %1$s</string>
+    <string name="client_phone_label">Teléfono: %1$s</string>
+    <string name="client_notes_label">Notas: %1$s</string>
+    <string name="not_available_short">N/A</string>
+    <string name="projects_section_title">Proyectos</string>
+    <string name="add_project_dialog_title">Nuevo Proyecto</string>
+    <string name="project_name_label">Nombre del Proyecto</string>
+    <string name="create_button">Crear</string>
+    
+    <!-- Project Details -->
+    <string name="project_not_found">Proyecto no encontrado...</string>
+    <string name="add_task_fab">Añadir Tarea</string>
+    <string name="create_work_report_button">Crear Parte de Trabajo</string>
+    <string name="work_reports_section_title">Partes de Trabajo</string>
+    <string name="report_item_title">Parte #%1$d</string>
+    <string name="no_reports_yet">No hay partes todavía.</string>
+    <string name="tasks_section_title">Tareas</string>
+    <string name="add_task_dialog_title">Nueva Tarea</string>
+    <string name="task_description_label">Descripción</string>
+
+    <!-- Quotes -->
+    <string name="new_quote_title">Nuevo Presupuesto</string>
+    <string name="back_content_desc">Atrás</string>
+    <string name="save_content_desc">Guardar</string>
+    <string name="select_client_placeholder">Seleccionar Cliente</string>
+    <string name="client_label">Cliente</string>
+    <string name="no_clients_found">No se encontraron clientes</string>
+    <string name="quote_title_label">Título del Presupuesto</string>
+    <string name="total_amount_label">Importe Total ($)</string>
+    <string name="quote_description_label">Descripción / Elementos</string>
+</resources>
