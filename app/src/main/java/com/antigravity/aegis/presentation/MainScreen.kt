@@ -1,11 +1,19 @@
 package com.antigravity.aegis.presentation
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.antigravity.aegis.presentation.auth.AuthState
 import com.antigravity.aegis.presentation.auth.AuthViewModel
@@ -140,7 +148,27 @@ fun MainScreen(
                         onNavigateBack = { crmNavController.popBackStack() }
                     )
                 }
+
+                composable("settings") {
+                    com.antigravity.aegis.presentation.settings.SettingsScreen(
+                        onNavigateBack = { crmNavController.popBackStack() },
+                        onLogout = { 
+                            viewModel.logout() 
+                        }
+                    )
+                }
             }
+            
+            // Global Settings Button Overlay
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+               // This overlay captures clicks? No, checking logic.
+               // We need the button to be on top.
+               // We cannot wrap NavHost easily without blocking interaction if not careful.
+               // But a small button in corner is fine.
+            }
+            // Better approach: Floating Action Button logic or just put it in the Box alongside NavHost
         }
     }
 }

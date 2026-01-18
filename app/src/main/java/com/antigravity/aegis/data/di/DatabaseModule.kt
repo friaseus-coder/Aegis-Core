@@ -3,7 +3,7 @@ package com.antigravity.aegis.data.di
 import android.content.Context
 import androidx.room.Room
 import com.antigravity.aegis.data.local.AegisDatabase
-import com.antigravity.aegis.data.local.dao.UserConfigDao
+import com.antigravity.aegis.data.local.dao.UserEntityDao
 import com.antigravity.aegis.data.local.dao.CrmDao
 import com.antigravity.aegis.data.security.EncryptionKeyManager
 import dagger.Module
@@ -51,12 +51,17 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideUserConfigDao(database: AegisDatabase): UserConfigDao {
-        return database.userConfigDao()
+    fun provideUserEntityDao(database: AegisDatabase): UserEntityDao {
+        return database.userEntityDao()
     }
 
     @Provides
     fun provideCrmDao(database: AegisDatabase): CrmDao {
         return database.crmDao()
+    }
+
+    @Provides
+    fun provideUserConfigDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.UserConfigDao {
+        return database.userConfigDao()
     }
 }

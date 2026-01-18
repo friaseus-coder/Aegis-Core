@@ -9,20 +9,14 @@ class FinalizeSetupUseCase @Inject constructor(
     private val encryptionKeyManager: EncryptionKeyManager
 ) {
     suspend operator fun invoke(pin: String, seedPhrase: List<String>, masterKey: ByteArray): Result<Unit> {
-        val saveResult = authRepository.saveCredentials(pin, seedPhrase, masterKey)
+        val saveResult = authRepository.createAdmin("Admin", pin, seedPhrase, masterKey)
         if (saveResult.isSuccess) {
             // Set the key in memory so the session is active immediately
-            encryptionKeyManager.setKey(String(masterKey.map { it.toInt().toChar() }.toCharArray()))
-            // Note: The KeyManager as written expects String (legacy from prompt).
-            // We should ideally pass ByteArray, but KeyManager converts string to char array.
-            // The Master Key is raw bytes, not chars. 
-            // FIX: EncryptionKeyManager was designed for "User enters PIN -> PIN is Key".
-            // NOW: "User enters PIN -> We unwrap MK -> MK is Key".
-            // We need to update EncryptionKeyManager to accept Byte Array or handle raw bytes.
-            // For now, we'll map bytes to a String representation (Base64) to set it, 
-            // OR we should update EncryptionKeyManager to hold ByteArray.
-            // Let's update EncryptionKeyManager to be safe.
+            // Using Base64 to store byte array as string key for now
+             val encodedKey = android.util.Base64.encodeToString(masterKey, android.util.Base64.NO_WRAP)
+            encryptionKeyManager.setKey(encodedKey)
+            return Result.success(Unit)
         }
-        return saveResult
+        return Result.failure(saveResult.exceptionOrNull() ?: Exception("Unknown error"))
     }
 }

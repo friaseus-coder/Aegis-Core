@@ -2,10 +2,22 @@ package com.antigravity.aegis.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Premium Security Palette
+val NavyBlue = Color(0xFF0A192F)
+val NavyBlueDark = Color(0xFF050C18) // For background variance if needed
+val Gold = Color(0xFFD4AF37)
+val GoldDim = Color(0xFFC5A028)
+val White = Color(0xFFFFFFFF)
+val LightGray = Color(0xFFE0E0E0)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Semantic Colors
+val Primary = NavyBlue
+val OnPrimary = Gold
+val Secondary = Gold
+val OnSecondary = NavyBlue
+val Background = NavyBlue
+val OnBackground = LightGray
+val Surface = NavyBlueDark
+val OnSurface = LightGray
+val Error = Color(0xFFCF6679)
+val OnError = Color.Black

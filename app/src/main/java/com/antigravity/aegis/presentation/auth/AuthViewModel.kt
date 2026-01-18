@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.antigravity.aegis.data.model.UserEntity
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
@@ -26,17 +28,49 @@ class AuthViewModel @Inject constructor(
     private val _setupState = MutableStateFlow<SetupUiState?>(null)
     val setupState = _setupState.asStateFlow()
 
+    // Users
+    private val _users = MutableStateFlow<List<UserEntity>>(emptyList())
+    val users = _users.asStateFlow()
+
+    private val _selectedUser = MutableStateFlow<UserEntity?>(null)
+    val selectedUser = _selectedUser.asStateFlow()
+
+    private val _language = MutableStateFlow("es")
+    val language = _language.asStateFlow()
+
     init {
-        checkAuthStatus()
+        observeUsers()
     }
 
-    private fun checkAuthStatus() {
-        if (authRepository.isSetupDone()) {
-            _authState.value = AuthState.Locked
-        } else {
-            _authState.value = AuthState.NeedsSetup
-            startSetup()
+    private fun observeUsers() {
+        viewModelScope.launch {
+            authRepository.getAllUsers().collect { userList ->
+                _users.value = userList
+                if (userList.isEmpty()) {
+                    // No users -> Needs Setup (Create Admin)
+                     _authState.value = AuthState.NeedsSetup
+                    if (_setupState.value == null) {
+                        startSetup()
+                    }
+                } else {
+                    // Users exist -> Locked/Select User
+                    if (_authState.value == AuthState.Loading || _authState.value == AuthState.NeedsSetup) {
+                         _authState.value = AuthState.Locked
+                    }
+                    if (_selectedUser.value == null) {
+                        _selectedUser.value = userList.first()
+                    }
+                }
+            }
         }
+    }
+
+    fun selectUser(user: UserEntity) {
+        _selectedUser.value = user
+    }
+
+    fun setLanguage(lang: String) {
+        _language.value = lang
     }
 
     private fun startSetup() {
@@ -56,20 +90,26 @@ class AuthViewModel @Inject constructor(
             if (result.isSuccess) {
                 _authState.value = AuthState.Authenticated
             } else {
-                // Handle error
+                // Todo: Handle error
             }
         }
     }
 
     fun login(pin: String) {
+        val user = _selectedUser.value ?: return
         viewModelScope.launch {
-            val result = loginWithPinUseCase(pin)
+            val result = loginWithPinUseCase(user.id, pin)
             if (result.isSuccess) {
                 _authState.value = AuthState.Authenticated
             } else {
-                // Show error
+                // Todo: Show error (Shake animation etc)
             }
         }
+    }
+
+    fun logout() {
+        // Clear session logic if any extra
+        _authState.value = AuthState.Locked
     }
 }
 

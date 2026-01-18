@@ -29,20 +29,22 @@ class SecurityDataSource @Inject constructor(
     }
 
     companion object {
-        private const val KEY_PIN_WRAPPED_MK = "pin_wrapped_mk"
+        private const val KEY_PIN_WRAPPED_MK_PREFIX = "pin_wrapped_mk_"
         private const val KEY_RECOVERY_WRAPPED_MK = "recovery_wrapped_mk"
         private const val KEY_IS_SETUP_DONE = "is_setup_done"
     }
 
-    fun savePinWrappedMk(wrappedKey: ByteArray) {
+    fun savePinWrappedMk(userId: Int, wrappedKey: ByteArray) {
         val encoded = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
-        sharedPreferences.edit().putString(KEY_PIN_WRAPPED_MK, encoded).apply()
+        sharedPreferences.edit().putString(getPinnedWrappedKey(userId), encoded).apply()
     }
 
-    fun getPinWrappedMk(): ByteArray? {
-        val encoded = sharedPreferences.getString(KEY_PIN_WRAPPED_MK, null) ?: return null
+    fun getPinWrappedMk(userId: Int): ByteArray? {
+        val encoded = sharedPreferences.getString(getPinnedWrappedKey(userId), null) ?: return null
         return Base64.decode(encoded, Base64.NO_WRAP)
     }
+
+    private fun getPinnedWrappedKey(userId: Int) = "${KEY_PIN_WRAPPED_MK_PREFIX}$userId"
 
     fun saveRecoveryWrappedMk(wrappedKey: ByteArray) {
         val encoded = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
