@@ -29,6 +29,9 @@
     <string name="locked_title">Bloqueado</string>
     <string name="enter_pin_label">Introducir PIN</string>
     <string name="unlock_button">Desbloquear</string>
+    <string name="create_user_label">Crear Usuario</string>
+    <string name="select_user_label">Seleccionar Usuario</string>
+    <string name="create_user_button">Crear Usuario</string>
 
     <!-- Clients -->
     <string name="clients_title">Clientes</string>

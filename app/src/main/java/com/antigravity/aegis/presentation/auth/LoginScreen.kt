@@ -10,18 +10,45 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
 import com.antigravity.aegis.data.model.UserEntity
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import java.util.Locale
 
 @Composable
 fun LoginScreen(
-    onLogin: (String) -> Unit
+    onLogin: (String) -> Unit,
+    onNavigateToCreateUser: () -> Unit
 ) {
     val viewModel: AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val users by viewModel.users.collectAsState()
     val selectedUser by viewModel.selectedUser.collectAsState()
-    val language by viewModel.language.collectAsState()
+    val language by viewModel.language.collectAsState() 
+    
+    val context = LocalContext.current
+    LaunchedEffect(language) {
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+        val config = context.resources.configuration
+        config.setLocale(locale)
+        @Suppress("DEPRECATION")
+        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+    }
+    
+    // Auto-redirect if no users
+    LaunchedEffect(users) {
+        // We wait a bit or check if we loaded. Assuming empty list means no users.
+        // But we need to distinguish "loading" from "empty".
+        // ViewModel handles this logic better but for now:
+        if (users.isEmpty()) { // Assuming AuthState handles this but let's be explicit or use a button
+             // onNavigateToCreateUser() // Optional: Auto-redirect
+        }
+    }
+
     
     var pin by remember { mutableStateOf("") }
 
@@ -32,31 +59,41 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Language Toggle (Simple Text Button for now)
+        // Language Toggle and Create User
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = { viewModel.setLanguage("es") }) {
-                Text("ES", fontWeight = if (language == "es") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
+            TextButton(onClick = onNavigateToCreateUser) {
+                Text(stringResource(R.string.create_user_label), fontSize = 12.sp) // Need resource or string
             }
-            TextButton(onClick = { viewModel.setLanguage("en") }) {
-                Text("EN", fontWeight = if (language == "en") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
+            
+            Row {
+                TextButton(onClick = { viewModel.setLanguage("es") }) {
+                    Text("ES", fontWeight = if (language == "es") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
+                }
+                TextButton(onClick = { viewModel.setLanguage("en") }) {
+                    Text("EN", fontWeight = if (language == "en") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
+                }
             }
         }
 
+
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = stringResource(R.string.locked_title),
-            style = MaterialTheme.typography.displayMedium,
-            color = MaterialTheme.colorScheme.primary
+        // Replaced Text title with App Icon
+        Image(
+            painter = painterResource(id = R.mipmap.ic_launcher),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier.size(120.dp)
         )
         
         Spacer(modifier = Modifier.height(32.dp))
         
         // User Selector
-        Text("Seleccionar Usuario", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.select_user_label), style = MaterialTheme.typography.labelMedium)
         androidx.compose.foundation.lazy.LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(vertical = 16.dp)

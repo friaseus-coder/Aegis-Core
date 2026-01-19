@@ -128,7 +128,7 @@ fun SettingsScreen(
         AddUserDialog(
             onDismiss = { showAddUserDialog = false },
             onConfirm = { name, pin, role ->
-                viewModel.createNewUser(name, pin, role)
+                viewModel.createNewUser(name = name, language = "es", pin = pin, role = role)
                 showAddUserDialog = false
             }
         )

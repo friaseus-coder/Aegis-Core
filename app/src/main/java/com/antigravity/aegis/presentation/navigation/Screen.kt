@@ -1,6 +1,8 @@
 package com.antigravity.aegis.presentation.navigation
 
 sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
+    data object CreateUser : Screen("create_user")
     data object Login : Screen("login")
     data object Dashboard : Screen("dashboard")
     data object Projects : Screen("projects")

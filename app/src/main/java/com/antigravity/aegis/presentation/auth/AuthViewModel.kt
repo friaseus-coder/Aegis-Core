@@ -14,6 +14,8 @@ import javax.inject.Inject
 
 import com.antigravity.aegis.data.model.UserEntity
 
+import com.antigravity.aegis.data.model.UserRole
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
@@ -86,7 +88,14 @@ class AuthViewModel @Inject constructor(
     fun confirmSetup(pin: String) {
         val currentSetup = _setupState.value ?: return
         viewModelScope.launch {
-            val result = finalizeSetupUseCase(pin, currentSetup.seedPhrase, currentSetup.masterKey)
+            // Legacy flow fix: defaulting name/lang
+            val result = finalizeSetupUseCase(
+                name = "Admin", 
+                language = "es", 
+                pin = pin, 
+                seedPhrase = currentSetup.seedPhrase, 
+                masterKey = currentSetup.masterKey
+            )
             if (result.isSuccess) {
                 _authState.value = AuthState.Authenticated
             } else {
@@ -103,6 +112,30 @@ class AuthViewModel @Inject constructor(
                 _authState.value = AuthState.Authenticated
             } else {
                 // Todo: Show error (Shake animation etc)
+            }
+        }
+    }
+
+    fun createUser(name: String, language: String, pin: String) {
+        viewModelScope.launch {
+            val currentSetup = _setupState.value
+            
+            if (currentSetup != null) {
+                 // Case: Initial Setup / First User
+                 val result = finalizeSetupUseCase(
+                    name = name, 
+                    language = language, 
+                    pin = pin, 
+                    seedPhrase = currentSetup.seedPhrase, 
+                    masterKey = currentSetup.masterKey
+                 )
+                 if (result.isSuccess) {
+                     _authState.value = AuthState.Authenticated
+                 }
+            } else {
+                // Case: Adding subsequent user (Not implemented fully yet)
+                // Requires Admin Auth to get MK, then createUser.
+                // For now, ignoring.
             }
         }
     }

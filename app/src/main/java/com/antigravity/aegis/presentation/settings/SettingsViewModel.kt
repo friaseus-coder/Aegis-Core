@@ -54,7 +54,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun createNewUser(name: String, pin: String, role: UserRole = UserRole.USER) {
+    fun createNewUser(name: String, language: String = "es", pin: String, role: UserRole = UserRole.USER) {
         val encodedKey = encryptionKeyManager.getKey()
         if (encodedKey == null) {
              _uiState.value = SettingsUiState.Error("Session locked. Cannot create user.")
@@ -83,7 +83,7 @@ class SettingsViewModel @Inject constructor(
             
             viewModelScope.launch {
                 _uiState.value = SettingsUiState.Loading("Creating User...")
-                val result = authRepository.createUser(name, pin, role, masterKey)
+                val result = authRepository.createUser(name, language, pin, role, masterKey)
                 if (result.isSuccess) {
                     _uiState.value = SettingsUiState.Success("User created successfully")
                 } else {

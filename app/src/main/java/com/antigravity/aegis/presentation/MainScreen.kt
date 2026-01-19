@@ -43,7 +43,8 @@ fun MainScreen(
         }
         AuthState.Locked -> {
             LoginScreen(
-                onLogin = { pin -> viewModel.login(pin) }
+                onLogin = { pin -> viewModel.login(pin) },
+                onNavigateToCreateUser = { /* TODO: Implement navigation if MainScreen is used */ }
             )
         }
         AuthState.Authenticated -> {

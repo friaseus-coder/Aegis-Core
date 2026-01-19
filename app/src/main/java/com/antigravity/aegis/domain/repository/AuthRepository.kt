@@ -13,10 +13,10 @@ interface AuthRepository {
     
     // Setup flow (First Admin)
     suspend fun createMasterKey(): ByteArray
-    suspend fun createAdmin(name: String, pin: String, seedPhrase: List<String>, masterKey: ByteArray): Result<UserEntity>
+    suspend fun createAdmin(name: String, language: String, pin: String, seedPhrase: List<String>, masterKey: ByteArray): Result<UserEntity>
     
     // Add subsequent users (requires current decrypted Master Key)
-    suspend fun createUser(name: String, pin: String, role: UserRole, masterKey: ByteArray): Result<UserEntity>
+    suspend fun createUser(name: String, language: String, pin: String, role: UserRole, masterKey: ByteArray): Result<UserEntity>
 
     // Login flow
     suspend fun loginWithPin(userId: Int, pin: String): Result<ByteArray> // Returns Master Key if success

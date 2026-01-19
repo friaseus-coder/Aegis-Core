@@ -15,17 +15,44 @@ fun NavigationGraph(
 ) {
     // Shared ViewModel for CRM domain
     val crmViewModel: com.antigravity.aegis.presentation.crm.CrmViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val authViewModel: com.antigravity.aegis.presentation.auth.AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Splash.route
     ) {
+        composable(Screen.Splash.route) {
+            com.antigravity.aegis.presentation.auth.SplashScreen(
+                onSplashFinished = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.CreateUser.route) {
+            com.antigravity.aegis.presentation.auth.CreateUserScreen(
+                onUserCreated = { name, lang, pin ->
+                    authViewModel.createUser(name, lang, pin)
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.CreateUser.route) { inclusive = true }
+                         // Also clear backstack so they can't go back to login/create
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.Login.route) {
             com.antigravity.aegis.presentation.auth.LoginScreen(
                 onLogin = {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
+                },
+                onNavigateToCreateUser = {
+                     navController.navigate(Screen.CreateUser.route)
                 }
             )
         }

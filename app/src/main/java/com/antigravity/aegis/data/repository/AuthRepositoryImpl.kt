@@ -34,13 +34,14 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun createAdmin(
         name: String,
+        language: String,
         pin: String,
         seedPhrase: List<String>,
         masterKey: ByteArray
     ): Result<UserEntity> {
         return try {
             // 1. Create User Entity
-            val user = UserEntity(name = name, role = UserRole.ADMIN)
+            val user = UserEntity(name = name, language = language, role = UserRole.ADMIN)
             val userId = userEntityDao.insertOrUpdate(user).toInt()
             val savedUser = user.copy(id = userId)
 
@@ -64,13 +65,14 @@ class AuthRepositoryImpl @Inject constructor(
     
     override suspend fun createUser(
         name: String, 
+        language: String,
         pin: String, 
         role: UserRole, 
         masterKey: ByteArray
     ): Result<UserEntity> {
         return try {
              // 1. Create User
-            val user = UserEntity(name = name, role = role)
+            val user = UserEntity(name = name, language = language, role = role)
             val userId = userEntityDao.insertOrUpdate(user).toInt()
             val savedUser = user.copy(id = userId)
             

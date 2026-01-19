@@ -30,7 +30,7 @@ import com.antigravity.aegis.data.model.UserConfig
         MileageLogEntity::class,
         UserConfig::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class AegisDatabase : RoomDatabase() {
