@@ -22,6 +22,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import com.antigravity.aegis.R
 
 import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,9 +65,9 @@ fun MileageScreen(
         is MileageViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text("Import Errors") },
+                title = { Text(stringResource(R.string.import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text("OK") } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.ok_button)) } }
             )
         }
         is MileageViewModel.TransferState.ValidationSuccess -> {
@@ -92,12 +94,12 @@ fun MileageScreen(
     if (showSettings) {
         AlertDialog(
             onDismissRequest = { showSettings = false },
-            title = { Text("Settings") },
+            title = { Text(stringResource(R.string.settings_title)) },
             text = {
                 OutlinedTextField(
                     value = tempPrice,
                     onValueChange = { tempPrice = it },
-                    label = { Text("Price per Km (€)") },
+                    label = { Text(stringResource(R.string.price_per_km)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
             },
@@ -105,10 +107,10 @@ fun MileageScreen(
                 TextButton(onClick = {
                     viewModel.updatePricePerKm(tempPrice.toDoubleOrNull() ?: 0.0)
                     showSettings = false
-                }) { Text("Save") }
+                }) { Text(stringResource(R.string.save_button)) }
             },
             dismissButton = {
-                TextButton(onClick = { showSettings = false }) { Text("Cancel") }
+                TextButton(onClick = { showSettings = false }) { Text(stringResource(R.string.cancel_button)) }
             }
         )
     }
@@ -116,7 +118,7 @@ fun MileageScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mileage Log") },
+                title = { Text(stringResource(R.string.mileage_log_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -148,18 +150,18 @@ fun MileageScreen(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("New Trip Calculator", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.new_trip_calculator), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = origin, onValueChange = { origin = it },
-                            label = { Text("Origin") },
+                            label = { Text(stringResource(R.string.origin_label)) },
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = destination, onValueChange = { destination = it },
-                            label = { Text("Destination") },
+                            label = { Text(stringResource(R.string.destination_label)) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -167,13 +169,13 @@ fun MileageScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = startOdo, onValueChange = { startOdo = it },
-                            label = { Text("Start Odo") },
+                            label = { Text(stringResource(R.string.start_odo_label)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = endOdo, onValueChange = { endOdo = it },
-                            label = { Text("End Odo") },
+                            label = { Text(stringResource(R.string.end_odo_label)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
@@ -215,7 +217,7 @@ fun MileageScreen(
                             },
                             enabled = dist > 0
                         ) {
-                            Text("Log Trip")
+                            Text(stringResource(R.string.log_trip))
                         }
                     }
                 }
@@ -226,9 +228,9 @@ fun MileageScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Recent Trips", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.recent_trips), style = MaterialTheme.typography.titleMedium)
                 TextButton(onClick = { viewModel.exportAnnualReport() }) {
-                    Text("Export Annual CSV")
+                    Text(stringResource(R.string.export_annual_csv))
                 }
             }
             

@@ -6,36 +6,81 @@
 
 ## 1. 🔐 Inicio y Seguridad
 
-### Primer Acceso
+### Primer Acceso (Crear Usuario)
+
 Al abrir la aplicación por primera vez:
 
-1. Cree un **PIN Maestro** de 6 dígitos
-2. (Opcional) Active el acceso biométrico (Huella/Cara)
-3. **⚠️ IMPORTANTE**: Anote su "Frase de Recuperación" (12 palabras)
-   > Es la única forma de recuperar sus datos si olvida el PIN
+1. **Splash Screen**: Se muestra el logo de Aegis Core
+2. **Crear Usuario**: Rellene los siguientes campos:
+   - **Nombre**: Su nombre de usuario
+   - **Idioma**: Español o English
+   - **PIN**: 4-6 dígitos para proteger su cuenta
+3. **⚠️ IMPORTANTE**: Se genera una "Frase de Recuperación" (12 palabras)
+   > Anótela en lugar seguro. Es la ÚNICA forma de recuperar sus datos si olvida el PIN
+
+### Inicio de Sesión (Usuarios Existentes)
+
+Si ya hay usuarios creados:
+
+1. **Seleccionar Usuario**: Toque en su tarjeta de usuario
+2. **Introducir PIN**: Escriba su PIN de 4-6 dígitos
+3. **Desbloquear**: Pulse el botón para acceder
+
+### Cambiar Idioma
+
+En la pantalla de login:
+- Pulse **ES** para Español
+- Pulse **EN** para English
+- El idioma cambia instantáneamente
+
+### Crear Usuario Adicional
+
+- En la pantalla de login, pulse **"Crear Usuario"**
+- Rellene nombre, idioma y PIN
+- El nuevo usuario aparecerá en la lista de selección
 
 ### Copias de Seguridad
-- Acceda a **Ajustes → Backup**
+
+- Acceda a **Ajustes → Exportar Base de Datos**
 - Se genera un archivo `.boveda` encriptado
 - Guárdelo en Google Drive o envíelo por email
 
 ---
 
-## 2. 💼 Hub de Proyectos (CRM)
+## 2. 🏠 Dashboard Principal
+
+Tras iniciar sesión, accede al **Dashboard** con todos los módulos:
+
+| Módulo | Descripción |
+|--------|-------------|
+| **Hub de Proyectos** | CRM y gestión de tareas |
+| **Partes de Trabajo** | Servicio de campo con firmas |
+| **Presupuestos** | Kanban y generación de PDFs |
+| **Gastos** | Escaneo OCR de tickets |
+| **Inventario** | Control de stock con códigos de barras |
+| **Kilometraje** | Registro de viajes y calculadora |
+
+### Cambiar Tema
+
+- Pulse el icono ☀️/🌙 en la esquina superior para alternar entre modo claro y oscuro
+
+---
+
+## 3. 💼 Hub de Proyectos (CRM)
 
 Gestione clientes y proyectos activos.
 
 | Acción | Cómo hacerlo |
 |--------|--------------|
-| **Ver Dashboard** | Pantalla principal al iniciar |
-| **Crear Cliente** | Botón **+** → Rellenar datos → "Add" |
+| **Ver Dashboard** | Pulse en "Hub de Proyectos" |
+| **Crear Cliente** | Botón **+** → Rellenar datos → "Añadir" |
 | **Crear Proyecto** | Dentro de Cliente → Botón **+** |
 | **Añadir Tareas** | Dentro de Proyecto → Botón **+** |
 | **Completar Tarea** | Marcar checkbox ☑️ |
 
 ---
 
-## 3. 📋 Partes de Trabajo (Field Service)
+## 4. 📋 Partes de Trabajo (Field Service)
 
 Herramienta para técnicos en campo.
 
@@ -54,7 +99,7 @@ Herramienta para técnicos en campo.
 
 ---
 
-## 4. 📊 Presupuestos (Kanban)
+## 5. 📊 Presupuestos (Kanban)
 
 Vista visual de oportunidades de venta.
 
@@ -69,7 +114,7 @@ Vista visual de oportunidades de venta.
 
 ---
 
-## 5. 🧾 Gastos y Tickets (OCR)
+## 6. 🧾 Gastos y Tickets (OCR)
 
 Digitalice gastos automáticamente.
 
@@ -82,7 +127,7 @@ Digitalice gastos automáticamente.
 
 ---
 
-## 6. 📦 Inventario (Scanner)
+## 7. 📦 Inventario (Scanner)
 
 Control de stock con códigos de barras.
 
@@ -97,7 +142,7 @@ Control de stock con códigos de barras.
 
 ---
 
-## 7. 🚗 Registro de Kilometraje
+## 8. 🚗 Registro de Kilometraje
 
 Control de viajes deducibles.
 
@@ -110,10 +155,23 @@ Control de viajes deducibles.
 
 ---
 
+## 9. ⚙️ Ajustes
+
+Acceda a Ajustes desde el Dashboard:
+
+| Opción | Descripción |
+|--------|-------------|
+| **Exportar BD** | Crear backup encriptado |
+| **Importar BD** | Restaurar desde backup |
+| **Crear Usuario** | Añadir nuevo usuario |
+| **Cerrar Sesión** | Volver a pantalla de login |
+
+---
+
 ## ❓ Soporte
 
 ¿Necesita ayuda? Consulte la documentación técnica o contacte con soporte.
 
 ---
 
-*Manual de Usuario v1.0 - Aegis Core*
+*Manual de Usuario v1.1 - Aegis Core - Enero 2026*

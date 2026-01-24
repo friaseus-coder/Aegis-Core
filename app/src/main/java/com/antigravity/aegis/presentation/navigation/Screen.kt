@@ -13,6 +13,7 @@ sealed class Screen(val route: String) {
     data object TimeControl : Screen("time_control")
     data object PasswordVault : Screen("password_vault")
     data object Mileage : Screen("mileage")
+    data object Settings : Screen("settings")
 
     // CRM Sub-routes
     data object Clients : Screen("clients")

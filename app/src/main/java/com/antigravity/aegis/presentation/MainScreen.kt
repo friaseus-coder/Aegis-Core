@@ -60,7 +60,8 @@ fun MainScreen(
                         onNavigateToBudgets = { crmNavController.navigate("budgets") },
                         onNavigateToExpenses = { crmNavController.navigate("expenses") },
                         onNavigateToInventory = { crmNavController.navigate("inventory") },
-                        onNavigateToMileage = { crmNavController.navigate("mileage") }
+                        onNavigateToMileage = { crmNavController.navigate("mileage") },
+                        onNavigateToSettings = { crmNavController.navigate("settings") }
                     )
                 }
 

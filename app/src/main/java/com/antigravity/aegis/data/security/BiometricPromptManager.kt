@@ -2,7 +2,7 @@ package com.antigravity.aegis.data.security
 
 import android.content.Context
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -12,14 +12,15 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
 class BiometricPromptManager(
-    private val activity: AppCompatActivity
+    private val activity: FragmentActivity
 ) {
     private val resultChannel = Channel<BiometricResult>()
     val promptResults = resultChannel.receiveAsFlow()
 
     fun showBiometricPrompt(
         title: String,
-        description: String
+        description: String,
+        cryptoObject: BiometricPrompt.CryptoObject? = null
     ) {
         val manager = BiometricManager.from(activity)
         val authenticators = if (Build.VERSION.SDK_INT >= 30) {
@@ -28,14 +29,16 @@ class BiometricPromptManager(
             BIOMETRIC_STRONG
         }
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(title)
             .setDescription(description)
             .setAllowedAuthenticators(authenticators)
 
         if (Build.VERSION.SDK_INT < 30) {
-            promptInfo.setNegativeButtonText("Cancel")
+            promptInfoBuilder.setNegativeButtonText("Cancel")
         }
+
+        val promptInfo = promptInfoBuilder.build()
 
         when (manager.canAuthenticate(authenticators)) {
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
@@ -64,7 +67,7 @@ class BiometricPromptManager(
 
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    trySendResult(BiometricResult.AuthenticationSuccess)
+                    trySendResult(BiometricResult.AuthenticationSuccess(result))
                 }
 
                 override fun onAuthenticationFailed() {
@@ -73,7 +76,12 @@ class BiometricPromptManager(
                 }
             }
         )
-        prompt.authenticate(promptInfo.build())
+        
+        if (cryptoObject != null) {
+            prompt.authenticate(promptInfo, cryptoObject)
+        } else {
+            prompt.authenticate(promptInfo)
+        }
     }
 
     private fun trySendResult(result: BiometricResult) {
@@ -86,5 +94,5 @@ sealed interface BiometricResult {
     data object FeatureUnavailable : BiometricResult
     data class AuthenticationError(val error: String) : BiometricResult
     data object AuthenticationFailed : BiometricResult
-    data object AuthenticationSuccess : BiometricResult
+    data class AuthenticationSuccess(val result: BiometricPrompt.AuthenticationResult) : BiometricResult
 }

@@ -28,7 +28,7 @@ fun CreateUserScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Crear Nuevo Usuario", // Should be string resource
+            text = stringResource(R.string.create_new_user_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary
         )
@@ -38,26 +38,26 @@ fun CreateUserScreen(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Nombre") }, // Should be string resource
+            label = { Text(stringResource(R.string.name_label)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
         
-        Text("Idioma / Language", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.language_label), style = MaterialTheme.typography.labelMedium)
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             FilterChip(
                 selected = language == "es",
                 onClick = { language = "es" },
-                label = { Text("Español") }
+                label = { Text(stringResource(R.string.language_spanish)) }
             )
             FilterChip(
                 selected = language == "en",
                 onClick = { language = "en" },
-                label = { Text("English") }
+                label = { Text(stringResource(R.string.language_english)) }
             )
         }
 
@@ -79,7 +79,7 @@ fun CreateUserScreen(
             enabled = name.isNotBlank() && pin.length >= 4,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Crear y Entrar") // Should be string resource
+            Text(stringResource(R.string.create_and_enter))
         }
     }
 }

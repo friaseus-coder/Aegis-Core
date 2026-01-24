@@ -55,6 +55,18 @@ class SecurityDataSource @Inject constructor(
         val encoded = sharedPreferences.getString(KEY_RECOVERY_WRAPPED_MK, null) ?: return null
         return Base64.decode(encoded, Base64.NO_WRAP)
     }
+
+    fun saveBiometricWrappedMk(userId: Int, wrappedKey: ByteArray) {
+        val encoded = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
+        sharedPreferences.edit().putString(getBiometricWrappedKey(userId), encoded).apply()
+    }
+
+    fun getBiometricWrappedMk(userId: Int): ByteArray? {
+        val encoded = sharedPreferences.getString(getBiometricWrappedKey(userId), null) ?: return null
+        return Base64.decode(encoded, Base64.NO_WRAP)
+    }
+
+    private fun getBiometricWrappedKey(userId: Int) = "biometric_wrapped_mk_$userId"
     
     fun setSetupDone(isDone: Boolean) {
         sharedPreferences.edit().putBoolean(KEY_IS_SETUP_DONE, isDone).apply()

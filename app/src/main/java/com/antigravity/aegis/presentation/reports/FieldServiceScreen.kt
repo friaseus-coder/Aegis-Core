@@ -3,29 +3,45 @@ package com.antigravity.aegis.presentation.reports
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.crm.CrmViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FieldServiceScreen(
-    viewModel: CrmViewModel
+    viewModel: CrmViewModel,
+    onNavigateToCreateReport: (Int) -> Unit = {}
 ) {
     val allReports by viewModel.allWorkReports.collectAsState()
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Field Service Console") })
+            TopAppBar(title = { Text(stringResource(R.string.field_service_title)) })
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { 
+                    // For simplicity, use projectId 1. 
+                    // In a real app, you might show a project picker dialog
+                    onNavigateToCreateReport(1)
+                }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Añadir Parte")
+            }
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
             Text(
-                "All Work Reports", 
+                stringResource(R.string.work_reports_section_title), 
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -36,17 +52,18 @@ fun FieldServiceScreen(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Report #${report.id}", style = MaterialTheme.typography.titleMedium)
-                            Text("Date: ${java.util.Date(report.date)}")
-                            Text("Project ID: ${report.projectId}") // Could join name if needed, keeping simple
+                            Text(stringResource(R.string.report_item_title, report.id), style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.date_label, java.util.Date(report.date).toString()))
+                            Text(stringResource(R.string.project_id_label, report.projectId))
                             Text(report.description, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
                     }
                 }
                 if (allReports.isEmpty()) {
-                    item { Text("No work reports found.") }
+                    item { Text(stringResource(R.string.no_work_reports_found)) }
                 }
             }
         }
     }
 }
+

@@ -32,6 +32,13 @@
     <string name="create_user_label">Create User</string>
     <string name="select_user_label">Select User</string>
     <string name="create_user_button">Create User</string>
+    <string name="loading_label">Loading...</string>
+    <string name="biometric_login_button">Biometric Login</string>
+    <string name="enable_biometrics_button">Enable Biometrics (Must be logged in)</string>
+    <string name="biometric_login_title">Biometric Login</string>
+    <string name="biometric_login_desc">Authenticate to unlock</string>
+    <string name="biometric_enable_title">Enable Biometrics</string>
+    <string name="biometric_enable_desc">Authenticate to enable biometric login</string>
 
     <!-- Clients -->
     <string name="clients_title">Clients</string>
@@ -104,4 +111,59 @@
     <string name="quote_title_label">Quote Title</string>
     <string name="total_amount_label">Total Amount ($)</string>
     <string name="quote_description_label">Description / Items</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="export_database">Export Database</string>
+    <string name="import_database_overwrite">Import Database (Overwrite)</string>
+    <string name="create_new_user">Create New User</string>
+    <string name="logout">Logout</string>
+    <string name="new_user">New User</string>
+    <string name="pin_digits_label">PIN (4-6 digits)</string>
+    <string name="create_and_enter">Create &amp; Enter</string>
+    <string name="security_section_title">Security</string>
+    <string name="database_section_title">Database</string>
+    <string name="user_management_section_title">User Management</string>
+    <string name="session_section_title">Session</string>
+    <string name="biometric_already_enabled">✓ Biometric authentication enabled</string>
+
+    <!-- Create User Screen -->
+    <string name="create_new_user_title">Create New User</string>
+    <string name="language_label">Language</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_english">English</string>
+
+    <!-- Field Service Screen -->
+    <string name="field_service_title">Field Service Console</string>
+    <string name="date_label">Date: %1$s</string>
+    <string name="project_id_label">Project ID: %1$d</string>
+    <string name="no_work_reports_found">No work reports found.</string>
+
+    <!-- Mileage Screen -->
+    <string name="mileage_log_title">Mileage Log</string>
+    <string name="price_per_km">Price per Km (€)</string>
+    <string name="new_trip_calculator">New Trip Calculator</string>
+    <string name="origin_label">Origin</string>
+    <string name="destination_label">Destination</string>
+    <string name="start_odo_label">Start Odo</string>
+    <string name="end_odo_label">End Odo</string>
+    <string name="distance_km">Distance: %1$d km</string>
+    <string name="estimated_cost">Est. Cost: €%1$.2f</string>
+    <string name="log_trip">Log Trip</string>
+    <string name="recent_trips">Recent Trips</string>
+    <string name="export_annual_csv">Export Annual CSV</string>
+
+    <!-- Expenses Screen -->
+    <string name="expenses_title">Expenses &amp; Tickets</string>
+    <string name="export_quarter">Export This Quarter</string>
+    <string name="review_ticket">Review Ticket</string>
+    <string name="merchant_concept">Merchant / Concept</string>
+    <string name="amount_label">Amount</string>
+    <string name="save_button">Save</string>
+
+    <!-- Inventory Screen -->
+    <string name="inventory_title">Inventory Control</string>
+    <string name="stock_list">Stock List</string>
+    <string name="scan_label">Scan</string>
+    <string name="barcode_label">Barcode: %1$s</string>
 </resources>

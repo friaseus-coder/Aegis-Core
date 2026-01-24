@@ -42,6 +42,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.widget.Toast
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.ui.res.stringResource
+import com.antigravity.aegis.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,9 +78,9 @@ fun InventoryScreen(
         is InventoryViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text("Import Errors") },
+                title = { Text(stringResource(R.string.import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text("OK") } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.ok_button)) } }
             )
         }
         is InventoryViewModel.TransferState.ValidationSuccess -> {
@@ -96,7 +98,7 @@ fun InventoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Inventory Control") },
+                title = { Text(stringResource(R.string.inventory_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -117,13 +119,13 @@ fun InventoryScreen(
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    label = { Text("Stock List") },
+                    label = { Text(stringResource(R.string.stock_list)) },
                     icon = { Text("📋") } // Placeholder icon
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    label = { Text("Scan") },
+                    label = { Text(stringResource(R.string.scan_label)) },
                     icon = { Text("📷") } // Placeholder icon
                 )
             }

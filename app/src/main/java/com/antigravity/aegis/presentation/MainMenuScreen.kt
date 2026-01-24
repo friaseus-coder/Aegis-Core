@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -30,11 +31,22 @@ fun MainMenuScreen(
     onNavigateToBudgets: () -> Unit,
     onNavigateToExpenses: () -> Unit,
     onNavigateToInventory: () -> Unit,
-    onNavigateToMileage: () -> Unit
+    onNavigateToMileage: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(stringResource(R.string.main_menu_title)) })
+            CenterAlignedTopAppBar(
+                title = { Text(stringResource(R.string.main_menu_title)) },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings_title)
+                        )
+                    }
+                }
+            )
         }
     ) { padding ->
         Column(

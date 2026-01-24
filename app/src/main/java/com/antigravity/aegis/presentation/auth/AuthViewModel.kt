@@ -16,12 +16,22 @@ import com.antigravity.aegis.data.model.UserEntity
 
 import com.antigravity.aegis.data.model.UserRole
 
+import com.antigravity.aegis.domain.usecase.EnableBiometricsUseCase
+import com.antigravity.aegis.domain.usecase.LoginWithBiometricsUseCase
+import com.antigravity.aegis.data.security.BiometricPromptManager
+import com.antigravity.aegis.data.security.BiometricResult
+import com.antigravity.aegis.data.security.EncryptionKeyManager
+import com.antigravity.aegis.R
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val initSetupUseCase: InitSetupUseCase,
     private val finalizeSetupUseCase: FinalizeSetupUseCase,
-    private val loginWithPinUseCase: LoginWithPinUseCase
+    private val loginWithPinUseCase: LoginWithPinUseCase,
+    private val enableBiometricsUseCase: EnableBiometricsUseCase,
+    private val loginWithBiometricsUseCase: LoginWithBiometricsUseCase,
+    private val encryptionKeyManager: EncryptionKeyManager
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
@@ -40,12 +50,23 @@ class AuthViewModel @Inject constructor(
     private val _language = MutableStateFlow("es")
     val language = _language.asStateFlow()
 
+    private val _isBiometricAvailable = MutableStateFlow(false)
+    val isBiometricAvailable = _isBiometricAvailable.asStateFlow()
+    
+    // Using StateFlow for simplicity in this context, handling nulls
+    private val _biometricPromptState = MutableStateFlow<BiometricPromptConfig?>(null)
+    val biometricPromptState = _biometricPromptState.asStateFlow()
+    
+    // Login error state - contains error message or null if no error
+    private val _loginError = MutableStateFlow<String?>(null)
+    val loginError = _loginError.asStateFlow()
+
     init {
         observeUsers()
     }
 
     private fun observeUsers() {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             authRepository.getAllUsers().collect { userList ->
                 _users.value = userList
                 if (userList.isEmpty()) {
@@ -62,6 +83,7 @@ class AuthViewModel @Inject constructor(
                     if (_selectedUser.value == null) {
                         _selectedUser.value = userList.first()
                     }
+                    checkBiometricAvailability(userList.first().id)
                 }
             }
         }
@@ -69,6 +91,13 @@ class AuthViewModel @Inject constructor(
 
     fun selectUser(user: UserEntity) {
         _selectedUser.value = user
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+             checkBiometricAvailability(user.id)
+        }
+    }
+    
+    private fun checkBiometricAvailability(userId: Int) {
+         _isBiometricAvailable.value = authRepository.isBiometricEnabled(userId)
     }
 
     fun setLanguage(lang: String) {
@@ -106,14 +135,19 @@ class AuthViewModel @Inject constructor(
 
     fun login(pin: String) {
         val user = _selectedUser.value ?: return
+        _loginError.value = null // Clear any previous error
         viewModelScope.launch {
             val result = loginWithPinUseCase(user.id, pin)
             if (result.isSuccess) {
                 _authState.value = AuthState.Authenticated
             } else {
-                // Todo: Show error (Shake animation etc)
+                _loginError.value = "PIN incorrecto"
             }
         }
+    }
+    
+    fun clearLoginError() {
+        _loginError.value = null
     }
 
     fun createUser(name: String, language: String, pin: String) {
@@ -143,8 +177,91 @@ class AuthViewModel @Inject constructor(
     fun logout() {
         // Clear session logic if any extra
         _authState.value = AuthState.Locked
+        encryptionKeyManager.clearKey()
+    }
+    
+    // We need a way to handle the result paired with the action.
+    // Since Channel is global for the VM, one action at a time.
+    private var pendingBiometricAction: ((javax.crypto.Cipher) -> Unit)? = null
+
+    fun loginBiometric() {
+        val user = _selectedUser.value ?: return
+        viewModelScope.launch {
+            val cipher = authRepository.getBiometricDecryptCipher(user.id)
+            if (cipher != null) {
+                pendingBiometricAction = { validCipher ->
+                    viewModelScope.launch {
+                        val result = loginWithBiometricsUseCase(user.id, validCipher)
+                        if (result.isSuccess) {
+                            _authState.value = AuthState.Authenticated
+                        }
+                    }
+                }
+                _biometricPromptState.value = BiometricPromptConfig(
+                    titleResId = R.string.biometric_login_title,
+                    descriptionResId = R.string.biometric_login_desc,
+                    cryptoObject = androidx.biometric.BiometricPrompt.CryptoObject(cipher)
+                )
+            } else {
+                // Biometrics not set up for this user
+            }
+        }
+    }
+
+    fun enableBiometric() {
+        val user = _selectedUser.value ?: return
+        val mk = encryptionKeyManager.getKey() ?: return // Must be logged in
+        
+        viewModelScope.launch {
+            val cipher = authRepository.getBiometricEncryptCipher(user.id)
+            if (cipher != null) {
+                 pendingBiometricAction = { validCipher ->
+                    viewModelScope.launch {
+                         val result = enableBiometricsUseCase(user.id, mk, validCipher)
+                         if (result.isSuccess) {
+                             // Success
+                             checkBiometricAvailability(user.id)
+                         }
+                    }
+                }
+                _biometricPromptState.value = BiometricPromptConfig(
+                    titleResId = R.string.biometric_enable_title,
+                    descriptionResId = R.string.biometric_enable_desc,
+                    cryptoObject = androidx.biometric.BiometricPrompt.CryptoObject(cipher)
+                )
+            }
+        }
+    }
+    
+    fun onBiometricPromptShown() {
+        _biometricPromptState.value = null
+    }
+    
+    fun onBiometricResult(result: BiometricResult) {
+        when (result) {
+            is BiometricResult.AuthenticationSuccess -> {
+                val cryptoObject = result.result.cryptoObject
+                val cipher = cryptoObject?.cipher
+                
+                if (cipher != null) {
+                    pendingBiometricAction?.invoke(cipher)
+                    pendingBiometricAction = null
+                }
+            }
+            is BiometricResult.AuthenticationError -> {
+                // Todo: Handle error
+                pendingBiometricAction = null
+            }
+            else -> Unit
+        }
     }
 }
+
+data class BiometricPromptConfig(
+    val titleResId: Int,
+    val descriptionResId: Int,
+    val cryptoObject: androidx.biometric.BiometricPrompt.CryptoObject
+)
 
 sealed interface AuthState {
     data object Loading : AuthState

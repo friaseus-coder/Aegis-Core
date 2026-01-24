@@ -31,28 +31,78 @@
 
 ---
 
-## Arquitectura de Seguridad
+## Arquitectura de Seguridad Multi-Usuario
 
-### 1. PIN Maestro / Biometría
+### 1. Sistema de Autenticación
 
 ```mermaid
 flowchart LR
     A[Usuario] --> B{Primera vez?}
-    B -->|Sí| C[Crear PIN 6 dígitos]
-    B -->|No| D[Login PIN/Huella]
-    C --> E[Hash → EncryptedSharedPreferences]
-    D --> F[Verificar Hash]
-    F --> G[PIN → RAM → Abrir Bóveda]
+    B -->|Sí| C[Crear Usuario Admin]
+    C --> D[Generar Seed Phrase 12 palabras]
+    D --> E[Crear PIN 4-6 dígitos]
+    B -->|No| F[Seleccionar Usuario]
+    F --> G[Introducir PIN]
+    G --> H{Verificar}
+    H -->|OK| I[Desbloquear Bóveda]
+    H -->|Fail| F
 ```
 
-| Aspecto | Implementación |
-|---------|----------------|
-| **Onboarding** | PIN de 6 dígitos obligatorio |
-| **Almacenamiento** | Solo se guarda el HASH, nunca el PIN |
-| **Llave** | PIN en memoria RAM solo mientras la app está abierta |
-| **Acceso diario** | Huella dactilar (`androidx.biometric`) o PIN |
+### Flujo de Primera Configuración
 
-### 2. Sistema de Backup: "Seguro de Vida"
+| Paso | Acción | Almacenamiento |
+|------|--------|----------------|
+| 1 | Generar Master Key (MK) | RAM temporal |
+| 2 | Generar Seed Phrase (12 palabras) | Mostrar al usuario |
+| 3 | Usuario crea PIN | - |
+| 4 | Wrap MK con PIN | EncryptedSharedPreferences (por usuario) |
+| 5 | Wrap MK con Seed | EncryptedSharedPreferences (global) |
+| 6 | Guardar usuario en Room | Base de datos |
+
+### Flujo de Login
+
+| Paso | Acción |
+|------|--------|
+| 1 | Seleccionar usuario de la lista |
+| 2 | Introducir PIN |
+| 3 | Recuperar PIN-Wrapped MK |
+| 4 | Unwrap con PIN → Obtener MK |
+| 5 | MK en RAM → Abrir Bóveda |
+
+### 2. Entidad de Usuario
+
+```kotlin
+@Entity(tableName = "users")
+data class UserEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val role: UserRole,        // ADMIN, USER, GUEST
+    val language: String,      // "es", "en"
+    val pricePerKm: Double,    // Configuración personal
+    val biometricEnabled: Boolean
+)
+```
+
+### 3. Sistema de Key Wrapping
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  ARQUITECTURA DE CLAVES                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   Master Key (AES-256)                                       │
+│        │                                                     │
+│        ├──→ PIN-Wrapped (por usuario)                        │
+│        │      └── Almacenado: pin_wrapped_mk_{userId}        │
+│        │                                                     │
+│        └──→ Seed-Wrapped (global/recuperación)               │
+│               └── Almacenado: recovery_wrapped_mk            │
+│                                                              │
+│   Cifrado: PBKDF2 + AES-GCM via KeyCryptoManager            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 4. Sistema de Backup: "Seguro de Vida"
 
 | Paso | Descripción |
 |------|-------------|
@@ -65,6 +115,38 @@ flowchart LR
 
 ---
 
+## 🌐 Sistema de Internacionalización
+
+### Idiomas Soportados
+
+| Código | Idioma | Archivo |
+|--------|--------|---------|
+| `es` | Español | `values-es/strings.xml` |
+| `en` | Inglés | `values/strings.xml` |
+
+### Cambio de Idioma Dinámico
+
+El cambio de idioma se realiza en tiempo real sin reiniciar la app:
+
+```kotlin
+// LoginScreen.kt
+val localizedContext = remember(language) {
+    val locale = Locale(language)
+    Locale.setDefault(locale)
+    val config = context.resources.configuration
+    config.setLocale(locale)
+    context.resources.updateConfiguration(config, context.resources.displayMetrics)
+    context.createConfigurationContext(config)
+}
+
+// Forzar recomposición
+key(language) {
+    // UI se reconstruye con nuevos strings
+}
+```
+
+---
+
 ## 🧩 Bóveda Modular: El Sistema de Compra
 
 ### El Desafío
@@ -74,10 +156,12 @@ No podemos tener una base de datos "gigante" si el usuario solo compra un módul
 
 ```mermaid
 flowchart TD
-    A[Base: Seguridad + PIN + Backup] --> B[+ Módulo Gastos]
-    B --> C[Migración Room: +Tabla Gasto, +CategoriaGasto]
-    C --> D[+ Módulo Inventario]
-    D --> E[Migración Room: +Tabla Producto, +Proveedor]
+    A[Base: Seguridad + Usuarios + Backup] --> B[+ Módulo CRM]
+    B --> C[Migración Room: +Cliente, +Proyecto, +Tarea]
+    C --> D[+ Módulo Gastos]
+    D --> E[Migración Room: +Expense, +Categoría]
+    E --> F[+ Módulo Inventario]
+    F --> G[Migración Room: +Producto, +Proveedor]
 ```
 
 **Resultado**: La Bóveda crece con los módulos comprados, manteniendo:
@@ -92,16 +176,46 @@ flowchart TD
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                   PRESENTATION LAYER                     │
-│         Jetpack Compose + ViewModels + Navigation        │
+│    Jetpack Compose + ViewModels + Navigation Compose     │
+│    (auth/, crm/, reports/, expenses/, inventory/, etc.)  │
 ├─────────────────────────────────────────────────────────┤
 │                     DOMAIN LAYER                         │
-│           UseCases + Repositories (Interfaces)           │
+│    UseCases (InitSetup, FinalizeSetup, LoginWithPin)    │
+│              + Repositories (Interfaces)                 │
 ├─────────────────────────────────────────────────────────┤
 │                      DATA LAYER                          │
-│     Room + SQLCipher + EncryptedSharedPreferences        │
+│   Room + SQLCipher + EncryptedSharedPreferences          │
+│   SecurityDataSource + KeyCryptoManager                  │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-*Documento de arquitectura v1.0 - Aegis Core*
+## Estados de la Aplicación
+
+### AuthState (en AuthViewModel)
+
+```kotlin
+sealed interface AuthState {
+    data object Loading : AuthState       // Cargando usuarios de BD
+    data object NeedsSetup : AuthState    // No hay usuarios, crear Admin
+    data object Locked : AuthState        // Hay usuarios, seleccionar + PIN
+    data object Authenticated : AuthState // Acceso concedido
+}
+```
+
+### Transiciones de Estado
+
+```mermaid
+stateDiagram-v2
+    [*] --> Loading
+    Loading --> NeedsSetup: users.isEmpty()
+    Loading --> Locked: users.isNotEmpty()
+    NeedsSetup --> Authenticated: Usuario creado
+    Locked --> Authenticated: PIN correcto
+    Authenticated --> Locked: Logout
+```
+
+---
+
+*Documento de arquitectura v1.1 - Aegis Core - Enero 2026*

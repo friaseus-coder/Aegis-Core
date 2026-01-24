@@ -23,4 +23,11 @@ interface AuthRepository {
     
     // Recovery flow (Resets everything or recovers Admin?) - For now, let's keep simple recovery that returns MK
     suspend fun recoverWithSeed(seedPhrase: List<String>): Result<ByteArray> // Returns Master Key
+    
+    // Biometric methods
+    suspend fun enableBiometric(userId: Int, masterKey: ByteArray, cipher: javax.crypto.Cipher): Result<Unit>
+    suspend fun loginWithBiometric(userId: Int, cipher: javax.crypto.Cipher): Result<ByteArray>
+    fun getBiometricEncryptCipher(userId: Int): javax.crypto.Cipher?
+    fun getBiometricDecryptCipher(userId: Int): javax.crypto.Cipher?
+    fun isBiometricEnabled(userId: Int): Boolean
 }

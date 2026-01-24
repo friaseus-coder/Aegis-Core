@@ -38,34 +38,129 @@ com.antigravity.aegis/
 ├── data/
 │   ├── local/          # Room DB, Entities, DAOs
 │   ├── repository/     # Implementaciones
-│   ├── security/       # EncryptionKeyManager, BiometricManager
-│   └── di/             # Módulos Hilt
+│   ├── datasource/     # SecurityDataSource (EncryptedSharedPrefs)
+│   ├── security/       # EncryptionKeyManager, KeyCryptoManager
+│   └── di/             # Módulos Hilt (Auth, CRM, Database, Backup, Settings)
 ├── domain/
 │   ├── repository/     # Interfaces
-│   ├── usecase/        # Casos de uso
+│   ├── usecase/        # Casos de uso (InitSetup, FinalizeSetup, LoginWithPin)
 │   ├── reports/        # PdfGenerator
 │   ├── expenses/       # OcrManager, ExportManager
 │   └── inventory/      # BarcodeAnalyzer
 └── presentation/
-    ├── auth/           # Login, Setup screens
-    ├── crm/            # Dashboard, Clients, Projects
-    ├── reports/        # WorkReports, SignatureCanvas
+    ├── auth/           # SplashScreen, LoginScreen, CreateUserScreen, AuthViewModel
+    ├── dashboard/      # DashboardScreen principal
+    ├── crm/            # Dashboard CRM, Clients, Projects, Quotes
+    ├── reports/        # WorkReports, SignatureCanvas, CreateReportScreen
     ├── expenses/       # ExpensesScreen + OCR
     ├── inventory/      # InventoryScreen + Scanner
-    └── mileage/        # MileageScreen
+    ├── mileage/        # MileageScreen
+    ├── navigation/     # NavigationGraph, Screen sealed class
+    └── theme/          # ThemeViewModel, AegisTheme
 ```
 
 ---
 
-## 3. Entidades de Base de Datos
+## 3. Flujo de Autenticación Multi-Usuario
+
+### Arquitectura de Autenticación
+
+```mermaid
+flowchart TD
+    A[App Inicio] --> B[SplashScreen]
+    B --> C[LoginScreen]
+    C --> D{¿Hay usuarios?}
+    D -->|No| E[CreateUserScreen]
+    D -->|Sí| F[Mostrar Lista Usuarios]
+    E --> G[Crear Admin + Seed Phrase]
+    G --> H[Dashboard]
+    F --> I[Seleccionar Usuario + PIN]
+    I --> J{¿PIN correcto?}
+    J -->|Sí| H
+    J -->|No| F
+```
+
+### Estados de Autenticación (AuthState)
+
+| Estado | Descripción |
+|--------|-------------|
+| `Loading` | Cargando usuarios de la base de datos |
+| `NeedsSetup` | No hay usuarios, mostrar pantalla de creación |
+| `Locked` | Usuarios existen, esperando selección + PIN |
+| `Authenticated` | Usuario autenticado, acceso completo |
+
+### Componentes Clave
+
+| Componente | Archivo | Responsabilidad |
+|------------|---------|-----------------|
+| **AuthViewModel** | `presentation/auth/AuthViewModel.kt` | Gestión de estados, usuarios, idioma |
+| **LoginScreen** | `presentation/auth/LoginScreen.kt` | UI de selección de usuario y PIN |
+| **CreateUserScreen** | `presentation/auth/CreateUserScreen.kt` | Creación de nuevo usuario |
+| **SplashScreen** | `presentation/auth/SplashScreen.kt` | Animación inicial del logo |
+| **AuthRepository** | `domain/repository/AuthRepository.kt` | Interface de operaciones de auth |
+| **AuthRepositoryImpl** | `data/repository/AuthRepositoryImpl.kt` | Implementación con Room + Security |
+| **SecurityDataSource** | `data/datasource/SecurityDataSource.kt` | EncryptedSharedPreferences para claves |
+
+### Sistema de Key Wrapping
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    KEY WRAPPING SYSTEM                       │
+├─────────────────────────────────────────────────────────────┤
+│  Master Key (MK) → Clave maestra para SQLCipher             │
+│  PIN Wrap       → MK encriptada con PIN del usuario         │
+│  Seed Wrap      → MK encriptada con frase de recuperación   │
+│                                                              │
+│  Almacenamiento: EncryptedSharedPreferences (per-user)      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4. Sistema de Internacionalización
+
+### Idiomas Soportados
+- **Español (es)** - `/res/values-es/strings.xml`
+- **Inglés (en)** - `/res/values/strings.xml` (default)
+
+### Implementación en Compose
+
+```kotlin
+// En LoginScreen.kt
+val localizedContext = remember(language) {
+    val locale = Locale(language)
+    Locale.setDefault(locale)
+    val config = context.resources.configuration
+    config.setLocale(locale)
+    context.resources.updateConfiguration(config, context.resources.displayMetrics)
+    context.createConfigurationContext(config)
+}
+
+// Forzar recomposición con key()
+key(language) {
+    // Contenido UI que se recompone al cambiar idioma
+}
+```
+
+---
+
+## 5. Entidades de Base de Datos
 
 ```mermaid
 erDiagram
+    USER ||--o{ PROJECT : "administra"
     CLIENT ||--o{ PROJECT : "tiene"
     PROJECT ||--o{ TASK : "contiene"
     PROJECT ||--o{ WORK_REPORT : "genera"
     PROJECT ||--o{ QUOTE : "presupuesta"
     
+    USER {
+        int id PK
+        string name
+        string language
+        enum role
+        float pricePerKm
+    }
     CLIENT {
         int id PK
         string name
@@ -104,7 +199,7 @@ erDiagram
 
 ---
 
-## 4. Módulos del Sistema
+## 6. Módulos del Sistema
 
 ### Módulo 1: Hub de Proyectos (CRM)
 | Componente | Descripción |
@@ -140,16 +235,16 @@ erDiagram
 | **Decodificación** | ML Kit Barcode (EAN-13, QR, UPC) |
 | **Alertas** | Highlight visual stock bajo |
 
-### Módulo 7: Kilometraje
+### Módulo 6: Kilometraje
 | Componente | Descripción |
 |------------|-------------|
 | **Calculadora** | Odómetro inicio/fin |
-| **Config** | Precio/Km en UserConfig |
+| **Config** | Precio/Km en UserEntity |
 | **Export** | CSV anual |
 
 ---
 
-## 5. Modelo de Seguridad
+## 7. Modelo de Seguridad
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -158,18 +253,54 @@ erDiagram
 │  • Master Key nunca se guarda en plano                  │
 │  • SQLCipher: BD encriptada AES-256                     │
 │  • Key Wrapping: Clave protegida por PIN + Keystore     │
+│  • Multi-usuario: Cada usuario tiene su PIN wrapped MK  │
+│  • Recovery: Seed phrase de 12 palabras                 │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 6. Sistema de Backup (.boveda)
+## 8. Navegación
 
-Exportación segura de datos:
-- **Formato**: JSON comprimido y encriptado
-- **Clave**: Contraseña personalizada del usuario
-- **Portabilidad**: Compatible entre dispositivos
+### Rutas Definidas (Screen sealed class)
+
+| Ruta | Pantalla |
+|------|----------|
+| `splash` | SplashScreen |
+| `login` | LoginScreen |
+| `create_user` | CreateUserScreen |
+| `dashboard` | DashboardScreen |
+| `projects` | CRM DashboardScreen |
+| `clients` | ClientListScreen |
+| `client_detail` | ClientDetailScreen |
+| `project_detail` | ProjectDetailScreen |
+| `work_reports` | FieldServiceScreen |
+| `budgets` | QuoteKanbanScreen |
+| `expenses` | ExpensesScreen |
+| `inventory` | InventoryScreen |
+| `mileage` | MileageScreen |
 
 ---
 
-*Documentación Técnica v1.0 - Aegis Core*
+## 9. Sistema de Temas
+
+### ThemeViewModel
+
+```kotlin
+class ThemeViewModel : ViewModel() {
+    var isDarkTheme by mutableStateOf(false)
+        private set
+    
+    fun toggleTheme() {
+        isDarkTheme = !isDarkTheme
+    }
+}
+```
+
+- Toggle disponible en DashboardScreen
+- Persiste durante la sesión
+- MaterialTheme con colorScheme dinámico
+
+---
+
+*Documentación Técnica v1.1 - Aegis Core - Enero 2026*

@@ -8,6 +8,8 @@ import com.antigravity.aegis.data.model.UserRole
 import com.antigravity.aegis.data.security.EncryptionKeyManager
 import com.antigravity.aegis.domain.repository.AuthRepository
 import com.antigravity.aegis.domain.repository.SettingsRepository
+import com.antigravity.aegis.domain.usecase.EnableBiometricsUseCase
+import com.antigravity.aegis.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,11 +20,36 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
-    private val encryptionKeyManager: EncryptionKeyManager
+    private val encryptionKeyManager: EncryptionKeyManager,
+    private val enableBiometricsUseCase: EnableBiometricsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Idle)
     val uiState = _uiState.asStateFlow()
+    
+    private val _biometricPromptState = MutableStateFlow<BiometricPromptConfig?>(null)
+    val biometricPromptState = _biometricPromptState.asStateFlow()
+    
+    private val _isBiometricEnabled = MutableStateFlow(false)
+    val isBiometricEnabled = _isBiometricEnabled.asStateFlow()
+    
+    // Current user ID - loaded from users
+    private var currentUserId: Int = 1
+    
+    init {
+        loadCurrentUser()
+    }
+    
+    private fun loadCurrentUser() {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            authRepository.getAllUsers().collect { users ->
+                if (users.isNotEmpty()) {
+                    currentUserId = users.first().id
+                    _isBiometricEnabled.value = authRepository.isBiometricEnabled(currentUserId)
+                }
+            }
+        }
+    }
 
     private val _users = authRepository.getAllUsers()
     // We could expose users here if we want to show list to Admin, etc.
@@ -55,43 +82,21 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun createNewUser(name: String, language: String = "es", pin: String, role: UserRole = UserRole.USER) {
-        val encodedKey = encryptionKeyManager.getKey()
-        if (encodedKey == null) {
+        val masterKey = encryptionKeyManager.getKey()
+        if (masterKey == null) {
              _uiState.value = SettingsUiState.Error("Session locked. Cannot create user.")
              return
         }
         
-        // Fix: KeyManager returns String (Base64) or Bytes? Current impl returns ByteArray?
-        // Let's check KeyManager. It returns ByteArray?
-        // Wait, I updated FinalizeSetup to set encoded string. 
-        // If KeyManager.getKey() returns ByteArray, it returns the bytes of the encoded string? 
-        // Or the raw bytes? 
-        // If KeyManager.passphrase is ByteArray, and I set it with `pin.toByteArray()`.
-        // In FinalizeSetup: `encryptionKeyManager.setKey(encodedKey)` where encodedKey is String (Base64).
-        // So `encryptionKeyManager.passphrase` holds `encodedKey` bytes (UTF-8 bytes of Base64 string).
-        
-        // To get the RAW MK, I need to decode the Base64 string from the stored bytes.
-        // This is messy. I should have fixed KeyManager properly.
-        // Assuming `encryptionKeyManager.getKey()` returns the bytes of `encodedKey`.
-        
-        val storedBytes = encodedKey
-        
-        try {
-            // Need to reconstruct the Base64 string from bytes and then decode to MK bytes
-            val base64String = String(storedBytes, Charsets.UTF_8)
-            val masterKey = Base64.decode(base64String, Base64.NO_WRAP)
-            
-            viewModelScope.launch {
-                _uiState.value = SettingsUiState.Loading("Creating User...")
-                val result = authRepository.createUser(name, language, pin, role, masterKey)
-                if (result.isSuccess) {
-                    _uiState.value = SettingsUiState.Success("User created successfully")
-                } else {
-                    _uiState.value = SettingsUiState.Error(result.exceptionOrNull()?.message ?: "Failed to create user")
-                }
+        // getKey() now returns raw bytes directly (not Base64 encoded)
+        viewModelScope.launch {
+            _uiState.value = SettingsUiState.Loading("Creating User...")
+            val result = authRepository.createUser(name, language, pin, role, masterKey)
+            if (result.isSuccess) {
+                _uiState.value = SettingsUiState.Success("User created successfully")
+            } else {
+                _uiState.value = SettingsUiState.Error(result.exceptionOrNull()?.message ?: "Failed to create user")
             }
-        } catch (e: Exception) {
-             _uiState.value = SettingsUiState.Error("Key Error: ${e.message}")
         }
     }
 
@@ -106,7 +111,78 @@ class SettingsViewModel @Inject constructor(
     fun clearState() {
         _uiState.value = SettingsUiState.Idle
     }
+    
+    private var pendingBiometricAction: ((javax.crypto.Cipher) -> Unit)? = null
+    
+    fun enableBiometric() {
+        _uiState.value = SettingsUiState.Loading("Iniciando configuración biométrica...")
+        
+        android.util.Log.d("EncryptionKeyManager", "SettingsViewModel: enableBiometric called. Checking key...")
+        if (encryptionKeyManager.isKeySet()) {
+             android.util.Log.d("EncryptionKeyManager", "SettingsViewModel: Key IS set.")
+        } else {
+             android.util.Log.d("EncryptionKeyManager", "SettingsViewModel: Key IS NOT set.")
+        }
+        
+        val mk = encryptionKeyManager.getKey() ?: run {
+            android.util.Log.e("EncryptionKeyManager", "SettingsViewModel: getKey() returned null. Session blocked. Forcing logout.")
+            // Instead of just showing Error, we logout the user because session key is lost (Process Death)
+            _uiState.value = SettingsUiState.LoggedOut
+            return
+        }
+        
+        viewModelScope.launch {
+            val cipher = authRepository.getBiometricEncryptCipher(currentUserId)
+            if (cipher != null) {
+                pendingBiometricAction = { validCipher ->
+                    viewModelScope.launch {
+                        val result = enableBiometricsUseCase(currentUserId, mk, validCipher)
+                        if (result.isSuccess) {
+                            _isBiometricEnabled.value = true
+                            _uiState.value = SettingsUiState.Success("Biometría activada correctamente")
+                        } else {
+                            _uiState.value = SettingsUiState.Error("Error al activar biometría")
+                        }
+                    }
+                }
+                _biometricPromptState.value = BiometricPromptConfig(
+                    titleResId = R.string.biometric_enable_title,
+                    descriptionResId = R.string.biometric_enable_desc,
+                    cryptoObject = androidx.biometric.BiometricPrompt.CryptoObject(cipher)
+                )
+            } else {
+                _uiState.value = SettingsUiState.Error("No se pudo inicializar biometría")
+            }
+        }
+    }
+    
+    fun onBiometricPromptShown() {
+        _biometricPromptState.value = null
+    }
+    
+    fun onBiometricResult(result: com.antigravity.aegis.data.security.BiometricResult) {
+        when (result) {
+            is com.antigravity.aegis.data.security.BiometricResult.AuthenticationSuccess -> {
+                val cipher = result.result.cryptoObject?.cipher
+                if (cipher != null) {
+                    pendingBiometricAction?.invoke(cipher)
+                    pendingBiometricAction = null
+                }
+            }
+            is com.antigravity.aegis.data.security.BiometricResult.AuthenticationError -> {
+                _uiState.value = SettingsUiState.Error("Autenticación biométrica fallida")
+                pendingBiometricAction = null
+            }
+            else -> Unit
+        }
+    }
 }
+
+data class BiometricPromptConfig(
+    val titleResId: Int,
+    val descriptionResId: Int,
+    val cryptoObject: androidx.biometric.BiometricPrompt.CryptoObject
+)
 
 sealed interface SettingsUiState {
     data object Idle : SettingsUiState

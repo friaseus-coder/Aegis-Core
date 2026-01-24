@@ -140,13 +140,26 @@ class CrmViewModel @Inject constructor(
     
     fun createWorkReport(projectId: Int, description: String, signatureBitmap: android.graphics.Bitmap?) {
         viewModelScope.launch {
-            // In a real app, save bitmap to file first
+            // Save signature bitmap to internal storage
+            var signaturePath: String? = null
+            if (signatureBitmap != null) {
+                val filename = "signature_${System.currentTimeMillis()}.png"
+                val file = java.io.File(context.filesDir, filename)
+                try {
+                    java.io.FileOutputStream(file).use { out ->
+                        signatureBitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+                    }
+                    signaturePath = file.absolutePath
+                } catch (e: Exception) {
+                    android.util.Log.e("CrmViewModel", "Error saving signature", e)
+                }
+            }
             
             val report = WorkReportEntity(
                 projectId = projectId,
                 date = System.currentTimeMillis(),
                 description = description,
-                signaturePath = "dummy_path_signature_${System.currentTimeMillis()}.png"
+                signaturePath = signaturePath
             )
             val reportId = repository.createWorkReport(report)
             

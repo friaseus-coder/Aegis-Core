@@ -3,6 +3,7 @@ package com.antigravity.aegis.presentation.settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,7 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.antigravity.aegis.R
 import com.antigravity.aegis.data.model.UserRole
+import com.antigravity.aegis.data.security.BiometricPromptManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +27,34 @@ fun SettingsScreen(
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
+    val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
+    val biometricPromptState by viewModel.biometricPromptState.collectAsState()
     val context = LocalContext.current
+    
+    // BiometricPromptManager
+    val activity = context as? androidx.fragment.app.FragmentActivity
+    val biometricPromptManager = remember(activity) {
+        if (activity != null) BiometricPromptManager(activity) else null
+    }
+    
+    // Observe biometric prompt trigger
+    LaunchedEffect(biometricPromptState) {
+        biometricPromptState?.let { config ->
+            biometricPromptManager?.showBiometricPrompt(
+                title = context.getString(config.titleResId),
+                description = context.getString(config.descriptionResId),
+                cryptoObject = config.cryptoObject
+            )
+            viewModel.onBiometricPromptShown()
+        }
+    }
+    
+    // Observe biometric results
+    LaunchedEffect(biometricPromptManager) {
+        biometricPromptManager?.promptResults?.collect { result ->
+            viewModel.onBiometricResult(result)
+        }
+    }
 
     // Launchers
     val exportLauncher = rememberLauncherForActivityResult(
@@ -60,10 +91,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ajustes") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back_content_desc))
                     }
                 }
             )
@@ -77,19 +108,56 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             
+            // Handle UI State Feedback
+            val context = androidx.compose.ui.platform.LocalContext.current
+            LaunchedEffect(uiState) {
+                val state = uiState
+                when (state) {
+                    is SettingsUiState.Success -> {
+                        android.widget.Toast.makeText(context, state.message, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                    is SettingsUiState.Error -> {
+                        android.widget.Toast.makeText(context, state.message, android.widget.Toast.LENGTH_LONG).show()
+                    }
+                    is SettingsUiState.LoggedOut -> {
+                        android.widget.Toast.makeText(context, "Sesión expirada. Identifícate de nuevo.", android.widget.Toast.LENGTH_LONG).show()
+                        onLogout()
+                    }
+                    else -> Unit
+                }
+            }
+
             // Loading Indicator
             if (uiState is SettingsUiState.Loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 Text((uiState as SettingsUiState.Loading).message)
             }
 
+            // Security Section
+            SettingsSection(title = stringResource(R.string.security_section_title)) {
+                if (isBiometricEnabled) {
+                    Text(
+                        text = stringResource(R.string.biometric_already_enabled),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Button(
+                        onClick = { viewModel.enableBiometric() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.enable_biometrics_button))
+                    }
+                }
+            }
+
             // Database Section
-            SettingsSection(title = "Base de Datos") {
+            SettingsSection(title = stringResource(R.string.database_section_title)) {
                 Button(
                     onClick = { exportLauncher.launch("aegis_backup.db") },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Exportar Base de Datos")
+                    Text(stringResource(R.string.export_database))
                 }
                 
                 Button(
@@ -97,28 +165,28 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
-                    Text("Importar Base de Datos (Sobreescribir)")
+                    Text(stringResource(R.string.import_database_overwrite))
                 }
             }
 
             // User Management Section
-            SettingsSection(title = "Gestión de Usuarios") {
+            SettingsSection(title = stringResource(R.string.user_management_section_title)) {
                 Button(
                     onClick = { showAddUserDialog = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Crear Nuevo Usuario")
+                    Text(stringResource(R.string.create_new_user))
                 }
             }
 
             // Session Section
-            SettingsSection(title = "Sesión") {
+            SettingsSection(title = stringResource(R.string.session_section_title)) {
                 OutlinedButton(
                     onClick = { viewModel.logout() },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Cerrar Sesión")
+                    Text(stringResource(R.string.logout))
                 }
             }
         }
@@ -150,18 +218,18 @@ fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo Usuario") },
+        title = { Text(stringResource(R.string.new_user)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name, 
                     onValueChange = { name = it }, 
-                    label = { Text("Nombre") }
+                    label = { Text(stringResource(R.string.name_label)) }
                 )
                 OutlinedTextField(
                     value = pin, 
                     onValueChange = { if (it.length <= 6) pin = it }, 
-                    label = { Text("PIN (4-6 dígitos)") }
+                    label = { Text(stringResource(R.string.pin_digits_label)) }
                 )
             }
         },
@@ -170,11 +238,11 @@ fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -
                 onClick = { onConfirm(name, pin, UserRole.USER) }, // Default to User for now
                 enabled = name.isNotBlank() && pin.length >= 4
             ) {
-                Text("Crear")
+                Text(stringResource(R.string.create_button))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) }
         }
     )
 }

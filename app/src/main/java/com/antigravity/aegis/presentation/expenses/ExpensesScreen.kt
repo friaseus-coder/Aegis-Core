@@ -29,6 +29,8 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import com.antigravity.aegis.R
 
 import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -69,9 +71,9 @@ fun ExpensesScreen(
         is ExpensesViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text("Import Errors") },
+                title = { Text(stringResource(R.string.import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text("OK") } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.ok_button)) } }
             )
         }
         is ExpensesViewModel.TransferState.ValidationSuccess -> {
@@ -130,7 +132,7 @@ fun ExpensesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Expenses & Tickets") },
+                title = { Text(stringResource(R.string.expenses_title)) },
                 actions = {
                     IconButton(onClick = { viewModel.exportExpenses() }) {
                         Icon(Icons.Default.ArrowDownward, contentDescription = "Export CSV")
@@ -165,7 +167,7 @@ fun ExpensesScreen(
             ) {
                 Icon(Icons.Default.Share, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Export This Quarter")
+                Text(stringResource(R.string.export_quarter))
             }
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -193,7 +195,7 @@ fun ReviewScanDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Review Ticket") },
+        title = { Text(stringResource(R.string.review_ticket)) },
         text = {
             Column {
                 if (imageUri != null) {
@@ -212,13 +214,13 @@ fun ReviewScanDialog(
                 OutlinedTextField(
                     value = merchant,
                     onValueChange = { merchant = it },
-                    label = { Text("Merchant / Concept") }
+                    label = { Text(stringResource(R.string.merchant_concept)) }
                 )
                 
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Amount") },
+                    label = { Text(stringResource(R.string.amount_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
                 
@@ -236,10 +238,10 @@ fun ReviewScanDialog(
                  onClick = {
                      onSave(amount.toDoubleOrNull() ?: 0.0, merchant)
                  }
-            ) { Text("Save") }
+            ) { Text(stringResource(R.string.save_button)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) }
         }
     )
 }

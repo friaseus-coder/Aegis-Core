@@ -23,10 +23,12 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -57,7 +59,8 @@ data class ModuleData(
 fun DashboardScreen(
     navController: NavController,
     isDarkTheme: Boolean,
-    onThemeToggle: () -> Unit
+    onThemeToggle: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val modules = listOf(
         ModuleData("Proyectos", Icons.Filled.Work, Screen.Projects.route),
@@ -66,7 +69,7 @@ fun DashboardScreen(
         ModuleData("Gastos", Icons.Filled.Money, Screen.Expenses.route),
         ModuleData("Inventario", Icons.Filled.Inventory, Screen.Inventory.route),
         ModuleData("Control Horario", Icons.Filled.Schedule, Screen.TimeControl.route),
-        ModuleData("Password Vault", Icons.Filled.Lock, Screen.PasswordVault.route),
+        ModuleData("Clientes", Icons.Filled.Person, Screen.Clients.route),
         ModuleData("Kilometraje", Icons.Filled.Map, Screen.Mileage.route)
     )
 
@@ -78,10 +81,16 @@ fun DashboardScreen(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
                 actions = {
+                    // Settings Button
+                    androidx.compose.material3.IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    // Theme Toggle Button
                     androidx.compose.material3.IconButton(onClick = onThemeToggle) {
-                        // Use a simple text or icon if available. Assuming standard icons.
-                        // If standard icons are missing, fallback to Text "Theme".
-                        // Trying standard icons first.
                          Icon(
                             imageVector = if (isDarkTheme) Icons.Filled.LightMode else Icons.Filled.DarkMode,
                             contentDescription = "Toggle Theme",

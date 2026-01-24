@@ -1,0 +1,50 @@
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kspDebugKotlin
+
+> Task :app:compileDebugKotlin
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/di/DatabaseModule.kt:25:9 Parameter 'keyManager' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/AuthRepositoryImpl.kt:147:18 Variable 'iv' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/expenses/ExportManager.kt:17:70 Parameter 'startDate' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/expenses/ExportManager.kt:17:87 Parameter 'endDate' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/expenses/OcrManager.kt:63:27 Type mismatch: inferred type is String? but String was expected
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/MainScreen.kt:27:9 Variable 'navController' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/common/ImportDialogs.kt:12:5 Parameter 'state' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/common/ImportDialogs.kt:13:5 Parameter 'onDismiss' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/common/ImportDialogs.kt:14:5 Parameter 'onConfirmWipe' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/ClientDetailScreen.kt:83:21 'Divider(Modifier = ..., Dp = ..., Color = ...): Unit' is deprecated. Renamed to HorizontalDivider
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/ClientListScreen.kt:105:17 'Divider(Modifier = ..., Dp = ..., Color = ...): Unit' is deprecated. Renamed to HorizontalDivider
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/CreateQuoteScreen.kt:40:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/CrmViewModel.kt:155:17 Variable 'client' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/CrmViewModel.kt:161:27 Variable 'pdfFile' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/ProjectDetailScreen.kt:63:22 'Divider(Modifier = ..., Dp = ..., Color = ...): Unit' is deprecated. Renamed to HorizontalDivider
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/ProjectDetailScreen.kt:90:21 'Divider(Modifier = ..., Dp = ..., Color = ...): Unit' is deprecated. Renamed to HorizontalDivider
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/QuoteKanbanScreen.kt:109:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/crm/QuoteKanbanViewModel.kt:149:21 Variable 'intent' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/expenses/ExpensesScreen.kt:43:5 Parameter 'onNavigateBack' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/inventory/InventoryScreen.kt:104:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/mileage/MileageScreen.kt:42:9 Variable 'exportStatus' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/mileage/MileageScreen.kt:124:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/reports/CreateReportScreen.kt:23:5 Parameter 'projectId' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/reports/CreateReportScreen.kt:33:9 Variable 'photoUri' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/reports/SignatureCanvas.kt:31:5 Parameter 'onSignatureChanged' is never used
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/reports/SignatureCanvas.kt:53:20 Parameter 'view' is never used, could be renamed to _
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/reports/SignatureCanvas.kt:115:17 'invalidate(Int, Int, Int, Int): Unit' is deprecated. Deprecated in Java
+w: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/settings/SettingsScreen.kt:68:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+
+BUILD SUCCESSFUL in 34s
+15 actionable tasks: 3 executed, 12 up-to-date

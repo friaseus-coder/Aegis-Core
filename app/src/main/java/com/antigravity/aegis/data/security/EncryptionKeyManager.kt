@@ -10,24 +10,23 @@ class EncryptionKeyManager @Inject constructor() {
     private var passphrase: ByteArray? = null
 
     fun setKey(pin: String) {
+        android.util.Log.d("EncryptionKeyManager", "setKey called with PIN length: ${pin.length}")
         clearKey()
-        // If we are using PIN as key (Legacy mode or dev), we convert to bytes.
-        // But in our new architecture, we shouldn't use PIN directly as DB Key.
-        // However, for compatibility or intermediate steps, we might need it.
         passphrase = pin.toByteArray(Charsets.UTF_8)
+        android.util.Log.d("EncryptionKeyManager", "Key set from PIN. Is set? ${isKeySet()}")
     }
 
     fun setMasterKey(key: ByteArray) {
+        android.util.Log.d("EncryptionKeyManager", "setMasterKey called with bytes length: ${key.size}")
         clearKey()
-        passphrase = key.clone() // Store a copy
+        passphrase = key.clone()
+        android.util.Log.d("EncryptionKeyManager", "Master Key set. Is set? ${isKeySet()}")
     }
 
-    /**
-     * Returns the current key.
-     * WARNING: This returns the reference to the sensitive array.
-     */
     fun getKey(): ByteArray? {
-        return passphrase
+        val key = passphrase
+        android.util.Log.d("EncryptionKeyManager", "getKey called. Returning null? ${key == null}")
+        return key
     }
 
     fun isKeySet(): Boolean {
@@ -35,8 +34,9 @@ class EncryptionKeyManager @Inject constructor() {
     }
 
     fun clearKey() {
+        android.util.Log.d("EncryptionKeyManager", "clearKey called")
         passphrase?.let {
-            Arrays.fill(it, 0.toByte()) // Zero out the memory
+            Arrays.fill(it, 0.toByte())
         }
         passphrase = null
     }

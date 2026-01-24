@@ -61,7 +61,8 @@ fun NavigationGraph(
             DashboardScreen(
                 navController = navController,
                 isDarkTheme = isDarkTheme,
-                onThemeToggle = onThemeToggle
+                onThemeToggle = onThemeToggle,
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
             )
         }
 
@@ -131,7 +132,10 @@ fun NavigationGraph(
 
         composable(Screen.WorkReports.route) {
             com.antigravity.aegis.presentation.reports.FieldServiceScreen(
-                viewModel = crmViewModel
+                viewModel = crmViewModel,
+                onNavigateToCreateReport = { projectId ->
+                    navController.navigate(Screen.CreateReport.createRoute(projectId))
+                }
             )
         }
 
@@ -157,6 +161,19 @@ fun NavigationGraph(
         composable(Screen.Mileage.route) {
              com.antigravity.aegis.presentation.mileage.MileageScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // --- SETTINGS ---
+        composable(Screen.Settings.route) {
+            com.antigravity.aegis.presentation.settings.SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onLogout = {
+                    // Navigate back to Login and clear backstack
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
         

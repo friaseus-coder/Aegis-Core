@@ -20,8 +20,55 @@ Devolver a los autónomos y pequeñas empresas el control de sus datos con un ec
 |----------------|-------------|
 | **Offline-First** | Toda la funcionalidad principal funciona sin conexión a internet |
 | **Seguridad AES-256** | Base de datos encriptada con el estándar de seguridad más alto |
-| **Acceso Biométrico** | Protección por PIN Maestro o Huella Dactilar |
+| **Multi-Usuario** | Sistema de usuarios con roles (Admin, User, Guest) |
+| **Multiidioma** | Soporte para Español e Inglés con cambio dinámico |
+| **Acceso por PIN** | Protección por PIN de 4-6 dígitos por usuario |
 | **Backup Seguro** | Archivo `.boveda` encriptado + Kit de Recuperación (12 palabras) |
+
+---
+
+## 👥 Sistema Multi-Usuario
+
+### Roles de Usuario
+
+| Rol | Permisos |
+|-----|----------|
+| **Admin** | Acceso total, puede crear usuarios, exportar/importar BD |
+| **User** | Acceso a módulos, operaciones estándar |
+| **Guest** | Acceso limitado (lectura) |
+
+### Flujo de Autenticación
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                  FLUJO DE AUTENTICACIÓN                   │
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│   Primera vez:                                            │
+│   ┌─────────┐   ┌─────────────┐   ┌────────────────┐     │
+│   │ Splash  │ → │ Crear Admin │ → │ Seed + PIN     │     │
+│   └─────────┘   └─────────────┘   └────────────────┘     │
+│                                                           │
+│   Usuarios existentes:                                    │
+│   ┌─────────┐   ┌─────────────┐   ┌────────────────┐     │
+│   │ Splash  │ → │ Seleccionar │ → │ Introducir PIN │     │
+│   └─────────┘   └─────────────┘   └────────────────┘     │
+│                                                           │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🌐 Internacionalización
+
+| Idioma | Código | Cobertura |
+|--------|--------|-----------|
+| Español | `es` | 100% |
+| Inglés | `en` | 100% |
+
+- Cambio de idioma instantáneo desde la pantalla de login
+- Sin necesidad de reiniciar la aplicación
+- El idioma preferido se guarda por usuario
 
 ---
 
@@ -54,7 +101,13 @@ Gestión de stock en tiempo real:
 - Control de entradas/salidas
 - Alertas de stock mínimo
 
-### Módulo 6: Control Horario (El Consultor)
+### Módulo 6: Kilometraje (El Viajero)
+Registro de viajes deducibles:
+- Calculadora de distancia y coste
+- Precio por km configurable por usuario
+- Exportación anual CSV
+
+### Módulo 7: Control Horario (El Consultor)
 Time tracker para profesionales:
 - Cronómetro por cliente/proyecto
 - Informes de horas (PDF/Excel)
@@ -69,9 +122,10 @@ Time tracker para profesionales:
 │  ✅ Sin suscripciones    │  ✅ 100% Offline                │
 │  ✅ Encriptación AES-256 │  ✅ Tus datos, tu control       │
 │  ✅ Pago único           │  ✅ Sin telemetría ni tracking  │
+│  ✅ Multi-usuario        │  ✅ Multiidioma (ES/EN)         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-*Documento de visión v1.0 - Aegis Core*
+*Documento de visión v1.1 - Aegis Core - Enero 2026*

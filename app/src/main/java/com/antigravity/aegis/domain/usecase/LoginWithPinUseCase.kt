@@ -12,11 +12,14 @@ class LoginWithPinUseCase @Inject constructor(
         val result = authRepository.loginWithPin(userId, pin)
         return if (result.isSuccess) {
             val masterKey = result.getOrThrow()
-            val encodedKey = android.util.Base64.encodeToString(masterKey, android.util.Base64.NO_WRAP)
-            encryptionKeyManager.setKey(encodedKey)
+            android.util.Log.d("EncryptionKeyManager", "Login successful. Setting Master Key of size: ${masterKey.size}")
+            // Store raw bytes directly, no need for Base64 encoding for memory storage
+            encryptionKeyManager.setMasterKey(masterKey)
             Result.success(Unit)
         } else {
-            Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            val error = result.exceptionOrNull()
+            android.util.Log.e("EncryptionKeyManager", "Login failed", error)
+            Result.failure(error ?: Exception("Unknown error"))
         }
     }
 }

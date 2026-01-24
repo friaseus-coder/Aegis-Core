@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 class AuthRepositoryImpl @Inject constructor(
     private val securityDataSource: SecurityDataSource,
     private val keyCryptoManager: KeyCryptoManager,
+    private val biometricCryptoManager: com.antigravity.aegis.data.security.BiometricCryptoManager,
     private val userEntityDao: UserEntityDao
 ) : AuthRepository {
 
@@ -110,5 +111,60 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun enableBiometric(
+        userId: Int,
+        masterKey: ByteArray,
+        cipher: javax.crypto.Cipher
+    ): Result<Unit> {
+        return try {
+            val encryptedMk = biometricCryptoManager.encryptData(masterKey, cipher)
+            // We append IV to encrypted data for storage if needed, 
+            // but BiometricCryptoManager might handle it.
+            // Let's check: BiometricCryptoManager.encryptData just calls doFinal.
+            // AES/GCM needs IV. The IV is in cipher.iv
+            
+            val iv = cipher.iv
+            val combined = iv + encryptedMk
+            
+            securityDataSource.saveBiometricWrappedMk(userId, combined)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun loginWithBiometric(
+        userId: Int,
+        cipher: javax.crypto.Cipher
+    ): Result<ByteArray> {
+         return try {
+             val combined = securityDataSource.getBiometricWrappedMk(userId)
+                 ?: return Result.failure(Exception("No biometric credentials found"))
+             
+             // Extract IV (12 bytes) and Data
+             val iv = combined.copyOfRange(0, 12)
+             val encryptedData = combined.copyOfRange(12, combined.size)
+             
+             val mk = biometricCryptoManager.decryptData(encryptedData, cipher)
+             Result.success(mk)
+         } catch (e: Exception) {
+             Result.failure(e)
+         }
+    }
+
+    override fun getBiometricEncryptCipher(userId: Int): javax.crypto.Cipher? {
+        return biometricCryptoManager.getEncryptCipher("biometric_key_$userId")
+    }
+
+    override fun getBiometricDecryptCipher(userId: Int): javax.crypto.Cipher? {
+        val combined = securityDataSource.getBiometricWrappedMk(userId) ?: return null
+        val iv = combined.copyOfRange(0, 12)
+        return biometricCryptoManager.getDecryptCipher("biometric_key_$userId", iv)
+    }
+
+    override fun isBiometricEnabled(userId: Int): Boolean {
+        return securityDataSource.getBiometricWrappedMk(userId) != null
     }
 }

@@ -12,9 +12,8 @@ class FinalizeSetupUseCase @Inject constructor(
         val saveResult = authRepository.createAdmin(name, language, pin, seedPhrase, masterKey)
         if (saveResult.isSuccess) {
             // Set the key in memory so the session is active immediately
-            // Using Base64 to store byte array as string key for now
-             val encodedKey = android.util.Base64.encodeToString(masterKey, android.util.Base64.NO_WRAP)
-            encryptionKeyManager.setKey(encodedKey)
+            // Use raw bytes directly for consistency with LoginWithPinUseCase
+            encryptionKeyManager.setMasterKey(masterKey)
             return Result.success(Unit)
         }
         return Result.failure(saveResult.exceptionOrNull() ?: Exception("Unknown error"))

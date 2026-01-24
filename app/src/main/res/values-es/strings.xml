@@ -32,6 +32,13 @@
     <string name="create_user_label">Crear Usuario</string>
     <string name="select_user_label">Seleccionar Usuario</string>
     <string name="create_user_button">Crear Usuario</string>
+    <string name="loading_label">Cargando...</string>
+    <string name="biometric_login_button">Acceso Biométrico</string>
+    <string name="enable_biometrics_button">Activar Biometría (Requiere estar conectado)</string>
+    <string name="biometric_login_title">Acceso Biométrico</string>
+    <string name="biometric_login_desc">Autentícate para desbloquear</string>
+    <string name="biometric_enable_title">Activar Biometría</string>
+    <string name="biometric_enable_desc">Autentícate para activar el acceso biométrico</string>
 
     <!-- Clients -->
     <string name="clients_title">Clientes</string>
@@ -104,4 +111,59 @@
     <string name="quote_title_label">Título del Presupuesto</string>
     <string name="total_amount_label">Importe Total ($)</string>
     <string name="quote_description_label">Descripción / Elementos</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Ajustes</string>
+    <string name="export_database">Exportar Base de Datos</string>
+    <string name="import_database_overwrite">Importar Base de Datos (Sobreescribir)</string>
+    <string name="create_new_user">Crear Nuevo Usuario</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="new_user">Nuevo Usuario</string>
+    <string name="pin_digits_label">PIN (4-6 dígitos)</string>
+    <string name="create_and_enter">Crear y Entrar</string>
+    <string name="security_section_title">Seguridad</string>
+    <string name="database_section_title">Base de Datos</string>
+    <string name="user_management_section_title">Gestión de Usuarios</string>
+    <string name="session_section_title">Sesión</string>
+    <string name="biometric_already_enabled">✓ Autenticación biométrica activada</string>
+
+    <!-- Create User Screen -->
+    <string name="create_new_user_title">Crear Nuevo Usuario</string>
+    <string name="language_label">Idioma</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_english">English</string>
+
+    <!-- Field Service Screen -->
+    <string name="field_service_title">Consola de Servicio de Campo</string>
+    <string name="date_label">Fecha: %1$s</string>
+    <string name="project_id_label">ID Proyecto: %1$d</string>
+    <string name="no_work_reports_found">No se encontraron partes de trabajo.</string>
+
+    <!-- Mileage Screen -->
+    <string name="mileage_log_title">Registro de Kilometraje</string>
+    <string name="price_per_km">Precio por Km (€)</string>
+    <string name="new_trip_calculator">Calculadora de Nuevo Viaje</string>
+    <string name="origin_label">Origen</string>
+    <string name="destination_label">Destino</string>
+    <string name="start_odo_label">Odo. Inicio</string>
+    <string name="end_odo_label">Odo. Fin</string>
+    <string name="distance_km">Distancia: %1$d km</string>
+    <string name="estimated_cost">Coste Est.: €%1$.2f</string>
+    <string name="log_trip">Registrar Viaje</string>
+    <string name="recent_trips">Viajes Recientes</string>
+    <string name="export_annual_csv">Exportar CSV Anual</string>
+
+    <!-- Expenses Screen -->
+    <string name="expenses_title">Gastos y Tickets</string>
+    <string name="export_quarter">Exportar Este Trimestre</string>
+    <string name="review_ticket">Revisar Ticket</string>
+    <string name="merchant_concept">Comercio / Concepto</string>
+    <string name="amount_label">Importe</string>
+    <string name="save_button">Guardar</string>
+
+    <!-- Inventory Screen -->
+    <string name="inventory_title">Control de Inventario</string>
+    <string name="stock_list">Lista de Stock</string>
+    <string name="scan_label">Escanear</string>
+    <string name="barcode_label">Código: %1$s</string>
 </resources>
