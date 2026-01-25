@@ -51,7 +51,12 @@ fun ClientDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(client!!.name) })
+            TopAppBar(title = { 
+                Text(
+                    if (client!!.tipoCliente == "Particular") "${client!!.firstName} ${client!!.lastName}" 
+                    else client!!.firstName 
+                ) 
+            })
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddProjectDialog = true }) {
@@ -63,9 +68,18 @@ fun ClientDetailScreen(
             // Client Details
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
+                    val address = listOfNotNull(client!!.calle, client!!.numero, client!!.piso, client!!.codigoPostal, client!!.poblacion).joinToString(", ")
+                    
+                    Text("Tipo: ${client!!.tipoCliente} - ${client!!.categoria}")
+                    if (!client!!.nifCif.isNullOrEmpty()) {
+                         Text("${if (client!!.tipoCliente == "Empresa") "CIF" else "NIF"}: ${client!!.nifCif}")
+                    }
+                    if (address.isNotBlank()) {
+                         Text("Dirección: $address")
+                    }
                     Text(stringResource(R.string.client_email_label, client!!.email ?: stringResource(R.string.not_available_short)))
                     Text(stringResource(R.string.client_phone_label, client!!.phone ?: stringResource(R.string.not_available_short)))
-                    Text(stringResource(R.string.client_notes_label, client!!.notes ?: stringResource(R.string.not_available_short)))
+                    Text("Notas: ${client!!.notas ?: stringResource(R.string.not_available_short)}")
                 }
             }
 

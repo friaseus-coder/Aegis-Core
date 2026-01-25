@@ -4,34 +4,47 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.ArrowDownward
 import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientListScreen(
     viewModel: CrmViewModel,
-    onNavigateToClientDetail: (Int) -> Unit
+    onNavigateToClientDetail: (Int) -> Unit,
+    onNavigateToClientCreate: () -> Unit
 ) {
     val clients by viewModel.allClients.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
-    var showAddDialog by remember { mutableStateOf(false) }
     
     val context = LocalContext.current
+    
+    // Filters State
+    var searchQuery by remember { mutableStateOf("") }
+    var filterType by remember { mutableStateOf<String?>(null) }
+    
+    LaunchedEffect(searchQuery) { viewModel.setSearchQuery(searchQuery) }
+    LaunchedEffect(filterType) { viewModel.setFilterType(filterType) }
     
     // Import Picker
     val importLauncher = rememberLauncherForActivityResult(
@@ -67,8 +80,7 @@ fun ClientListScreen(
             )
         }
         is CrmViewModel.TransferState.Loading -> {
-             // Show simple loading, usually automatic via box, but here blocking interaction
-             // For MVP, just a toast or background indicator
+             // Show simple loading
         }
         else -> {}
     }
@@ -88,70 +100,92 @@ fun ClientListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
+            FloatingActionButton(onClick = { onNavigateToClientCreate() }) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_client_fab))
             }
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier.padding(padding).fillMaxSize()
-        ) {
-            items(clients) { client ->
-                ListItem(
-                    headlineContent = { Text(client.name) },
-                    supportingContent = { Text(client.email ?: stringResource(R.string.client_email_placeholder)) },
-                    modifier = Modifier.clickable { onNavigateToClientDetail(client.id) }
-                )
-                Divider()
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            
+            // Search Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Buscar (min 3 letras)") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                maxLines = 1,
+                trailingIcon = {
+                     if (searchQuery.isNotEmpty()) {
+                         IconButton(onClick = { searchQuery = "" }) {
+                             Icon(Icons.Default.Clear, "Limpiar")
+                         }
+                     } else {
+                         Icon(Icons.Default.Search, "Buscar")
+                     }
+                }
+            )
+
+            // Filters Row
+            Row(
+                 modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                 FilterChip(
+                     selected = filterType == null,
+                     onClick = { filterType = null },
+                     label = { Text("Todos") }
+                 )
+                 Spacer(modifier = Modifier.width(8.dp))
+                 FilterChip(selected = filterType == "Particular", onClick = { filterType = "Particular" }, label = { Text("Particulares") })
+                 Spacer(modifier = Modifier.width(8.dp))
+                 FilterChip(selected = filterType == "Empresa", onClick = { filterType = "Empresa" }, label = { Text("Empresas") })
             }
-            if (clients.isEmpty()) {
-                item {
-                    Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                        Text(stringResource(R.string.no_clients))
+            
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().weight(1f)
+            ) {
+                items(clients) { client ->
+                    ListItem(
+                        headlineContent = { 
+                            Text(
+                                if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" 
+                                else client.firstName // "Nombre Comercial"
+                            ) 
+                        },
+                        supportingContent = { 
+                            Column {
+                                val detalle = if (client.tipoCliente == "Empresa") client.razonSocial else client.nifCif
+                                Text(
+                                    text = if (!detalle.isNullOrEmpty()) "${client.tipoCliente} • $detalle" else client.tipoCliente,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    text = client.categoria,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (client.categoria == "Activo") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        },
+                        modifier = Modifier.clickable { 
+                             onNavigateToClientDetail(client.id) 
+                        }
+                    )
+                    Divider()
+                }
+                if (clients.isEmpty()) {
+                    item {
+                        Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                            Text(if (searchQuery.length in 1..2) "Escribe al menos 3 letras para buscar" else stringResource(R.string.no_clients))
+                        }
                     }
                 }
             }
         }
-
-        if (showAddDialog) {
-            AddClientDialog(
-                onDismiss = { showAddDialog = false },
-                onConfirm = { name, email, phone, notes ->
-                    viewModel.createClient(name, email, phone, notes)
-                    showAddDialog = false
-                }
-            )
-        }
     }
-}
-
-@Composable
-fun AddClientDialog(onDismiss: () -> Unit, onConfirm: (String, String?, String?, String?) -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_client_dialog_title)) },
-        text = {
-            Column {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.name_label)) })
-                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(stringResource(R.string.email_label)) })
-                OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(stringResource(R.string.phone_label)) })
-                OutlinedTextField(value = notes, onValueChange = { notes = it }, label = { Text(stringResource(R.string.notes_label)) })
-            }
-        },
-        confirmButton = {
-            Button(onClick = { 
-                if (name.isNotBlank()) onConfirm(name, email.ifBlank { null }, phone.ifBlank { null }, notes.ifBlank { null }) 
-            }) {
-                Text(stringResource(R.string.add_button))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) }
-        }
-    )
 }

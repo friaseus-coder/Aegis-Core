@@ -21,11 +21,20 @@ interface CrmDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClient(client: ClientEntity): Long
 
-    @Query("SELECT * FROM clients")
+    @Query("SELECT * FROM clients ORDER BY firstName ASC")
     fun getAllClients(): Flow<List<ClientEntity>>
+
+    @Query("SELECT * FROM clients WHERE tipoCliente = :tipoCliente ORDER BY firstName ASC")
+    fun getClientsByType(tipoCliente: String): Flow<List<ClientEntity>>
+
+    @Query("SELECT * FROM clients WHERE firstName LIKE '%' || :query || '%' OR lastName LIKE '%' || :query || '%' ORDER BY firstName ASC")
+    fun searchClients(query: String): Flow<List<ClientEntity>>
 
     @Query("SELECT * FROM clients WHERE id = :id")
     suspend fun getClientById(id: Int): ClientEntity?
+
+    @Query("UPDATE clients SET categoria = :categoria WHERE id = :clientId")
+    suspend fun updateClientCategoria(clientId: Int, categoria: String)
 
     // Projects
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -133,6 +133,48 @@ fun SettingsScreen(
                 Text((uiState as SettingsUiState.Loading).message)
             }
 
+            // General / Appearance Section
+            val config = viewModel.userConfig.collectAsState().value
+            
+            SettingsSection(title = stringResource(R.string.general_section_title)) {
+                // Language Selector
+                Text("Idioma / Language", style = MaterialTheme.typography.bodyMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = config?.language == "es",
+                        onClick = { viewModel.updateLanguage("es") },
+                        label = { Text("Español") }
+                    )
+                    FilterChip(
+                        selected = config?.language == "en",
+                        onClick = { viewModel.updateLanguage("en") },
+                        label = { Text("English") }
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Theme Selector
+                Text("Tema / Theme", style = MaterialTheme.typography.bodyMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                     FilterChip(
+                        selected = config?.themeMode == "system",
+                        onClick = { viewModel.updateThemeMode("system") },
+                        label = { Text("Sistema") }
+                    )
+                    FilterChip(
+                        selected = config?.themeMode == "light",
+                        onClick = { viewModel.updateThemeMode("light") },
+                        label = { Text("Claro") }
+                    )
+                    FilterChip(
+                        selected = config?.themeMode == "dark",
+                        onClick = { viewModel.updateThemeMode("dark") },
+                        label = { Text("Oscuro") }
+                    )
+                }
+            }
+
             // Security Section
             SettingsSection(title = stringResource(R.string.security_section_title)) {
                 if (isBiometricEnabled) {

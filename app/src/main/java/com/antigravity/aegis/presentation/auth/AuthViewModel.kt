@@ -204,6 +204,7 @@ class AuthViewModel @Inject constructor(
                 )
             } else {
                 // Biometrics not set up for this user
+                _loginError.value = "Biometría no disponible para este usuario"
             }
         }
     }
@@ -249,7 +250,7 @@ class AuthViewModel @Inject constructor(
                 }
             }
             is BiometricResult.AuthenticationError -> {
-                // Todo: Handle error
+                _loginError.value = "Error biométrico: ${result.error}"
                 pendingBiometricAction = null
             }
             else -> Unit

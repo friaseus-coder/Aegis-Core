@@ -69,4 +69,27 @@ class SettingsRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+
+    override fun getUserConfig(): kotlinx.coroutines.flow.Flow<com.antigravity.aegis.data.model.UserConfig?> {
+        return database.userConfigDao().getUserConfig()
+    }
+
+    override suspend fun updateLanguage(language: String) {
+        // Ensure config exists first
+        ensureConfigExists()
+        database.userConfigDao().updateLanguage(language)
+    }
+
+    override suspend fun updateThemeMode(mode: String) {
+        ensureConfigExists()
+        database.userConfigDao().updateThemeMode(mode)
+    }
+
+    private suspend fun ensureConfigExists() {
+        val current = database.userConfigDao().getUserConfigOneShot()
+        if (current == null) {
+            database.userConfigDao().insertUserConfig(com.antigravity.aegis.data.model.UserConfig())
+        }
+    }
 }

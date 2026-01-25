@@ -126,6 +126,7 @@
     <string name="user_management_section_title">User Management</string>
     <string name="session_section_title">Session</string>
     <string name="biometric_already_enabled">✓ Biometric authentication enabled</string>
+    <string name="general_section_title">General / Appearance</string>
 
     <!-- Create User Screen -->
     <string name="create_new_user_title">Create New User</string>

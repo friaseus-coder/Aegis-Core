@@ -36,9 +36,9 @@ class DataTransferManager @Inject constructor(
                 
                 when (type) {
                     EntityType.CLIENTS -> {
-                        errors.addAll(CsvHelper.validateHeader(header, listOf("name", "email", "phone")))
+                        errors.addAll(CsvHelper.validateHeader(header, listOf("firstName"))) // Minimal check
                         rows.forEachIndexed { idx, row ->
-                            if (row["name"].isNullOrBlank()) errors.add("Row ${idx + 1}: Missing name")
+                            if (row["firstName"].isNullOrBlank() && row["name"].isNullOrBlank()) errors.add("Row ${idx + 1}: Missing name")
                         }
                     }
                     EntityType.INVENTORY -> {
@@ -84,10 +84,15 @@ class DataTransferManager @Inject constructor(
                         EntityType.CLIENTS -> {
                             rows.forEach { row ->
                                 val entity = ClientEntity(
-                                    name = row["name"] ?: "",
-                                    email = row["email"] ?: "",
-                                    phone = row["phone"] ?: "",
-                                    notes = row["notes"] ?: ""
+                                    firstName = row["firstName"] ?: row["name"] ?: "",
+                                    lastName = row["lastName"] ?: "",
+                                    tipoCliente = row["type"] ?: "Particular",
+                                    razonSocial = row["companyName"],
+                                    nifCif = row["nif"],
+                                    email = row["email"],
+                                    phone = row["phone"],
+                                    notas = row["notes"],
+                                    calle = row["address"] // Simple mapping to calle for now
                                 )
                                 crmDao.insertClient(entity)
                             }
@@ -163,10 +168,11 @@ class DataTransferManager @Inject constructor(
             FileWriter(file).use { writer ->
                  when (type) {
                     EntityType.CLIENTS -> {
-                        writer.append("name,email,phone,notes\n")
+                        writer.append("firstName,lastName,type,companyName,nif,email,phone,address,notes\n")
                         val data = crmDao.getAllClients().first()
                         data.forEach { 
-                            writer.append("\"${it.name}\",\"${it.email}\",\"${it.phone}\",\"${it.notes}\"\n") 
+                            val address = listOfNotNull(it.calle, it.numero, it.poblacion).joinToString(" ")
+                            writer.append("\"${it.firstName}\",\"${it.lastName}\",\"${it.tipoCliente}\",\"${it.razonSocial ?: ""}\",\"${it.nifCif ?: ""}\",\"${it.email ?: ""}\",\"${it.phone ?: ""}\",\"$address\",\"${it.notas ?: ""}\"\n") 
                         }
                     }
                     EntityType.INVENTORY -> {

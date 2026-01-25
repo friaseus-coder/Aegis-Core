@@ -10,26 +10,60 @@ import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.reports.PdfGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.antigravity.aegis.domain.transfer.DataTransferManager
+import com.antigravity.aegis.data.repository.AttachmentRepository
+import com.antigravity.aegis.data.model.DocumentEntity
+import android.provider.OpenableColumns
+import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CrmViewModel @Inject constructor(
     private val repository: CrmRepository,
-    private val pdfGenerator: PdfGenerator, // Inject PDF Generator
+    private val pdfGenerator: PdfGenerator,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
-    private val transferManager: DataTransferManager
+    private val transferManager: DataTransferManager,
+    private val attachmentRepository: AttachmentRepository
 ) : ViewModel() {
 
+
+    // --- Filter State ---
+    private val _searchQuery = MutableStateFlow("")
+    private val _filterType = MutableStateFlow<String?>(null) // "Todos" (null), "Particular", "Empresa"
+
     // --- Clients ---
-    val allClients: StateFlow<List<ClientEntity>> = repository.getAllClients()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    // We combine the search query and the filter type.
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val allClients: StateFlow<List<ClientEntity>> = combine(
+        _searchQuery,
+        _filterType
+    ) { query, type ->
+        Pair(query, type)
+    }.flatMapLatest { (query, type) ->
+        val sourceFlow = if (query.length >= 3) {
+            repository.searchClients(query)
+        } else {
+            repository.getAllClients()
+        }
+        
+        combine(sourceFlow, kotlinx.coroutines.flow.flowOf(type)) { clients, filterType ->
+             if (filterType == null || filterType == "Todos") {
+                 clients
+             } else {
+                 clients.filter { client -> client.tipoCliente == filterType }
+             }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun setSearchQuery(query: String) { _searchQuery.value = query }
+    fun setFilterType(type: String?) { _filterType.value = type }
 
     // --- Projects ---
     val activeProjects: StateFlow<List<ProjectEntity>> = repository.getActiveProjects()
@@ -45,6 +79,10 @@ class CrmViewModel @Inject constructor(
     // --- Derived State for Selected Client's Projects ---
     private val _clientProjects = MutableStateFlow<List<ProjectEntity>>(emptyList())
     val clientProjects: StateFlow<List<ProjectEntity>> = _clientProjects
+
+    // --- Derived State for Selected Client's Documents ---
+    private val _clientDocuments = MutableStateFlow<List<DocumentEntity>>(emptyList())
+    val clientDocuments: StateFlow<List<DocumentEntity>> = _clientDocuments
 
     // --- Derived State for Selected Project's Tasks ---
     private val _projectTasks = MutableStateFlow<List<TaskEntity>>(emptyList())
@@ -111,10 +149,105 @@ class CrmViewModel @Inject constructor(
     }
 
     // Create new objects
-    fun createClient(name: String, email: String?, phone: String?, notes: String?) {
+    fun createClient(
+        firstName: String,
+        lastName: String,
+        tipoCliente: String,
+        razonSocial: String?,
+        nifCif: String?,
+        personaContacto: String?,
+        phone: String?,
+        email: String?,
+        // Address
+        calle: String?,
+        numero: String?,
+        piso: String?,
+        poblacion: String?,
+        codigoPostal: String?,
+        // Notes
+        notas: String?
+    ) {
         viewModelScope.launch {
-            val client = ClientEntity(name = name, email = email, phone = phone, notes = notes)
+            val client = ClientEntity(
+                firstName = firstName,
+                lastName = lastName,
+                tipoCliente = tipoCliente,
+                razonSocial = razonSocial,
+                nifCif = nifCif,
+                personaContacto = personaContacto,
+                phone = phone,
+                email = email,
+                calle = calle,
+                numero = numero,
+                piso = piso,
+                poblacion = poblacion,
+                codigoPostal = codigoPostal,
+                notas = notas,
+                categoria = "Potencial" // Default
+            )
             repository.createClient(client)
+        }
+    }
+
+    fun updateClient(client: ClientEntity) {
+        viewModelScope.launch {
+            repository.createClient(client) // Room Insert(OnConflictStrategy.REPLACE) acts as update
+        }
+    }
+
+    fun uploadDocument(uri: Uri) {
+        val client = _selectedClient.value ?: return
+        viewModelScope.launch {
+            // 1. Get Metadata
+            var fileName = "unknown"
+            var size = 0L
+            var mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
+            
+            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (nameIndex != -1) fileName = cursor.getString(nameIndex)
+                    if (sizeIndex != -1) size = cursor.getLong(sizeIndex)
+                }
+            }
+
+            // 2. Encrypt and Save Local
+            // We use a unique name internally: client_{id}_{timestamp}_{filename}
+            val internalName = "client_${client.id}_${System.currentTimeMillis()}_$fileName"
+            
+            try {
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    attachmentRepository.saveAttachmentEncrypted(internalName, input)
+                }
+                
+                // 3. Save Metadata to DB
+                val doc = DocumentEntity(
+                    clientId = client.id,
+                    fileName = internalName,
+                    originalName = fileName,
+                    mimeType = mimeType,
+                    size = size,
+                    dateAdded = System.currentTimeMillis()
+                )
+                repository.addDocument(doc)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Handle error
+            }
+        }
+    }
+
+    fun exportDocument(document: DocumentEntity, destinationUri: Uri) {
+         viewModelScope.launch {
+             attachmentRepository.exportAttachmentToUri(document.fileName, destinationUri)
+         }
+    }
+    
+    fun deleteDocument(document: DocumentEntity) {
+        viewModelScope.launch {
+            repository.deleteDocument(document)
+            attachmentRepository.deleteAttachment(document.fileName)
         }
     }
 
@@ -182,8 +315,17 @@ class CrmViewModel @Inject constructor(
     fun selectClient(clientId: Int) {
         viewModelScope.launch {
             _selectedClient.value = repository.getClientById(clientId)
-            repository.getProjectsForClient(clientId).collect { projects ->
-                _clientProjects.value = projects
+            
+            launch {
+                repository.getProjectsForClient(clientId).collect { projects ->
+                    _clientProjects.value = projects
+                }
+            }
+            
+            launch {
+                repository.getDocumentsForClient(clientId).collect { docs ->
+                    _clientDocuments.value = docs
+                }
             }
         }
     }

@@ -4,21 +4,32 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.map
 import com.antigravity.aegis.data.preferences.ThemePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class ThemeViewModel @Inject constructor(
-    private val themePreference: ThemePreference
+    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
 ) : ViewModel() {
 
-    var isDarkTheme by mutableStateOf(themePreference.isDarkMode)
-        private set
+    // Ideally we subscribe to the flow
+    // For Compose, we expose a State
+    // However, MainActivity reads this on onCreate and setContent.
+    // We should expose a Flow or State that MainActivity collects.
+    
+    val themeMode = settingsRepository.getUserConfig().map { 
+        it?.themeMode ?: "system"
+    }
 
+    val language = settingsRepository.getUserConfig().map { 
+        it?.language ?: "es" // Default to Spanish
+    }
+
+    // Deprecated simple toggle, now we use SettingsScreen
     fun toggleTheme() {
-        val newMode = !isDarkTheme
-        isDarkTheme = newMode
-        themePreference.isDarkMode = newMode
+        // No-op or cycle? Let's leave empty or implement cycling if needed.
+        // For now, SettingsScreen handles the update.
     }
 }

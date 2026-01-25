@@ -86,17 +86,35 @@ fun NavigationGraph(
                 onNavigateToClientDetail = { clientId ->
                     crmViewModel.selectClient(clientId)
                     navController.navigate(Screen.ClientDetail.route)
+                },
+                onNavigateToClientCreate = {
+                    navController.navigate(Screen.ClientEdit.createRoute(0))
                 }
             )
         }
 
         composable(Screen.ClientDetail.route) {
-            com.antigravity.aegis.presentation.crm.ClientDetailScreen(
+            com.antigravity.aegis.presentation.crm.ClientDashboardScreen(
                 viewModel = crmViewModel,
                 onNavigateToProject = { projectId ->
                     crmViewModel.selectProject(projectId)
                     navController.navigate(Screen.ProjectDetail.route)
+                },
+                onEditClient = {
+                    val client = crmViewModel.selectedClient.value
+                    if (client != null) {
+                        navController.navigate(Screen.ClientEdit.createRoute(client.id))
+                    }
                 }
+            )
+        }
+
+        composable(Screen.ClientEdit.route) { backStackEntry ->
+            val clientId = backStackEntry.arguments?.getString("clientId")?.toIntOrNull() ?: 0
+            com.antigravity.aegis.presentation.crm.ClientEditScreen(
+                viewModel = crmViewModel,
+                clientId = if (clientId == 0) null else clientId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

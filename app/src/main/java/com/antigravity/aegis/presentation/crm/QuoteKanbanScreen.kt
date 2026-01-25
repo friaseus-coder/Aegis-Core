@@ -262,7 +262,7 @@ fun QuoteCard(
                     )
                     if (client != null) {
                         Text(
-                            text = client.name,
+                            text = if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -13,6 +13,7 @@ import com.antigravity.aegis.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,6 +33,28 @@ class SettingsViewModel @Inject constructor(
     
     private val _isBiometricEnabled = MutableStateFlow(false)
     val isBiometricEnabled = _isBiometricEnabled.asStateFlow()
+    
+    // User Config
+    val userConfig = settingsRepository.getUserConfig()
+        .stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
+    fun updateLanguage(language: String) {
+        viewModelScope.launch {
+            settingsRepository.updateLanguage(language)
+            _uiState.value = SettingsUiState.Success("Idioma cambiado a ${if(language == "es") "Español" else "English"}")
+        }
+    }
+
+    fun updateThemeMode(mode: String) {
+        viewModelScope.launch {
+            settingsRepository.updateThemeMode(mode)
+            _uiState.value = SettingsUiState.Success("Tema cambiado")
+        }
+    }
     
     // Current user ID - loaded from users
     private var currentUserId: Int = 1

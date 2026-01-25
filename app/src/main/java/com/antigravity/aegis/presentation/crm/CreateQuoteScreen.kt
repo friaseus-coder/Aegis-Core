@@ -74,7 +74,7 @@ fun CreateQuoteScreen(
                 onExpandedChange = { expandedClientDropdown = !expandedClientDropdown }
             ) {
                 OutlinedTextField(
-                    value = selectedClient?.name ?: stringResource(R.string.select_client_placeholder),
+                    value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.select_client_placeholder),
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.client_label)) },
@@ -94,7 +94,7 @@ fun CreateQuoteScreen(
                     } else {
                         clients.forEach { client ->
                             DropdownMenuItem(
-                                text = { Text(client.name) },
+                                text = { Text(if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName) },
                                 onClick = {
                                     selectedClient = client
                                     expandedClientDropdown = false

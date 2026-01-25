@@ -1,6 +1,7 @@
 package com.antigravity.aegis.data.repository
 
 import com.antigravity.aegis.data.local.dao.CrmDao
+import com.antigravity.aegis.data.local.dao.DocumentDao
 import com.antigravity.aegis.data.model.ClientEntity
 import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.TaskEntity
@@ -8,12 +9,14 @@ import com.antigravity.aegis.data.model.WorkReportEntity
 import com.antigravity.aegis.data.model.QuoteEntity
 import com.antigravity.aegis.data.model.ExpenseEntity
 import com.antigravity.aegis.data.model.ProductEntity
+import com.antigravity.aegis.data.model.DocumentEntity
 import com.antigravity.aegis.domain.repository.CrmRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class CrmRepositoryImpl @Inject constructor(
-    private val dao: CrmDao
+    private val dao: CrmDao,
+    private val documentDao: DocumentDao
 ) : CrmRepository {
 
     override suspend fun createClient(client: ClientEntity): Long {
@@ -24,8 +27,20 @@ class CrmRepositoryImpl @Inject constructor(
         return dao.getAllClients()
     }
 
+    override fun getClientsByType(tipoCliente: String): Flow<List<ClientEntity>> {
+        return dao.getClientsByType(tipoCliente)
+    }
+
+    override fun searchClients(query: String): Flow<List<ClientEntity>> {
+        return dao.searchClients(query)
+    }
+
     override suspend fun getClientById(id: Int): ClientEntity? {
         return dao.getClientById(id)
+    }
+
+    override suspend fun updateClientCategoria(clientId: Int, categoria: String) {
+        dao.updateClientCategoria(clientId, categoria)
     }
 
     override suspend fun createProject(project: ProjectEntity): Long {
@@ -118,5 +133,21 @@ class CrmRepositoryImpl @Inject constructor(
 
     override fun getLowStockProducts(): Flow<List<ProductEntity>> {
         return dao.getLowStockProducts()
+    }
+
+    override suspend fun addDocument(document: DocumentEntity): Long {
+        return documentDao.insertDocument(document)
+    }
+
+    override fun getDocumentsForClient(clientId: Int): Flow<List<DocumentEntity>> {
+        return documentDao.getDocumentsForClient(clientId)
+    }
+
+    override suspend fun getDocumentById(id: Int): DocumentEntity? {
+        return documentDao.getDocumentById(id)
+    }
+
+    override suspend fun deleteDocument(document: DocumentEntity) {
+        documentDao.deleteDocument(document)
     }
 }

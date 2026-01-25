@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.antigravity.aegis.data.local.AegisDatabase
 import com.antigravity.aegis.data.local.dao.UserEntityDao
 import com.antigravity.aegis.data.local.dao.CrmDao
+import com.antigravity.aegis.data.local.dao.DocumentDao
 import com.antigravity.aegis.data.security.EncryptionKeyManager
 import dagger.Module
 import dagger.Provides
@@ -63,5 +64,10 @@ object DatabaseModule {
     @Provides
     fun provideUserConfigDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.UserConfigDao {
         return database.userConfigDao()
+    }
+
+    @Provides
+    fun provideDocumentDao(database: AegisDatabase): DocumentDao {
+        return database.documentDao()
     }
 }

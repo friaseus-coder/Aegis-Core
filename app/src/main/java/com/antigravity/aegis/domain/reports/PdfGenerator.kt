@@ -38,7 +38,8 @@ class PdfGenerator @Inject constructor() {
         canvas.drawText("Report ID: ${report.id}", 50f, 80f, paint)
         canvas.drawText("Date: ${java.util.Date(report.date)}", 50f, 100f, paint)
         
-        canvas.drawText("Client: ${client.name}", 50f, 140f, paint)
+        val clientName = if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName
+        canvas.drawText("Client: $clientName", 50f, 140f, paint)
         canvas.drawText("Project: ${project.name}", 50f, 160f, paint)
 
         canvas.drawText("Description:", 50f, 200f, paint)
@@ -103,7 +104,8 @@ class PdfGenerator @Inject constructor() {
         canvas.drawText("Date: ${java.util.Date(quote.date)}", 50f, 100f, paint)
         canvas.drawText("Status: ${quote.status}", 50f, 120f, paint)
         
-        canvas.drawText("Client: ${client.name}", 50f, 160f, paint)
+        val clientName = if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName
+        canvas.drawText("Client: $clientName", 50f, 160f, paint)
         if (!client.email.isNullOrEmpty()) canvas.drawText("Email: ${client.email}", 50f, 180f, paint)
 
         paint.textSize = 18f

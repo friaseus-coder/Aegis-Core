@@ -8,5 +8,7 @@ data class UserConfig(
     @PrimaryKey val id: Int = 1,
     val pinHash: String? = null,
     val biometricsEnabled: Boolean = false,
-    val pricePerKm: Double = 0.35 // Default mileage price
+    val pricePerKm: Double = 0.35, // Default mileage price
+    val language: String = "es", // "es", "en"
+    val themeMode: String = "system" // "system", "light", "dark"
 )

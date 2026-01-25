@@ -21,7 +21,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.appcompat.app.AppCompatActivity
 import com.antigravity.aegis.data.security.BiometricPromptManager
+
 import java.util.Locale
+import androidx.compose.runtime.saveable.rememberSaveable
 
 @Composable
 fun LoginScreen(
@@ -76,7 +78,7 @@ fun LoginScreen(
         }
     }
 
-    var pin by remember { mutableStateOf("") }
+    var pin by rememberSaveable { mutableStateOf("") }
 
     // Main content based on auth state - key forces recomposition when language changes
     key(language) {

@@ -19,6 +19,8 @@ import com.antigravity.aegis.presentation.auth.AuthState
 import com.antigravity.aegis.presentation.auth.AuthViewModel
 import com.antigravity.aegis.presentation.auth.LoginScreen
 import com.antigravity.aegis.presentation.auth.SetupScreen
+import com.antigravity.aegis.presentation.crm.ClientDashboardScreen
+import com.antigravity.aegis.presentation.crm.ClientEditScreen
 
 @Composable
 fun MainScreen(
@@ -87,16 +89,33 @@ fun MainScreen(
                         onNavigateToClientDetail = { clientId ->
                              crmViewModel.selectClient(clientId)
                              crmNavController.navigate("client_detail")
+                        },
+                        onNavigateToClientCreate = {
+                             crmNavController.navigate("client_edit/0")
                         }
                     )
                 }
                 composable("client_detail") {
-                    com.antigravity.aegis.presentation.crm.ClientDetailScreen(
+                    ClientDashboardScreen(
                         viewModel = crmViewModel,
                         onNavigateToProject = { projectId ->
                             crmViewModel.selectProject(projectId)
                             crmNavController.navigate("project_detail")
+                        },
+                        onEditClient = {
+                            val client = crmViewModel.selectedClient.value
+                            if (client != null) {
+                                crmNavController.navigate("client_edit/${client.id}")
+                            }
                         }
+                    )
+                }
+                composable("client_edit/{clientId}") { backStackEntry ->
+                    val clientId = backStackEntry.arguments?.getString("clientId")?.toIntOrNull() ?: 0
+                    ClientEditScreen(
+                        viewModel = crmViewModel,
+                        clientId = if (clientId == 0) null else clientId,
+                        onNavigateBack = { crmNavController.popBackStack() }
                     )
                 }
                 composable("project_detail") {

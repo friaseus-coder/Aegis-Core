@@ -7,13 +7,17 @@ import com.antigravity.aegis.data.model.WorkReportEntity
 import com.antigravity.aegis.data.model.QuoteEntity
 import com.antigravity.aegis.data.model.ExpenseEntity
 import com.antigravity.aegis.data.model.ProductEntity
+import com.antigravity.aegis.data.model.DocumentEntity
 import kotlinx.coroutines.flow.Flow
 
 interface CrmRepository {
     // Clients
     suspend fun createClient(client: ClientEntity): Long
     fun getAllClients(): Flow<List<ClientEntity>>
+    fun getClientsByType(tipoCliente: String): Flow<List<ClientEntity>>
+    fun searchClients(query: String): Flow<List<ClientEntity>>
     suspend fun getClientById(id: Int): ClientEntity?
+    suspend fun updateClientCategoria(clientId: Int, categoria: String)
 
     // Projects
     suspend fun createProject(project: ProjectEntity): Long
@@ -49,4 +53,10 @@ interface CrmRepository {
     suspend fun getProductByBarcode(barcode: String): ProductEntity?
     suspend fun updateProductQuantity(id: Int, quantity: Int)
     fun getLowStockProducts(): Flow<List<ProductEntity>>
+
+    // Documents
+    suspend fun addDocument(document: DocumentEntity): Long
+    fun getDocumentsForClient(clientId: Int): Flow<List<DocumentEntity>>
+    suspend fun getDocumentById(id: Int): DocumentEntity?
+    suspend fun deleteDocument(document: DocumentEntity)
 }

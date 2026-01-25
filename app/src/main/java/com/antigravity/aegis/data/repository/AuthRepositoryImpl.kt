@@ -39,8 +39,8 @@ class AuthRepositoryImpl @Inject constructor(
         pin: String,
         seedPhrase: List<String>,
         masterKey: ByteArray
-    ): Result<UserEntity> {
-        return try {
+    ): Result<UserEntity> = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        try {
             // 1. Create User Entity
             val user = UserEntity(name = name, language = language, role = UserRole.ADMIN)
             val userId = userEntityDao.insertOrUpdate(user).toInt()
@@ -87,10 +87,10 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun loginWithPin(userId: Int, pin: String): Result<ByteArray> {
-        return try {
+    override suspend fun loginWithPin(userId: Int, pin: String): Result<ByteArray> = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        try {
             val wrapped = securityDataSource.getPinWrappedMk(userId)
-                ?: return Result.failure(Exception("No PIN credentials found for user $userId"))
+                ?: return@withContext Result.failure(Exception("No PIN credentials found for user $userId"))
             
             val mk = keyCryptoManager.unwrapKey(wrapped, pin.toCharArray())
             Result.success(mk)

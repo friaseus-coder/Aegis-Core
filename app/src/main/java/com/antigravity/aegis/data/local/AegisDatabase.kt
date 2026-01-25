@@ -13,7 +13,8 @@ import com.antigravity.aegis.data.model.QuoteEntity
 import com.antigravity.aegis.data.model.ExpenseEntity
 import com.antigravity.aegis.data.model.ProductEntity
 import com.antigravity.aegis.data.model.MileageLogEntity
-
+import com.antigravity.aegis.data.model.DocumentEntity
+import com.antigravity.aegis.data.local.dao.DocumentDao
 import com.antigravity.aegis.data.local.dao.UserConfigDao
 import com.antigravity.aegis.data.model.UserConfig
 
@@ -28,13 +29,15 @@ import com.antigravity.aegis.data.model.UserConfig
         ExpenseEntity::class,
         ProductEntity::class,
         MileageLogEntity::class,
-        UserConfig::class
+        UserConfig::class,
+        DocumentEntity::class
     ],
-    version = 10,
+    version = 13,
     exportSchema = false
 )
 abstract class AegisDatabase : RoomDatabase() {
     abstract fun userEntityDao(): UserEntityDao
     abstract fun crmDao(): CrmDao
     abstract fun userConfigDao(): UserConfigDao
+    abstract fun documentDao(): DocumentDao
 }

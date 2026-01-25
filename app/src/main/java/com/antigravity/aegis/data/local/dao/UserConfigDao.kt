@@ -23,4 +23,10 @@ interface UserConfigDao {
 
     @Query("UPDATE user_config SET pricePerKm = :price WHERE id = 1")
     suspend fun updatePricePerKm(price: Double)
+
+    @Query("UPDATE user_config SET language = :language WHERE id = 1")
+    suspend fun updateLanguage(language: String)
+
+    @Query("UPDATE user_config SET themeMode = :mode WHERE id = 1")
+    suspend fun updateThemeMode(mode: String)
 }
