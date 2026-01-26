@@ -32,7 +32,7 @@ import com.antigravity.aegis.data.model.UserConfig
         UserConfig::class,
         DocumentEntity::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = false
 )
 abstract class AegisDatabase : RoomDatabase() {
