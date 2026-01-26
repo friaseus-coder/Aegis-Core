@@ -43,6 +43,7 @@ fun SetupScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .imePadding() // Avoid keyboard overlap
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -206,7 +207,7 @@ fun SetupScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
         
-        val isValid = name.isNotBlank() && pin.length == 6 && (isEmpresa || isParticular)
+        val isValid = name.isNotBlank() && pin.length >= 4 && (isEmpresa || isParticular)
         Button(
             onClick = { 
                  val role = when {
