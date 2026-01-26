@@ -23,4 +23,7 @@ interface UserEntityDao {
 
     @Query("DELETE FROM users WHERE id = :userId")
     suspend fun deleteUser(userId: Int)
+
+    @Query("UPDATE users SET role = :role WHERE id = :userId")
+    suspend fun updateUserRole(userId: Int, role: com.antigravity.aegis.data.model.UserRole)
 }

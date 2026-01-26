@@ -89,14 +89,7 @@ fun DashboardScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    // Theme Toggle Button
-                    androidx.compose.material3.IconButton(onClick = onThemeToggle) {
-                         Icon(
-                            imageVector = if (isDarkTheme) Icons.Filled.LightMode else Icons.Filled.DarkMode,
-                            contentDescription = "Toggle Theme",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+
                 }
             )
         }

@@ -6,6 +6,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.antigravity.aegis.presentation.dashboard.DashboardScreen
 import com.antigravity.aegis.presentation.screens.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.antigravity.aegis.presentation.auth.AuthState
+import com.antigravity.aegis.presentation.auth.SetupScreen
 
 @Composable
 fun NavigationGraph(
@@ -32,16 +36,40 @@ fun NavigationGraph(
         }
 
         composable(Screen.CreateUser.route) {
-            com.antigravity.aegis.presentation.auth.CreateUserScreen(
-                onUserCreated = { name, lang, pin ->
-                    authViewModel.createUser(name, lang, pin)
-                    navController.navigate(Screen.Dashboard.route) {
-                        popUpTo(Screen.CreateUser.route) { inclusive = true }
-                         // Also clear backstack so they can't go back to login/create
-                        popUpTo(Screen.Login.route) { inclusive = true }
+            val authState by authViewModel.authState.collectAsState()
+            val setupState by authViewModel.setupState.collectAsState()
+
+            if (authState == AuthState.NeedsSetup && setupState != null) {
+                // Show Initial Setup (Seed Phrase + Profile Selection)
+                SetupScreen(
+                    state = setupState!!,
+                    onConfirm = { name, language, pin, role ->
+                         authViewModel.confirmSetup(name, language, pin, role)
+                         // Navigate to Dashboard is handled by AuthViewModel state change?
+                         // Actually confirmSetup changes state to Authenticated.
+                         // But we might need to navigate manually if logic depends on it.
+                         // If state becomes Authenticated, where do we go?
+                         // We are in CreateUser route.
+                         // If AuthState changes to Authenticated, LoginScreen (if we were there) would navigate.
+                         // But here we are independent.
+                         navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(0) { inclusive = true }
+                         }
                     }
-                }
-            )
+                )
+            } else {
+                // Show User Creation (Standard)
+                com.antigravity.aegis.presentation.auth.CreateUserScreen(
+                    onUserCreated = { name, lang, pin ->
+                        authViewModel.createUser(name, lang, pin)
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.CreateUser.route) { inclusive = true }
+                            // Also clear backstack so they can't go back to login/create
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
 
         composable(Screen.Login.route) {

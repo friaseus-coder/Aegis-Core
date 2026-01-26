@@ -114,14 +114,14 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun confirmSetup(pin: String) {
+    fun confirmSetup(name: String, language: String, pin: String, role: UserRole) {
         val currentSetup = _setupState.value ?: return
         viewModelScope.launch {
-            // Legacy flow fix: defaulting name/lang
             val result = finalizeSetupUseCase(
-                name = "Admin", 
-                language = "es", 
+                name = name, 
+                language = language, 
                 pin = pin, 
+                role = role,
                 seedPhrase = currentSetup.seedPhrase, 
                 masterKey = currentSetup.masterKey
             )
@@ -160,6 +160,7 @@ class AuthViewModel @Inject constructor(
                     name = name, 
                     language = language, 
                     pin = pin, 
+                    role = com.antigravity.aegis.data.model.UserRole.ADMIN,
                     seedPhrase = currentSetup.seedPhrase, 
                     masterKey = currentSetup.masterKey
                  )

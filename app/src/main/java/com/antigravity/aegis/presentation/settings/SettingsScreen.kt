@@ -5,8 +5,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
 import com.antigravity.aegis.data.model.UserRole
 import com.antigravity.aegis.data.security.BiometricPromptManager
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,6 +92,7 @@ fun SettingsScreen(
     
     // Add User Dialog State
     var showAddUserDialog by remember { mutableStateOf(false) }
+    var userToEdit by remember { mutableStateOf<com.antigravity.aegis.data.model.UserEntity?>(null) }
 
     Scaffold(
         topBar = {
@@ -104,6 +110,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -219,6 +226,48 @@ fun SettingsScreen(
                 ) {
                     Text(stringResource(R.string.create_new_user))
                 }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                val users by viewModel.users.collectAsState()
+                
+                if (users.isNotEmpty()) {
+                    Text("Usuarios Registrados (Click para editar)", style = MaterialTheme.typography.titleSmall)
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        users.forEach { user ->
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { userToEdit = user }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(user.name, fontWeight = FontWeight.Bold)
+                                        val roleText = when (user.role) {
+                                            UserRole.ADMIN -> "Ambos Perfiles (Empresa + Trabajador)"
+                                            UserRole.MANAGER -> "Empresa / Autónomo"
+                                            UserRole.USER, UserRole.GUEST -> "Particular / Trabajador"
+                                        }
+                                        Text(
+                                            text = roleText, 
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = if (user.role == UserRole.ADMIN || user.role == UserRole.MANAGER) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                    Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             // Session Section
@@ -243,6 +292,17 @@ fun SettingsScreen(
             }
         )
     }
+    
+    userToEdit?.let { user ->
+        EditRoleDialog(
+            user = user,
+            onDismiss = { userToEdit = null },
+            onConfirm = { newRole ->
+                viewModel.updateUserRole(user.id, newRole)
+                userToEdit = null
+            }
+        )
+    }
 }
 
 @Composable
@@ -258,27 +318,68 @@ fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -
     var name by remember { mutableStateOf("") }
     var pin by remember { mutableStateOf("") }
     
+    var isEmpresa by remember { mutableStateOf(false) }
+    var isParticular by remember { mutableStateOf(true) } // Default to Worker
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.new_user)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = name, 
                     onValueChange = { name = it }, 
-                    label = { Text(stringResource(R.string.name_label)) }
+                    label = { Text(stringResource(R.string.name_label)) },
+                    singleLine = true
                 )
                 OutlinedTextField(
                     value = pin, 
                     onValueChange = { if (it.length <= 6) pin = it }, 
-                    label = { Text(stringResource(R.string.pin_digits_label)) }
+                    label = { Text(stringResource(R.string.pin_digits_label)) },
+                    singleLine = true
                 )
+                
+                // Role Selection
+                Column {
+                    Text("Perfiles Activos", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = isEmpresa,
+                            onCheckedChange = { isEmpresa = it }
+                        )
+                        Column {
+                            Text("Empresa / Autónomo", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text("Acceso total y gestión", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = isParticular,
+                            onCheckedChange = { isParticular = it }
+                        )
+                         Column {
+                            Text("Particular / Trabajador", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text("Acceso operativo limitado", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
+            val isValid = name.isNotBlank() && pin.length >= 4 && (isEmpresa || isParticular)
             TextButton(
-                onClick = { onConfirm(name, pin, UserRole.USER) }, // Default to User for now
-                enabled = name.isNotBlank() && pin.length >= 4
+                onClick = { 
+                    val role = when {
+                        isEmpresa && isParticular -> UserRole.ADMIN
+                        isEmpresa -> UserRole.MANAGER
+                        else -> UserRole.USER
+                    }
+                    onConfirm(name, pin, role) 
+                }, 
+                enabled = isValid
             ) {
                 Text(stringResource(R.string.create_button))
             }
@@ -287,4 +388,64 @@ fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) }
         }
     )
+}
+
+@Composable
+fun EditRoleDialog(
+    user: com.antigravity.aegis.data.model.UserEntity,
+    onDismiss: () -> Unit,
+    onConfirm: (UserRole) -> Unit
+) {
+     var isEmpresa by remember { mutableStateOf(user.role == UserRole.MANAGER || user.role == UserRole.ADMIN) }
+     var isParticular by remember { mutableStateOf(user.role == UserRole.USER || user.role == UserRole.ADMIN) }
+     
+     AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar Rol: ${user.name}") },
+        text = {
+             Column {
+                Text("Perfiles Activos:", style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = isEmpresa,
+                        onCheckedChange = { isEmpresa = it }
+                    )
+                    Column {
+                        Text("Empresa / Autónomo", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = isParticular,
+                        onCheckedChange = { isParticular = it }
+                    )
+                     Column {
+                        Text("Particular / Trabajador", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            val isValid = isEmpresa || isParticular
+            TextButton(
+                onClick = { 
+                    val newRole = when {
+                        isEmpresa && isParticular -> UserRole.ADMIN
+                        isEmpresa -> UserRole.MANAGER
+                        else -> UserRole.USER
+                    }
+                    onConfirm(newRole)
+                },
+                enabled = isValid
+            ) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+     )
 }

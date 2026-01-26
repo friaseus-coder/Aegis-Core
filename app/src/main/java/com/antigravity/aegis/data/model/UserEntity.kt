@@ -16,5 +16,5 @@ data class UserEntity(
 )
 
 enum class UserRole {
-    ADMIN, USER, GUEST
+    ADMIN, USER, GUEST, MANAGER
 }

@@ -20,7 +20,7 @@ class ThemeViewModel @Inject constructor(
     // We should expose a Flow or State that MainActivity collects.
     
     val themeMode = settingsRepository.getUserConfig().map { 
-        it?.themeMode ?: "system"
+        it?.themeMode ?: "dark"
     }
 
     val language = settingsRepository.getUserConfig().map { 

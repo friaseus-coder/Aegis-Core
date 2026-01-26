@@ -86,6 +86,11 @@ class SettingsRepositoryImpl @Inject constructor(
         database.userConfigDao().updateThemeMode(mode)
     }
 
+    override suspend fun insertOrUpdateConfig(config: com.antigravity.aegis.data.model.UserConfig) {
+        database.userConfigDao().insertOrUpdate(config)
+    }
+
+
     private suspend fun ensureConfigExists() {
         val current = database.userConfigDao().getUserConfigOneShot()
         if (current == null) {

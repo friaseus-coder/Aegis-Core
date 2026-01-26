@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         
         // Collect Theme Mode
         setContent {
-            val themeMode by themeViewModel.themeMode.collectAsState(initial = "system")
+            val themeMode by themeViewModel.themeMode.collectAsState(initial = "dark")
             val language by themeViewModel.language.collectAsState(initial = "es")
 
             // Apply Language (Side Effect)

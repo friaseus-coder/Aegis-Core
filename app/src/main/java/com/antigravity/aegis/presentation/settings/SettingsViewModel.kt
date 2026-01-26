@@ -74,8 +74,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private val _users = authRepository.getAllUsers()
-    // We could expose users here if we want to show list to Admin, etc.
+    val users = authRepository.getAllUsers()
+        .stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     
     fun exportDatabase(uri: Uri) {
         viewModelScope.launch {
@@ -119,6 +123,17 @@ class SettingsViewModel @Inject constructor(
                 _uiState.value = SettingsUiState.Success("User created successfully")
             } else {
                 _uiState.value = SettingsUiState.Error(result.exceptionOrNull()?.message ?: "Failed to create user")
+            }
+        }
+    }
+
+    fun updateUserRole(userId: Int, role: UserRole) {
+        viewModelScope.launch {
+            val result = authRepository.updateUserRole(userId, role)
+            if (result.isSuccess) {
+                _uiState.value = SettingsUiState.Success("Rol actualizado correctamente")
+            } else {
+                _uiState.value = SettingsUiState.Error("Error al actualizar rol")
             }
         }
     }

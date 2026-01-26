@@ -32,9 +32,10 @@ import com.antigravity.aegis.data.model.UserConfig
         UserConfig::class,
         DocumentEntity::class
     ],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
+@androidx.room.TypeConverters(Converters::class)
 abstract class AegisDatabase : RoomDatabase() {
     abstract fun userEntityDao(): UserEntityDao
     abstract fun crmDao(): CrmDao

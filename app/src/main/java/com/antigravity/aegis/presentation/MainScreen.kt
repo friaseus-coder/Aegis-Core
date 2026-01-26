@@ -39,7 +39,7 @@ fun MainScreen(
             setupState?.let { state ->
                 SetupScreen(
                     state = state,
-                    onConfirm = { pin -> viewModel.confirmSetup(pin) }
+                    onConfirm = { name, language, pin, role -> viewModel.confirmSetup(name, language, pin, role) }
                 )
             }
         }
@@ -52,21 +52,31 @@ fun MainScreen(
         AuthState.Authenticated -> {
             // CRM / Project Hub Navigation
             val crmViewModel: com.antigravity.aegis.presentation.crm.CrmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+            val mainViewModel: com.antigravity.aegis.presentation.MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
             val crmNavController = rememberNavController()
 
             NavHost(navController = crmNavController, startDestination = "main_menu") {
                 composable("main_menu") {
                     MainMenuScreen(
+                        mainViewModel = mainViewModel,
                         onNavigateToCrm = { crmNavController.navigate("dashboard") },
                         onNavigateToFieldService = { crmNavController.navigate("field_service") },
                         onNavigateToBudgets = { crmNavController.navigate("budgets") },
                         onNavigateToExpenses = { crmNavController.navigate("expenses") },
                         onNavigateToInventory = { crmNavController.navigate("inventory") },
                         onNavigateToMileage = { crmNavController.navigate("mileage") },
-                        onNavigateToSettings = { crmNavController.navigate("settings") }
+                        onNavigateToSettings = { crmNavController.navigate("settings") },
+                        onNavigateToProfile = { crmNavController.navigate("profile_config") }
                     )
                 }
 
+                composable("profile_config") {
+                    com.antigravity.aegis.presentation.settings.ProfileConfigScreen(
+                        viewModel = mainViewModel,
+                        onNavigateBack = { crmNavController.popBackStack() }
+                    )
+                }
+                
                 composable("field_service") {
                     com.antigravity.aegis.presentation.reports.FieldServiceScreen(
                         viewModel = crmViewModel

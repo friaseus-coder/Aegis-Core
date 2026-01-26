@@ -37,12 +37,13 @@ class AuthRepositoryImpl @Inject constructor(
         name: String,
         language: String,
         pin: String,
+        role: UserRole,
         seedPhrase: List<String>,
         masterKey: ByteArray
     ): Result<UserEntity> = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
         try {
             // 1. Create User Entity
-            val user = UserEntity(name = name, language = language, role = UserRole.ADMIN)
+            val user = UserEntity(name = name, language = language, role = role)
             val userId = userEntityDao.insertOrUpdate(user).toInt()
             val savedUser = user.copy(id = userId)
 
@@ -82,6 +83,15 @@ class AuthRepositoryImpl @Inject constructor(
             securityDataSource.savePinWrappedMk(userId, pinWrapped)
             
             Result.success(savedUser)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateUserRole(userId: Int, role: UserRole): Result<Unit> {
+        return try {
+            userEntityDao.updateUserRole(userId, role)
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -10,5 +10,19 @@ data class UserConfig(
     val biometricsEnabled: Boolean = false,
     val pricePerKm: Double = 0.35, // Default mileage price
     val language: String = "es", // "es", "en"
-    val themeMode: String = "system" // "system", "light", "dark"
+    val themeMode: String = "dark", // "system", "light", "dark"
+    // New Profile Fields
+    val titularName: String = "Usuario",
+    val entityType: EntityType = EntityType.PARTICULAR,
+    val activeRole: ActiveRole = ActiveRole.AUTONOMO,
+    val isDualModeEnabled: Boolean = false,
+    val profileImageUri: String? = null
 )
+
+enum class EntityType {
+    EMPRESA, PARTICULAR
+}
+
+enum class ActiveRole {
+    AUTONOMO, TRABAJADOR
+}
