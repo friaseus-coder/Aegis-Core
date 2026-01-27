@@ -21,4 +21,13 @@ interface DocumentDao {
 
     @Delete
     suspend fun deleteDocument(document: DocumentEntity)
+
+    @Query("SELECT * FROM documents")
+    suspend fun getAllDocumentsSync(): List<DocumentEntity>
+
+    @Query("DELETE FROM documents")
+    suspend fun deleteAllDocuments()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDocuments(documents: List<DocumentEntity>)
 }

@@ -23,11 +23,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.FilterChip
 
 @Composable
 fun SetupScreen(
     state: SetupUiState,
-    onConfirm: (String, String, String, com.antigravity.aegis.data.model.UserRole) -> Unit
+    onConfirm: (String, String, String, com.antigravity.aegis.data.model.UserRole, String, String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var pin by remember { mutableStateOf("") }
@@ -129,10 +131,34 @@ fun SetupScreen(
         Text(text = "Información del Administrador")
         Spacer(modifier = Modifier.height(8.dp))
 
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+
+    // ... (existing code)
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
             label = { Text("Nombre de Usuario") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Add Email Field
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email (Recuperación)") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Add Phone Field
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Teléfono (Opcional)") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -147,67 +173,53 @@ fun SetupScreen(
                 selected = language == "es",
                 onClick = { language = "es" },
                 label = { Text("Español") },
-                leadingIcon = if (language == "es") {
-                    { Icon(Icons.Filled.Check, contentDescription = null) }
-                } else null
+                leadingIcon = if (language == "es") { { Icon(Icons.Filled.Check, null) } } else null
             )
             FilterChip(
                 selected = language == "en",
                 onClick = { language = "en" },
                 label = { Text("English") },
-                leadingIcon = if (language == "en") {
-                    { Icon(Icons.Filled.Check, contentDescription = null) }
-                } else null
+                leadingIcon = if (language == "en") { { Icon(Icons.Filled.Check, null) } } else null
             )
         }
-        
-        Spacer(modifier = Modifier.height(8.dp))
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Role Selection
+        Text("Tipo de Usuario", style = MaterialTheme.typography.labelMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+             Checkbox(checked = isEmpresa, onCheckedChange = { isEmpresa = it })
+             Text("Empresa")
+             Spacer(modifier = Modifier.width(16.dp))
+             Checkbox(checked = isParticular, onCheckedChange = { isParticular = it })
+             Text("Particular / Trabajador")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // PIN Input
+        var showPin by remember { mutableStateOf(false) }
         OutlinedTextField(
             value = pin,
             onValueChange = { if (it.length <= 6) pin = it },
-            label = { Text(stringResource(R.string.pin_hint)) },
+            label = { Text("Crear PIN Maestro (4-6 dígitos)") },
+            visualTransformation = if (showPin) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+            trailingIcon = {
+                val image = if (showPin) Icons.Filled.Share else Icons.Filled.Lock // Using available icons, ideally use Visibility
+                // Let's use standard Visibility icon logic if imports allow, otherwise simple toggle
+                IconButton(onClick = { showPin = !showPin }) {
+                    // Start of workaround for missing icons
+                    Text(if (showPin) "Ocultar" else "Ver", style = MaterialTheme.typography.labelSmall) 
+                    // End workaround
+                }
+            },
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Perfiles Activos", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isEmpresa,
-                        onCheckedChange = { isEmpresa = it }
-                    )
-                    Column {
-                        Text("Empresa / Autónomo", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                        Text("Acceso total y gestión", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isParticular,
-                        onCheckedChange = { isParticular = it }
-                    )
-                     Column {
-                        Text("Particular / Trabajador", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                        Text("Acceso operativo limitado", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
-        }
-
         Spacer(modifier = Modifier.height(24.dp))
-        
-        val isValid = name.isNotBlank() && pin.length >= 4 && (isEmpresa || isParticular)
+        val isValid = name.isNotBlank() && pin.length >= 4 && (isEmpresa || isParticular) && email.isNotBlank() // Require Email
         Button(
             onClick = { 
                  val role = when {
@@ -215,7 +227,7 @@ fun SetupScreen(
                     isEmpresa -> com.antigravity.aegis.data.model.UserRole.MANAGER
                     else -> com.antigravity.aegis.data.model.UserRole.USER
                 }
-                onConfirm(name, language, pin, role) 
+                onConfirm(name, language, pin, role, email, phone) 
             },
             enabled = isValid,
             modifier = Modifier.fillMaxWidth()

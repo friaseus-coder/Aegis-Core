@@ -32,7 +32,7 @@ import com.antigravity.aegis.data.model.UserConfig
         UserConfig::class,
         DocumentEntity::class
     ],
-    version = 15,
+    version = 16,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)

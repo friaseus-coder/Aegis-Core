@@ -28,7 +28,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 @Composable
 fun LoginScreen(
     onLogin: (String) -> Unit,
-    onNavigateToCreateUser: () -> Unit
+    onNavigateToCreateUser: () -> Unit,
+    onNavigateToRecovery: () -> Unit,
+    onNavigateToImport: () -> Unit,
+    onNavigateToChangePin: () -> Unit
 ) {
     val viewModel: AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val users by viewModel.users.collectAsState()
@@ -63,8 +66,6 @@ fun LoginScreen(
     
     // Track if we've already navigated to avoid duplicate navigation
     var hasNavigated by remember { mutableStateOf(false) }
-    
-    // Safe auto-redirect based on authState
     LaunchedEffect(authState) {
         when {
             authState == AuthState.NeedsSetup && !hasNavigated -> {
@@ -73,19 +74,20 @@ fun LoginScreen(
             }
             authState == AuthState.Authenticated && !hasNavigated -> {
                 hasNavigated = true
-                onLogin("") // Empty string, navigation handle is the callback's purpose now
+                onLogin("")
+            }
+            authState == AuthState.RecoverySuccess && !hasNavigated -> {
+                hasNavigated = true
+                onNavigateToChangePin()
             }
         }
     }
-
     var pin by rememberSaveable { mutableStateOf("") }
-
-    // Main content based on auth state - key forces recomposition when language changes
     key(language) {
         Box(modifier = Modifier.fillMaxSize()) {
             when (authState) {
                 // ... (Loading/NeedsSetup) ...
-                AuthState.Loading -> {
+                AuthState.Loading, AuthState.RecoverySuccess -> {
                      Box(
                          modifier = Modifier.fillMaxSize(),
                          contentAlignment = Alignment.Center
@@ -98,7 +100,7 @@ fun LoginScreen(
                      }
                 }
                 AuthState.NeedsSetup -> {
-                    Box(
+                     Box(
                          modifier = Modifier.fillMaxSize(),
                          contentAlignment = Alignment.Center
                      ) {
@@ -133,6 +135,8 @@ fun LoginScreen(
                         onLanguageChange = { viewModel.setLanguage(it) },
                         onSelectUser = { viewModel.selectUser(it) },
                         onNavigateToCreateUser = onNavigateToCreateUser,
+                        onNavigateToRecovery = onNavigateToRecovery,
+                        onNavigateToImport = onNavigateToImport,
                         onLogin = { viewModel.login(pin) },
                         onBiometricLogin = { viewModel.loginBiometric() },
                         onEnableBiometric = { viewModel.enableBiometric() }
@@ -156,6 +160,9 @@ private fun LoginContent(
     onLanguageChange: (String) -> Unit,
     onSelectUser: (UserEntity) -> Unit,
     onNavigateToCreateUser: () -> Unit,
+    onNavigateToRecovery: () -> Unit,
+    onNavigateToImport: () -> Unit,
+    onNavigateToChangePin: () -> Unit = {}, // Optional for preview/compatibility if needed
     onLogin: () -> Unit,
     onBiometricLogin: () -> Unit,
     onEnableBiometric: () -> Unit
@@ -163,6 +170,7 @@ private fun LoginContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -265,6 +273,21 @@ private fun LoginContent(
                 Icon(Icons.Default.Person, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.biometric_login_button))
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Forgot PIN and Import
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextButton(onClick = onNavigateToRecovery) {
+                Text(stringResource(R.string.forgot_pin_label))
+            }
+            TextButton(onClick = onNavigateToImport) {
+                Text(stringResource(R.string.import_backup_label))
             }
         }
         

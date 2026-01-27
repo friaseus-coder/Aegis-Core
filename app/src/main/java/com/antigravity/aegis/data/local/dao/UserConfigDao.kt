@@ -29,4 +29,13 @@ interface UserConfigDao {
 
     @Query("UPDATE user_config SET themeMode = :mode WHERE id = 1")
     suspend fun updateThemeMode(mode: String)
+
+    @Query("SELECT * FROM user_config")
+    suspend fun getAllUserConfigsSync(): List<UserConfig>
+
+    @Query("DELETE FROM user_config")
+    suspend fun deleteAllUserConfigs()
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserConfigs(configs: List<UserConfig>)
 }

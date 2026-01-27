@@ -26,4 +26,9 @@ sealed class Screen(val route: String) {
         fun createRoute(clientId: Int) = "client_edit/$clientId"
     }
     data object CreateQuote : Screen("create_quote")
+    
+    // Auth & Utilities
+    data object Recovery : Screen("recovery")
+    data object ChangePin : Screen("change_pin")
+    data object ImportBackup : Screen("import_backup")
 }

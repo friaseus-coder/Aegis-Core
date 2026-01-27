@@ -9,6 +9,7 @@ import com.antigravity.aegis.domain.usecase.LoginWithPinUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +32,8 @@ class AuthViewModel @Inject constructor(
     private val loginWithPinUseCase: LoginWithPinUseCase,
     private val enableBiometricsUseCase: EnableBiometricsUseCase,
     private val loginWithBiometricsUseCase: LoginWithBiometricsUseCase,
-    private val encryptionKeyManager: EncryptionKeyManager
+    private val encryptionKeyManager: EncryptionKeyManager,
+    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
@@ -102,6 +104,20 @@ class AuthViewModel @Inject constructor(
 
     fun setLanguage(lang: String) {
         _language.value = lang
+        viewModelScope.launch {
+            try {
+                // Ensure config exists first by collecting flow once
+                val config = settingsRepository.getUserConfig().first()
+                if (config == null) {
+                    // Create default if missing
+                     settingsRepository.insertOrUpdateConfig(com.antigravity.aegis.data.model.UserConfig(language = lang))
+                } else {
+                    settingsRepository.updateLanguage(lang)
+                }
+            } catch (e: Exception) {
+                // Log? Set local only?
+            }
+        }
     }
 
     private fun startSetup() {
@@ -114,7 +130,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun confirmSetup(name: String, language: String, pin: String, role: UserRole) {
+    fun confirmSetup(name: String, language: String, pin: String, role: UserRole, email: String?, phone: String?) {
         val currentSetup = _setupState.value ?: return
         viewModelScope.launch {
             val result = finalizeSetupUseCase(
@@ -122,6 +138,8 @@ class AuthViewModel @Inject constructor(
                 language = language, 
                 pin = pin, 
                 role = role,
+                email = email,
+                phone = phone,
                 seedPhrase = currentSetup.seedPhrase, 
                 masterKey = currentSetup.masterKey
             )
@@ -132,6 +150,33 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+    
+    fun recoverWithWords(words: List<String>) {
+        viewModelScope.launch {
+            val result = authRepository.recoverWithSeed(words)
+            if (result.isSuccess) {
+                val mk = result.getOrThrow()
+                encryptionKeyManager.setMasterKey(mk)
+                _authState.value = AuthState.RecoverySuccess
+            } else {
+                _loginError.value = "Palabras incorrectas"
+            }
+        }
+    }
+
+    fun recoverWithEmailPhone(email: String, phone: String) {
+        val user = _selectedUser.value ?: return
+        viewModelScope.launch {
+             val result = authRepository.recoverWithEmailPhone(user.id, email, phone)
+             if (result.isSuccess) {
+                 val mk = result.getOrThrow()
+                 encryptionKeyManager.setMasterKey(mk)
+                 _authState.value = AuthState.RecoverySuccess
+             } else {
+                 _loginError.value = "Datos incorrectos"
+             }
+        }
+    }
 
     fun login(pin: String) {
         val user = _selectedUser.value ?: return
@@ -139,9 +184,32 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             val result = loginWithPinUseCase(user.id, pin)
             if (result.isSuccess) {
-                _authState.value = AuthState.Authenticated
+                 // Key is already set by usecase
+                 
+                 // Check if forcePinChange is true
+                 if (user.forcePinChange) {
+                     _authState.value = AuthState.RecoverySuccess // Reusing this state to trigger ChangePin nav
+                 } else {
+                     _authState.value = AuthState.Authenticated
+                 }
             } else {
                 _loginError.value = "PIN incorrecto"
+            }
+        }
+    }
+    
+    fun changePin(newPin: String) {
+        val user = _selectedUser.value ?: return
+        val mk = encryptionKeyManager.getKey() ?: return
+        
+        viewModelScope.launch {
+            val result = authRepository.updatePin(user.id, newPin, mk)
+            if (result.isSuccess) {
+                // Pin changed successfully
+                // Also ensures forcePinChange is cleared in Repo
+                _authState.value = AuthState.Authenticated
+            } else {
+                // Handle error
             }
         }
     }
@@ -150,7 +218,7 @@ class AuthViewModel @Inject constructor(
         _loginError.value = null
     }
 
-    fun createUser(name: String, language: String, pin: String) {
+    fun createUser(name: String, language: String, pin: String, email: String?, phone: String?) {
         viewModelScope.launch {
             val currentSetup = _setupState.value
             
@@ -161,6 +229,8 @@ class AuthViewModel @Inject constructor(
                     language = language, 
                     pin = pin, 
                     role = com.antigravity.aegis.data.model.UserRole.ADMIN,
+                    email = email,
+                    phone = phone,
                     seedPhrase = currentSetup.seedPhrase, 
                     masterKey = currentSetup.masterKey
                  )
@@ -168,9 +238,7 @@ class AuthViewModel @Inject constructor(
                      _authState.value = AuthState.Authenticated
                  }
             } else {
-                // Case: Adding subsequent user (Not implemented fully yet)
-                // Requires Admin Auth to get MK, then createUser.
-                // For now, ignoring.
+                // Case: Adding subsequent user
             }
         }
     }
@@ -270,6 +338,7 @@ sealed interface AuthState {
     data object NeedsSetup : AuthState
     data object Locked : AuthState
     data object Authenticated : AuthState
+    data object RecoverySuccess : AuthState
 }
 
 data class SetupUiState(

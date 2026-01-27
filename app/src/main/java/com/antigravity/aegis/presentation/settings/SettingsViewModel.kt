@@ -118,7 +118,7 @@ class SettingsViewModel @Inject constructor(
         // getKey() now returns raw bytes directly (not Base64 encoded)
         viewModelScope.launch {
             _uiState.value = SettingsUiState.Loading("Creating User...")
-            val result = authRepository.createUser(name, language, pin, role, masterKey)
+            val result = authRepository.createUser(name, language, pin, role, null, null, masterKey)
             if (result.isSuccess) {
                 _uiState.value = SettingsUiState.Success("User created successfully")
             } else {

@@ -26,4 +26,12 @@ interface UserEntityDao {
 
     @Query("UPDATE users SET role = :role WHERE id = :userId")
     suspend fun updateUserRole(userId: Int, role: com.antigravity.aegis.data.model.UserRole)
+    @Query("SELECT * FROM users")
+    suspend fun getAllUsersList(): List<UserEntity>
+
+    @Query("DELETE FROM users")
+    suspend fun deleteAllUsers()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUsers(users: List<UserEntity>)
 }

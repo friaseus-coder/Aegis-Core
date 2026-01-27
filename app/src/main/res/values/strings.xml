@@ -167,4 +167,6 @@
     <string name="stock_list">Stock List</string>
     <string name="scan_label">Scan</string>
     <string name="barcode_label">Barcode: %1$s</string>
+    <string name="forgot_pin_label">¿Olvidaste tu PIN?</string>
+    <string name="import_backup_label">Importar Backup</string>
 </resources>

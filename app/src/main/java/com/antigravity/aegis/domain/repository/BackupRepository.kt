@@ -1,9 +1,9 @@
 package com.antigravity.aegis.domain.repository
 
-import android.net.Uri
+import com.antigravity.aegis.data.model.*
+import kotlinx.coroutines.flow.Flow
 
 interface BackupRepository {
-    suspend fun exportBackup(uri: Uri, password: String): Result<Unit>
-    suspend fun importBackup(uri: Uri, password: String): Result<Unit>
-    suspend fun createAutoBackup(tag: String): Result<String> // Returns path
+    suspend fun createBackupJson(): Result<String>
+    suspend fun restoreBackupJson(json: String): Result<Unit>
 }

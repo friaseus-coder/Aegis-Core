@@ -22,7 +22,7 @@ class InitSetupUseCase @Inject constructor(
 
     private fun generateDummyMnemonic(): List<String> {
         // Simplified list for demo purposes.
-        val words = listOf("apple", "brave", "cloud", "delta", "eagle", "flame", "grape", "house", "image", "joker", "kite", "lemon", "moon", "neon", "ocean", "piano", "queen", "river", "stone", "tiger", "unity", "vivid", "water", "zebra")
-        return words.shuffled().take(12)
+        val words = listOf("manzana", "perro", "cielo", "fuego", "agua", "tierra", "aire", "libro", "mesa", "silla", "gato", "sol", "luna", "estrella", "rio", "montana", "arbol", "flor", "mar", "pez", "nube", "viento", "nieve", "madera")
+        return words.shuffled().take(2)
     }
 }

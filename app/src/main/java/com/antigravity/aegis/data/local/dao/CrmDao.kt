@@ -143,4 +143,60 @@ interface CrmDao {
 
     @Query("DELETE FROM quotes")
     suspend fun deleteAllQuotes()
+    // Sync methods for Backup
+    @Query("SELECT * FROM clients")
+    suspend fun getAllClientsSync(): List<ClientEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertClients(clients: List<ClientEntity>)
+
+    @Query("SELECT * FROM projects")
+    suspend fun getAllProjectsSync(): List<ProjectEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProjects(projects: List<ProjectEntity>)
+    
+    @Query("SELECT * FROM tasks")
+    suspend fun getAllTasksSync(): List<TaskEntity>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTasks(tasks: List<TaskEntity>)
+    
+    @Query("SELECT * FROM work_reports")
+    suspend fun getAllWorkReportsSync(): List<WorkReportEntity>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWorkReports(reports: List<WorkReportEntity>)
+    
+    @Query("SELECT * FROM quotes")
+    suspend fun getAllQuotesSync(): List<QuoteEntity>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertQuotes(quotes: List<QuoteEntity>)
+    
+    @Query("SELECT * FROM expenses")
+    suspend fun getAllExpensesSync(): List<ExpenseEntity>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExpenses(expenses: List<ExpenseEntity>)
+    
+    @Query("SELECT * FROM products")
+    suspend fun getAllProductsSync(): List<ProductEntity>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProducts(products: List<ProductEntity>)
+    
+    @Query("SELECT * FROM mileage_logs")
+    suspend fun getAllMileageLogsSync(): List<MileageLogEntity>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMileageLogs(logs: List<MileageLogEntity>)
+    
+    // Wipe remaining tables
+    @Query("DELETE FROM projects")
+    suspend fun deleteAllProjects()
+    @Query("DELETE FROM tasks")
+    suspend fun deleteAllTasks()
+    @Query("DELETE FROM work_reports")
+    suspend fun deleteAllWorkReports()
 }

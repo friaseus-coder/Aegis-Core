@@ -43,8 +43,8 @@ fun NavigationGraph(
                 // Show Initial Setup (Seed Phrase + Profile Selection)
                 SetupScreen(
                     state = setupState!!,
-                    onConfirm = { name, language, pin, role ->
-                         authViewModel.confirmSetup(name, language, pin, role)
+                    onConfirm = { name, language, pin, role, email, phone ->
+                         authViewModel.confirmSetup(name, language, pin, role, email, phone)
                          // Navigate to Dashboard is handled by AuthViewModel state change?
                          // Actually confirmSetup changes state to Authenticated.
                          // But we might need to navigate manually if logic depends on it.
@@ -61,7 +61,7 @@ fun NavigationGraph(
                 // Show User Creation (Standard)
                 com.antigravity.aegis.presentation.auth.CreateUserScreen(
                     onUserCreated = { name, lang, pin ->
-                        authViewModel.createUser(name, lang, pin)
+                        authViewModel.createUser(name, lang, pin, null, null)
                         navController.navigate(Screen.Dashboard.route) {
                             popUpTo(Screen.CreateUser.route) { inclusive = true }
                             // Also clear backstack so they can't go back to login/create
@@ -81,6 +81,17 @@ fun NavigationGraph(
                 },
                 onNavigateToCreateUser = {
                      navController.navigate(Screen.CreateUser.route)
+                },
+                onNavigateToRecovery = {
+                    navController.navigate(Screen.Recovery.route)
+                },
+                onNavigateToImport = {
+                    navController.navigate(Screen.ImportBackup.route)
+                },
+                onNavigateToChangePin = {
+                    navController.navigate(Screen.ChangePin.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -214,6 +225,7 @@ fun NavigationGraph(
         composable(Screen.Settings.route) {
             com.antigravity.aegis.presentation.settings.SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
+                onNavigateToBackup = { navController.navigate(Screen.ImportBackup.route) },
                 onLogout = {
                     // Navigate back to Login and clear backstack
                     navController.navigate(Screen.Login.route) {
@@ -226,5 +238,33 @@ fun NavigationGraph(
         // --- PLACEHOLDERS ---
         composable(Screen.TimeControl.route) { TimeControlScreen() }
         composable(Screen.PasswordVault.route) { PasswordVaultScreen() }
+        
+        // --- AUTH & UTILITIES ---
+        composable(Screen.Recovery.route) {
+            com.antigravity.aegis.presentation.auth.RecoveryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToChangePin = {
+                    navController.navigate(Screen.ChangePin.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable(Screen.ChangePin.route) {
+             com.antigravity.aegis.presentation.auth.ChangePinScreen(
+                 onPinChanged = {
+                     navController.navigate(Screen.Dashboard.route) {
+                         popUpTo(Screen.Login.route) { inclusive = true }
+                     }
+                 }
+             )
+        }
+        
+        composable(Screen.ImportBackup.route) {
+            com.antigravity.aegis.presentation.backup.ImportBackupScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }

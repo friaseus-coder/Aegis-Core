@@ -28,7 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToBackup: () -> Unit
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -203,18 +204,10 @@ fun SettingsScreen(
             // Database Section
             SettingsSection(title = stringResource(R.string.database_section_title)) {
                 Button(
-                    onClick = { exportLauncher.launch("aegis_backup.db") },
+                    onClick = onNavigateToBackup,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.export_database))
-                }
-                
-                Button(
-                    onClick = { importLauncher.launch(arrayOf("application/x-sqlite3", "*/*")) }, // Mime type might vary
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text(stringResource(R.string.import_database_overwrite))
+                    Text("Gestionar Copias de Seguridad (Importar / Exportar)")
                 }
             }
 

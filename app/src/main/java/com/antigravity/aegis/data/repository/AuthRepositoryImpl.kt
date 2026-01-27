@@ -38,12 +38,14 @@ class AuthRepositoryImpl @Inject constructor(
         language: String,
         pin: String,
         role: UserRole,
+        email: String?,
+        phone: String?,
         seedPhrase: List<String>,
         masterKey: ByteArray
     ): Result<UserEntity> = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
         try {
             // 1. Create User Entity
-            val user = UserEntity(name = name, language = language, role = role)
+            val user = UserEntity(name = name, language = language, role = role, email = email, phone = phone)
             val userId = userEntityDao.insertOrUpdate(user).toInt()
             val savedUser = user.copy(id = userId)
 
@@ -51,10 +53,17 @@ class AuthRepositoryImpl @Inject constructor(
             val pinWrapped = keyCryptoManager.wrapKey(masterKey, pin.toCharArray())
             securityDataSource.savePinWrappedMk(userId, pinWrapped)
             
-            // 3. Wrap MK with Seed (Global/Recovery)
+            // 3. Wrap MK with Seed (Global/Recovery) - Using 2 words now
             val seedString = seedPhrase.joinToString(" ") // Space separated
             val recoveryWrapped = keyCryptoManager.wrapKey(masterKey, seedString.toCharArray())
             securityDataSource.saveRecoveryWrappedMk(recoveryWrapped)
+            
+            // 3b. Wrap MK with Email+Phone if provided
+            if (!email.isNullOrBlank() && !phone.isNullOrBlank()) {
+                 val combined = "$email|$phone"
+                 val emailPhoneWrapped = keyCryptoManager.wrapKey(masterKey, combined.toCharArray())
+                 securityDataSource.saveEmailPhoneWrappedMk(userId, emailPhoneWrapped)
+            }
             
             // 4. Set Setup Done
             securityDataSource.setSetupDone(true)
@@ -70,17 +79,26 @@ class AuthRepositoryImpl @Inject constructor(
         language: String,
         pin: String, 
         role: UserRole, 
+        email: String?,
+        phone: String?,
         masterKey: ByteArray
     ): Result<UserEntity> {
         return try {
              // 1. Create User
-            val user = UserEntity(name = name, language = language, role = role)
+            val user = UserEntity(name = name, language = language, role = role, email = email, phone = phone)
             val userId = userEntityDao.insertOrUpdate(user).toInt()
             val savedUser = user.copy(id = userId)
             
             // 2. Wrap MK with new PIN
             val pinWrapped = keyCryptoManager.wrapKey(masterKey, pin.toCharArray())
             securityDataSource.savePinWrappedMk(userId, pinWrapped)
+            
+            // 3. Wrap MK with Email+Phone if provided
+            if (!email.isNullOrBlank() && !phone.isNullOrBlank()) {
+                 val combined = "$email|$phone"
+                 val emailPhoneWrapped = keyCryptoManager.wrapKey(masterKey, combined.toCharArray())
+                 securityDataSource.saveEmailPhoneWrappedMk(userId, emailPhoneWrapped)
+            }
             
             Result.success(savedUser)
         } catch (e: Exception) {
@@ -91,6 +109,25 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun updateUserRole(userId: Int, role: UserRole): Result<Unit> {
         return try {
             userEntityDao.updateUserRole(userId, role)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updatePin(userId: Int, newPin: String, masterKey: ByteArray): Result<Unit> {
+        return try {
+            // Re-wrap MK with new PIN
+            val pinWrapped = keyCryptoManager.wrapKey(masterKey, newPin.toCharArray())
+            securityDataSource.savePinWrappedMk(userId, pinWrapped)
+            
+            // Note: We should also verify if forcePinChange was true and set it to false?
+            // UserEntity currently has forcePinChange. We should update the user entity too.
+             val user = userEntityDao.getUserById(userId)
+             if (user != null && user.forcePinChange) {
+                 userEntityDao.insertOrUpdate(user.copy(forcePinChange = false))
+             }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -117,6 +154,21 @@ class AuthRepositoryImpl @Inject constructor(
             
             val seedString = seedPhrase.joinToString(" ")
             val mk = keyCryptoManager.unwrapKey(wrapped, seedString.toCharArray())
+            Result.success(mk)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun recoverWithEmailPhone(userId: Int, email: String, phone: String): Result<ByteArray> {
+        return try {
+            // Reconstruct the key string
+            val combined = "$email|$phone"
+            
+            val wrapped = securityDataSource.getEmailPhoneWrappedMk(userId)
+                ?: return Result.failure(Exception("No recovery credentials found for email/phone"))
+                
+            val mk = keyCryptoManager.unwrapKey(wrapped, combined.toCharArray())
             Result.success(mk)
         } catch (e: Exception) {
             Result.failure(e)

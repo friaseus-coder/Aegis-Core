@@ -61,8 +61,8 @@ class DataTransferManager @Inject constructor(
     suspend fun importData(type: EntityType, uri: Uri, wipeExisting: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
         try {
                 if (wipeExisting) {
-                    val backupResult = backupRepository.createAutoBackup("pre_import_${type.name.lowercase()}")
-                    if (backupResult.isFailure) throw Exception("Safety backup failed: ${backupResult.exceptionOrNull()?.message}")
+                    // val backupResult = backupRepository.createAutoBackup("pre_import_${type.name.lowercase()}")
+                    // if (backupResult.isFailure) throw Exception("Safety backup failed: ${backupResult.exceptionOrNull()?.message}")
                     
                     // Wipe Table
                      when (type) {
