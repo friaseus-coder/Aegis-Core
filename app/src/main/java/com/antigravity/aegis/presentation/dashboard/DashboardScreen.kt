@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +42,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,8 +66,27 @@ fun DashboardScreen(
     navController: NavController,
     isDarkTheme: Boolean,
     onThemeToggle: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    viewModel: DashboardViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
+    val showBackupDialog by viewModel.showBackupDialog.collectAsState()
+    val backupStatus by viewModel.autoBackupStatus.collectAsState()
+    val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
+
+    androidx.compose.runtime.LaunchedEffect(backupStatus) {
+        backupStatus?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearBackupStatus()
+        }
+    }
+    
+    if (showBackupDialog) {
+        com.antigravity.aegis.presentation.components.BackupCheckDialog(
+            onBackupLocationSelected = { uri ->
+                viewModel.onBackupLocationSelected(uri)
+            }
+        )
+    }
     val modules = listOf(
         ModuleData("Proyectos", Icons.Filled.Work, Screen.Projects.route),
         ModuleData("Partes Trabajo", Icons.Filled.Build, Screen.WorkReports.route),
@@ -74,23 +99,10 @@ fun DashboardScreen(
     )
 
     Scaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { BovedaLogo() },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                ),
-                actions = {
-                    // Settings Button
-                    androidx.compose.material3.IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                }
+            com.antigravity.aegis.presentation.components.AegisTopAppBar(
+                onNavigateToSettings = onNavigateToSettings
             )
         }
     ) { paddingValues ->

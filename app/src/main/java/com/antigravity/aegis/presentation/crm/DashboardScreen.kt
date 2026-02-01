@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +24,7 @@ fun DashboardScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.dashboard_title)) })
+            AegisTopAppBar()
         },
         floatingActionButton = {
             // Optional: Quick add project?
@@ -35,6 +36,14 @@ fun DashboardScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
+            // Screen Title
+            Text(
+                text = stringResource(R.string.dashboard_title),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Quick Actions
             Button(
                 onClick = onNavigateToClients,

@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.antigravity.aegis.domain.transfer.DataTransferManager
+import kotlinx.coroutines.flow.firstOrNull
 import android.net.Uri
 
 @HiltViewModel
@@ -28,12 +29,17 @@ class QuoteKanbanViewModel @Inject constructor(
     private val repository: CrmRepository,
     private val pdfGenerator: PdfGenerator,
     @ApplicationContext private val context: Context,
-    private val transferManager: DataTransferManager
+    private val transferManager: DataTransferManager,
+    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
 ) : ViewModel() {
 
     // Transfer Logic
     private val _transferState = MutableStateFlow<TransferState>(TransferState.Idle)
     val transferState = _transferState.asStateFlow()
+    
+    val userConfig = settingsRepository.getUserConfig()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
 
     fun exportQuotes() {
         viewModelScope.launch {
@@ -139,7 +145,8 @@ class QuoteKanbanViewModel @Inject constructor(
     fun generateAndSharePdf(quote: QuoteEntity, client: ClientEntity) {
         viewModelScope.launch {
             try {
-                val pdfFile = pdfGenerator.generateQuotePdf(context, quote, client)
+                val config = settingsRepository.getUserConfig().firstOrNull()
+                val pdfFile = pdfGenerator.generateQuotePdf(context, quote, client, config)
                 val uri = FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.provider",

@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,8 +98,7 @@ fun InventoryScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.inventory_title)) },
+            AegisTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -132,9 +132,18 @@ fun InventoryScreen(
         }
     ) { padding ->
         Column(Modifier.padding(padding)) {
+            // Screen Title (Only on List view for cleanliness, or both?)
+            // Putting it at top of Column
             if (selectedTab == 0) {
+                 Text(
+                    text = stringResource(R.string.inventory_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
                 InventoryList(products)
             } else {
+                 // On Scanner view, maybe title is less important or can be part of overlay
                 ScannerView(
                     scanState = scanState,
                     onBarcodeDetected = { viewModel.onBarcodeDetected(it) },

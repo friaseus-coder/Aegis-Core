@@ -1,0 +1,1 @@
+Regla de Compilación: Siempre que generes una APK o un Bundle de Android, muévelos automáticamente a la carpeta /apks/. Si la carpeta no existe, créala. No dejes los archivos en la carpeta de build por defecto de Gradle/Flutter. El fichero tiene que tener el nombre de la versión, por ejemplo: app-release-v1.0.0.apk

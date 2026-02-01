@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -80,11 +81,11 @@ fun SettingsScreen(
         when (val state = uiState) {
             is SettingsUiState.LoggedOut -> onLogout()
             is SettingsUiState.Success -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, state.message.asString(context), Toast.LENGTH_SHORT).show()
                 viewModel.clearState()
             }
             is SettingsUiState.Error -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, state.message.asString(context), Toast.LENGTH_LONG).show()
                 viewModel.clearState()
             }
             else -> {}
@@ -116,29 +117,28 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             
-            // Handle UI State Feedback
-            val context = androidx.compose.ui.platform.LocalContext.current
-            LaunchedEffect(uiState) {
-                val state = uiState
-                when (state) {
-                    is SettingsUiState.Success -> {
-                        android.widget.Toast.makeText(context, state.message, android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                    is SettingsUiState.Error -> {
-                        android.widget.Toast.makeText(context, state.message, android.widget.Toast.LENGTH_LONG).show()
-                    }
-                    is SettingsUiState.LoggedOut -> {
-                        android.widget.Toast.makeText(context, "Sesión expirada. Identifícate de nuevo.", android.widget.Toast.LENGTH_LONG).show()
-                        onLogout()
-                    }
-                    else -> Unit
-                }
-            }
-
+            // Handle UI State Feedback (Redundant? Lines 82-93 also handle it?)
+            // The previous block (80-93) uses `context` from `LocalContext.current` at line 39.
+            // This block (122-137) used a new `context`.
+            // I will remove this duplicate block and just keep the Loading indicator logic which is unique here, or better yet, verify logic.
+            // Lines 80-93 handle the Toast.
+            // Lines 122-137 seem to be a duplicate added during previous edits or original code? 
+            // Ah, I see in original file lines 80-93 and 122-137. I should probably clean it up.
+            // But for now, let's just make sure it compiles.
+            // The `uiState` collection in 122 seems to shadow/copy.
+            
+            // Actually, let's just update the duplicate block inside Column if I can't remove it safely without viewing.
+            // Wait, looking at file content:
+            // Line 39: val context = LocalContext.current
+            // Line 80: LaunchedEffect(uiState) ... Toast ...
+            // Line 121: val context = androidx.compose.ui.platform.LocalContext.current
+            // Line 122: LaunchedEffect... 
+            // It IS duplicated. I should remove the second one.
+            
             // Loading Indicator
             if (uiState is SettingsUiState.Loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                Text((uiState as SettingsUiState.Loading).message)
+                Text((uiState as SettingsUiState.Loading).message.asString(context))
             }
 
             // General / Appearance Section
@@ -146,39 +146,39 @@ fun SettingsScreen(
             
             SettingsSection(title = stringResource(R.string.general_section_title)) {
                 // Language Selector
-                Text("Idioma / Language", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.language_section_label), style = MaterialTheme.typography.bodyMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
                         selected = config?.language == "es",
                         onClick = { viewModel.updateLanguage("es") },
-                        label = { Text("Español") }
+                        label = { Text(stringResource(R.string.language_spanish)) }
                     )
                     FilterChip(
                         selected = config?.language == "en",
                         onClick = { viewModel.updateLanguage("en") },
-                        label = { Text("English") }
+                        label = { Text(stringResource(R.string.language_english)) }
                     )
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 // Theme Selector
-                Text("Tema / Theme", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.theme_section_label), style = MaterialTheme.typography.bodyMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                      FilterChip(
                         selected = config?.themeMode == "system",
                         onClick = { viewModel.updateThemeMode("system") },
-                        label = { Text("Sistema") }
+                        label = { Text(stringResource(R.string.theme_system)) }
                     )
                     FilterChip(
                         selected = config?.themeMode == "light",
                         onClick = { viewModel.updateThemeMode("light") },
-                        label = { Text("Claro") }
+                        label = { Text(stringResource(R.string.theme_light)) }
                     )
                     FilterChip(
                         selected = config?.themeMode == "dark",
                         onClick = { viewModel.updateThemeMode("dark") },
-                        label = { Text("Oscuro") }
+                        label = { Text(stringResource(R.string.theme_dark)) }
                     )
                 }
             }
@@ -207,7 +207,15 @@ fun SettingsScreen(
                     onClick = onNavigateToBackup,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Gestionar Copias de Seguridad (Importar / Exportar)")
+                    Text(stringResource(R.string.backup_management_button))
+                }
+                
+                Button(
+                    onClick = { viewModel.shareBackup(context) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text(stringResource(R.string.share_backup_button))
                 }
             }
 
@@ -225,7 +233,7 @@ fun SettingsScreen(
                 val users by viewModel.users.collectAsState()
                 
                 if (users.isNotEmpty()) {
-                    Text("Usuarios Registrados (Click para editar)", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.registered_users_title), style = MaterialTheme.typography.titleSmall)
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         users.forEach { user ->
                             Card(
@@ -245,9 +253,9 @@ fun SettingsScreen(
                                     Column {
                                         Text(user.name, fontWeight = FontWeight.Bold)
                                         val roleText = when (user.role) {
-                                            UserRole.ADMIN -> "Ambos Perfiles (Empresa + Trabajador)"
-                                            UserRole.MANAGER -> "Empresa / Autónomo"
-                                            UserRole.USER, UserRole.GUEST -> "Particular / Trabajador"
+                                            UserRole.ADMIN -> stringResource(R.string.role_admin_desc)
+                                            UserRole.MANAGER -> stringResource(R.string.role_manager_title)
+                                            UserRole.USER, UserRole.GUEST -> stringResource(R.string.role_worker_title)
                                         }
                                         Text(
                                             text = roleText, 
@@ -258,6 +266,118 @@ fun SettingsScreen(
                                     Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // Company Details Section
+            val configState = viewModel.userConfig.collectAsState()
+            val currentConfig = configState.value
+            
+            SettingsSection(title = stringResource(R.string.company_details_title)) {
+                var companyName by remember(currentConfig) { mutableStateOf(currentConfig?.companyName ?: "") }
+                var address by remember(currentConfig) { mutableStateOf(currentConfig?.companyAddress ?: "") }
+                var postalCode by remember(currentConfig) { mutableStateOf(currentConfig?.companyPostalCode ?: "") }
+                var city by remember(currentConfig) { mutableStateOf(currentConfig?.companyCity ?: "") }
+                var province by remember(currentConfig) { mutableStateOf(currentConfig?.companyProvince ?: "") }
+                var dniCif by remember(currentConfig) { mutableStateOf(currentConfig?.companyDniCif ?: "") }
+                
+                // Text Fields
+                OutlinedTextField(
+                    value = companyName, onValueChange = { companyName = it },
+                    label = { Text(stringResource(R.string.company_name_label)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = dniCif, onValueChange = { dniCif = it },
+                    label = { Text(stringResource(R.string.company_dni_label)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = address, onValueChange = { address = it },
+                    label = { Text(stringResource(R.string.company_address_label)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = postalCode, onValueChange = { postalCode = it },
+                        label = { Text(stringResource(R.string.company_postal_code_label)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = city, onValueChange = { city = it },
+                        label = { Text(stringResource(R.string.company_city_label)) },
+                        modifier = Modifier.weight(2f)
+                    )
+                }
+                OutlinedTextField(
+                    value = province, onValueChange = { province = it },
+                    label = { Text(stringResource(R.string.company_province_label)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Button(
+                    onClick = {
+                        viewModel.updateCompanyConfig(companyName, address, postalCode, city, province, dniCif)
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                ) {
+                    Text(stringResource(R.string.save_company_data_button))
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Logo Section
+                Text(stringResource(R.string.logo_title), style = MaterialTheme.typography.titleSmall)
+                
+                val logoLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.PickVisualMedia()
+                ) { uri ->
+                    uri?.let { viewModel.updateCompanyLogo(it) }
+                }
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Preview
+                    if (currentConfig?.companyLogoUri != null) {
+                        coil.compose.AsyncImage(
+                            model = currentConfig.companyLogoUri,
+                            contentDescription = "Logo Empresa",
+                            modifier = Modifier.size(80.dp),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(stringResource(R.string.no_logo_label), style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    
+                    Button(
+                        onClick = { 
+                            logoLauncher.launch(
+                                androidx.activity.result.PickVisualMediaRequest(
+                                    mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.select_logo_button))
+                    }
+                    
+                    if (currentConfig?.companyLogoUri != null) {
+                         TextButton(
+                            onClick = { viewModel.deleteCompanyLogo() },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text(stringResource(R.string.delete_logo_button))
                         }
                     }
                 }
@@ -334,7 +454,7 @@ fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -
                 
                 // Role Selection
                 Column {
-                    Text("Perfiles Activos", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.active_profiles_label), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -343,8 +463,8 @@ fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -
                             onCheckedChange = { isEmpresa = it }
                         )
                         Column {
-                            Text("Empresa / Autónomo", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                            Text("Acceso total y gestión", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.role_manager_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.role_manager_desc), style = MaterialTheme.typography.bodySmall)
                         }
                     }
                     
@@ -354,8 +474,8 @@ fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -
                             onCheckedChange = { isParticular = it }
                         )
                          Column {
-                            Text("Particular / Trabajador", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                            Text("Acceso operativo limitado", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.role_worker_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.role_worker_desc), style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -394,10 +514,10 @@ fun EditRoleDialog(
      
      AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Editar Rol: ${user.name}") },
+        title = { Text(stringResource(R.string.edit_role_title_prefix, user.name)) },
         text = {
              Column {
-                Text("Perfiles Activos:", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.active_profiles_label), style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -406,7 +526,7 @@ fun EditRoleDialog(
                         onCheckedChange = { isEmpresa = it }
                     )
                     Column {
-                        Text("Empresa / Autónomo", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.role_manager_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                     }
                 }
                 
@@ -416,7 +536,7 @@ fun EditRoleDialog(
                         onCheckedChange = { isParticular = it }
                     )
                      Column {
-                        Text("Particular / Trabajador", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.role_worker_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -434,11 +554,11 @@ fun EditRoleDialog(
                 },
                 enabled = isValid
             ) {
-                Text("Guardar")
+                Text(stringResource(R.string.save_general))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_general)) }
         }
      )
 }

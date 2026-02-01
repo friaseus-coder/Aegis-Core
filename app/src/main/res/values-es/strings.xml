@@ -166,4 +166,8 @@
     <string name="stock_list">Lista de Stock</string>
     <string name="scan_label">Escanear</string>
     <string name="barcode_label">Código: %1$s</string>
+    <string name="share_backup_button">Subir a la Nube / Compartir</string>
+    <string name="share_backup_loading">Preparando archivo...</string>
+    <string name="share_backup_error">Error al generar archivo: %1$s</string>
+    <string name="share_backup_chooser_title">Guardar copia en...</string>
 </resources>

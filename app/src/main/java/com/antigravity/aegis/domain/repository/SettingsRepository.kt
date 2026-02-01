@@ -13,4 +13,10 @@ interface SettingsRepository {
     suspend fun updateLanguage(language: String)
     suspend fun updateThemeMode(mode: String)
     suspend fun insertOrUpdateConfig(config: UserConfig)
+    
+    suspend fun saveImageToInternalStorage(uri: Uri): Result<String>
+
+    suspend fun persistBackupUri(uri: Uri): Result<Unit>
+    suspend fun performAutoBackup(userConfig: UserConfig): Result<String>
+    suspend fun createTemporaryBackupFile(): Result<java.io.File>
 }

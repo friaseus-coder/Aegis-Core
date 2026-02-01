@@ -166,6 +166,18 @@ Acceda a Ajustes desde el Dashboard:
 | **Crear Usuario** | Añadir nuevo usuario |
 | **Cerrar Sesión** | Volver a pantalla de login |
 
+### Datos de Empresa y Logo
+Configure los datos que aparecerán en la cabecera de sus Informes y Presupuestos:
+
+1.  En la pantalla de Ajustes, busque la sección **"Datos de Empresa"**.
+2.  Rellene los campos: Nombre/Titular, DNI/CIF, Dirección, etc.
+3.  Pulse **"Guardar Datos Empresa"** para confirmar.
+4.  **Añadir Logo**:
+    *   Pulse el botón **"Seleccionar Logo"**.
+    *   Elija una imagen de su galería (se recomienda formato cuadrado o rectangular horizontal y fondo transparente).
+    *   Una previsualización del logo aparecerá junto al botón.
+    *   Este logo se incluirá automáticamente en la esquina superior izquierda de los PDFs generados.
+
 ---
 
 ## ❓ Soporte

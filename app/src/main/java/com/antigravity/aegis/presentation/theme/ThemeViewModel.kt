@@ -26,6 +26,10 @@ class ThemeViewModel @Inject constructor(
     val language = settingsRepository.getUserConfig().map { 
         it?.language ?: "es" // Default to Spanish
     }
+    
+    val companyLogoUri = settingsRepository.getUserConfig().map {
+        it?.companyLogoUri
+    }
 
     // Deprecated simple toggle, now we use SettingsScreen
     fun toggleTheme() {

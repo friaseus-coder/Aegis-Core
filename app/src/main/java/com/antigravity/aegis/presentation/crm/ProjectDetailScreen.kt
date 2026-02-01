@@ -12,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
+import com.antigravity.aegis.presentation.components.BovedaLogo
+import com.antigravity.aegis.ui.theme.LocalCompanyLogoUri
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +34,7 @@ fun ProjectDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(project!!.name) })
+            AegisTopAppBar()
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddTaskDialog = true }) {
@@ -40,6 +43,14 @@ fun ProjectDetailScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize().padding(16.dp)) {
+            // Project Name as Header
+            Text(
+                text = project!!.name,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
             Text(stringResource(R.string.status_label, project!!.status), style = MaterialTheme.typography.titleMedium)
             
             Spacer(modifier = Modifier.height(16.dp))

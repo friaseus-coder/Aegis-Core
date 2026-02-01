@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.compose.foundation.isSystemInDarkTheme
 
 private val PremiumSecurityValidColorScheme = darkColorScheme(
     primary = Gold,
@@ -50,9 +51,13 @@ private val PremiumSecurityLightColorScheme = androidx.compose.material3.lightCo
     onError = Color.White
 )
 
+val LocalCompanyLogoUri = androidx.compose.runtime.staticCompositionLocalOf<String?> { null }
+
 @Composable
 fun AegisTheme(
-    darkTheme: Boolean = true, // Default to true, but controllable
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) PremiumSecurityValidColorScheme else PremiumSecurityLightColorScheme

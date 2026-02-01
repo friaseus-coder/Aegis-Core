@@ -169,4 +169,70 @@
     <string name="barcode_label">Barcode: %1$s</string>
     <string name="forgot_pin_label">¿Olvidaste tu PIN?</string>
     <string name="import_backup_label">Importar Backup</string>
+    
+    <!-- Settings - Company Details -->
+    <string name="backup_management_button">Gestionar Copias de Seguridad (Importar / Exportar)</string>
+    <string name="registered_users_title">Usuarios Registrados (Click para editar)</string>
+    <string name="role_admin_desc">Ambos Perfiles (Empresa + Trabajador)</string>
+    <string name="role_manager_title">Empresa / Autónomo</string>
+    <string name="role_worker_title">Particular / Trabajador</string>
+    <string name="role_manager_desc">Acceso total y gestión</string>
+    <string name="role_worker_desc">Acceso operativo limitado</string>
+    <string name="company_details_title">Datos de Empresa (para Informes PDF)</string>
+    <string name="company_name_label">Nombre Empresa / Titular</string>
+    <string name="company_dni_label">DNI / CIF</string>
+    <string name="company_address_label">Dirección</string>
+    <string name="company_postal_code_label">CP</string>
+    <string name="company_city_label">Ciudad</string>
+    <string name="company_province_label">Provincia</string>
+    <string name="save_company_data_button">Guardar Datos Empresa</string>
+    <string name="logo_title">Logotipo</string>
+    <string name="no_logo_label">Sin Logo</string>
+    <string name="select_logo_button">Seleccionar Logo</string>
+    <string name="delete_logo_button">Eliminar Logo</string>
+    
+    <!-- Settings - Messages -->
+    <string name="logo_deleted_success">Logo eliminado</string>
+    <string name="logo_updated_success">Logo actualizado correctamente</string>
+    <string name="saving_logo_message">Guardando logo...</string>
+    <string name="session_expired_message">Sesión expirada. Identifícate de nuevo.</string>
+    <string name="save_success">Datos guardados correctamente</string>
+    
+    <!-- Settings - General -->
+    <string name="language_section_label">Idioma / Language</string>
+    <string name="theme_section_label">Tema / Theme</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="active_profiles_label">Perfiles Activos</string>
+    <string name="edit_role_title_prefix">Editar Rol: %1$s</string>
+    <string name="save_general">Guardar</string>
+    <string name="cancel_general">Cancelar</string>
+    
+    <!-- ViewModel Messages -->
+    <string name="language_changed_message">Idioma cambiado a %1$s</string>
+    <string name="theme_changed_message">Tema cambiado</string>
+    <string name="db_export_loading">Exportando Base de Datos...</string>
+    <string name="db_export_success">Base de Datos exportada correctamente</string>
+    <string name="db_export_error">Error al exportar: %1$s</string>
+    <string name="db_import_loading">Importando Base de Datos...</string>
+    <string name="db_import_success">Importación exitosa. Por favor, loguéate de nuevo.</string>
+    <string name="db_import_error">Error al importar: %1$s</string>
+    <string name="creating_user_loading">Creando Usuario...</string>
+    <string name="session_locked_error">Sesión bloqueada. No se puede crear usuario.</string>
+    <string name="user_created_success">Usuario creado correctamente</string>
+    <string name="user_create_failed">Fallo al crear usuario: %1$s</string>
+    <string name="role_updated_success">Rol actualizado correctamente</string>
+    <string name="role_update_error">Error al actualizar rol</string>
+    <string name="biometric_setup_loading">Iniciando configuración biométrica...</string>
+    <string name="biometric_enabled_success">Biometría activada correctamente</string>
+    <string name="biometric_enable_error">Error al activar biometría</string>
+    <string name="biometric_init_error">No se pudo inicializar biometría</string>
+    <string name="biometric_auth_failed">Autenticación biométrica fallida</string>
+    <string name="company_data_updated_success">Datos de empresa actualizados</string>
+    <string name="logo_save_error_prefix">Error al guardar el logo: %1$s</string>
+    <string name="share_backup_button">Subir a la Nube / Compartir</string>
+    <string name="share_backup_loading">Preparando archivo...</string>
+    <string name="share_backup_error">Error al generar archivo: %1$s</string>
+    <string name="share_backup_chooser_title">Guardar copia en...</string>
 </resources>

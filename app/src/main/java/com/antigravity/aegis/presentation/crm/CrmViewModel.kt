@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,7 +31,8 @@ class CrmViewModel @Inject constructor(
     private val pdfGenerator: PdfGenerator,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val transferManager: DataTransferManager,
-    private val attachmentRepository: AttachmentRepository
+    private val attachmentRepository: AttachmentRepository,
+    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
 ) : ViewModel() {
 
 
@@ -303,8 +305,10 @@ class CrmViewModel @Inject constructor(
             if (project != null && project.id == projectId) {
                 // We need client...
                  val currentClient = repository.getClientById(project.clientId)
+                 val config = settingsRepository.getUserConfig().firstOrNull() // Get current config
+                 
                  if (currentClient != null) {
-                      val pdfFile = pdfGenerator.generateReportPdf(context, report.copy(id = reportId.toInt()), project, currentClient, signatureBitmap)
+                      val pdfFile = pdfGenerator.generateReportPdf(context, report.copy(id = reportId.toInt()), project, currentClient, signatureBitmap, config)
                       // Notify user or share intent?
                  }
             }

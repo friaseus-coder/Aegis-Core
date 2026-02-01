@@ -23,8 +23,12 @@ import androidx.compose.ui.unit.dp
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
 import android.widget.Toast
+import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
+import com.antigravity.aegis.presentation.components.BovedaLogo
+import com.antigravity.aegis.ui.theme.LocalCompanyLogoUri
+import androidx.compose.ui.Alignment
 import com.antigravity.aegis.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,8 +91,7 @@ fun ClientListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.clients_title)) },
+            AegisTopAppBar(
                 actions = {
                     IconButton(onClick = { viewModel.exportClients() }) {
                         Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.export_csv))
@@ -106,6 +109,14 @@ fun ClientListScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            
+            // Screen Title in Body
+            Text(
+                text = stringResource(R.string.clients_title),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
             
             // Search Bar
             OutlinedTextField(

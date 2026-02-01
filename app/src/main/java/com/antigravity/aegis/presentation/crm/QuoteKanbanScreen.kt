@@ -2,6 +2,8 @@ package com.antigravity.aegis.presentation.crm
 
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
+import com.antigravity.aegis.presentation.components.BovedaLogo
+import com.antigravity.aegis.ui.theme.LocalCompanyLogoUri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +50,7 @@ import android.widget.Toast
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +61,7 @@ fun QuoteKanbanScreen(
 ) {
     val kanbanState by viewModel.kanbanState.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
+    val userConfig by viewModel.userConfig.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     
@@ -102,8 +106,7 @@ fun QuoteKanbanScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Presupuestos (Kanban)") },
+            AegisTopAppBar(
                 navigationIcon = {
                      IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -148,11 +151,9 @@ fun QuoteKanbanScreen(
                     },
                     onShareQuote = { quote, client ->
                         // Generate and Share
-                        val pdfGenerator = PdfGenerator() // Ideally injected, but for quick context action:
-                        // Actually, better to trigger a VM function that returns the file or URI
-                        // But for direct context usage in Composable (simpler for now):
+                        val pdfGenerator = PdfGenerator() 
                         scope.launch {
-                             val pdfFile = pdfGenerator.generateQuotePdf(context, quote, client)
+                             val pdfFile = pdfGenerator.generateQuotePdf(context, quote, client, userConfig)
                              val uri = FileProvider.getUriForFile(
                                 context,
                                 "${context.packageName}.provider",

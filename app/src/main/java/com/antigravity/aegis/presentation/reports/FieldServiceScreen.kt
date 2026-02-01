@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.crm.CrmViewModel
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,7 +26,7 @@ fun FieldServiceScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.field_service_title)) })
+            AegisTopAppBar()
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -40,6 +41,14 @@ fun FieldServiceScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+            // Screen Title
+            Text(
+                text = stringResource(R.string.field_service_title),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
             Text(
                 stringResource(R.string.work_reports_section_title), 
                 style = MaterialTheme.typography.titleLarge

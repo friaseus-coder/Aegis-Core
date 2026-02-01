@@ -14,7 +14,8 @@ import javax.inject.Inject
 
 class SettingsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val database: AegisDatabase // Injected to close it or checkpoint it
+    private val database: AegisDatabase,
+    private val backupRepository: com.antigravity.aegis.domain.repository.BackupRepository
 ) : SettingsRepository {
 
     override suspend fun exportDatabase(destinationUri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
@@ -95,6 +96,142 @@ class SettingsRepositoryImpl @Inject constructor(
         val current = database.userConfigDao().getUserConfigOneShot()
         if (current == null) {
             database.userConfigDao().insertUserConfig(com.antigravity.aegis.data.model.UserConfig())
+        }
+    }
+
+    override suspend fun saveImageToInternalStorage(uri: Uri): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+                ?: return@withContext Result.failure(Exception("Cannot open input stream"))
+
+            val directory = File(context.filesDir, "company_assets")
+            if (!directory.exists()) directory.mkdirs()
+
+            val fileName = "company_logo_${System.currentTimeMillis()}.jpg" 
+            val file = File(directory, fileName)
+            
+            FileOutputStream(file).use { output ->
+                inputStream.copyTo(output)
+            }
+            
+            Result.success(file.absolutePath)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun persistBackupUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val takeFlags: Int = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            // Check if the URI is a tree URI or document URI. 
+            // For OpenDocumentTree, we take persistable permission.
+            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+            
+            // Save to UserConfig
+            ensureConfigExists()
+            val current = database.userConfigDao().getUserConfigOneShot()!!
+            val newConfig = current.copy(backupLocationUri = uri.toString())
+            database.userConfigDao().insertOrUpdate(newConfig)
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Additional dependency: BackupRepository. 
+    // Since SettingsRepositoryImpl is created via Hilt, we can request Provider<BackupRepository> if there's a circular dependency, 
+    // or just inject BackupRepository if not. 
+    // BackupRepository does NOT depend on SettingsRepository. So it's safe.
+    // However, I need to add it to the constructor.
+    // Let's assume I can modify the constructor.
+    
+    // As I cannot easily modify the constructor in this tool call without replacing the whole file header, 
+    // I will use a different approach: directly calling the logic or creating a separate scoped use case. 
+    // BUT the prompt said "Modify SettingsRepositoryImpl". 
+    // The cleanest way is to use `BackupRepository` here.
+    // I will assume BackupRepository is NOT available in this class yet. 
+    // I will try to manually invoke the Backup logic or better: inject it.
+    
+    // Wait, to inject it I need to change the primary constructor at the top of the file.
+    // This tool call is only replacing the bottom. 
+    // I will do this in TWO steps. First add the method bodies (commented out or with TODO), then fix the constructor. 
+    // ACTUALLY, I can replace the whole file or just use `find_by_name` to see if I can do a larger replacement.
+    // No, I should use `replace_file_content` carefully. 
+    
+    // Alternative: Move `performAutoBackup` to a UseCase? 
+    // The interface is in Repository. 
+    
+    // Let's assume for now I will duplicate the backup JSON creation logic OR 
+    // (Better) I will change the constructor in the next step. 
+    // For now I will put a placeholder or just use the DB directly as I have access to `database`.
+    // `BackupRepository` logic is basically `database.dao...`.
+    
+    // Oh wait, `BackupRepository` uses Gson. I have access to Gson via injection? No.
+    // I need Gson too.
+    
+    // Plan:
+    // 1. Add methods `persistBackupUri`.
+    // 2. `performAutoBackup` will perform the file writing. But obtaining the JSON string... 
+    //    It calls `BackupRepository.createBackupJson()`.
+    //    I really should inject BackupRepository.
+    
+    // I will skip implementing `performAutoBackup` fully here until I add BackupRepository to constructor.
+    
+    override suspend fun performAutoBackup(userConfig: com.antigravity.aegis.data.model.UserConfig): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val uriString = userConfig.backupLocationUri ?: return@withContext Result.failure(Exception("No backup location configured"))
+            val treeUri = Uri.parse(uriString)
+            
+            // Generate JSON using BackupRepository
+            val jsonResult = backupRepository.createBackupJson()
+            if (jsonResult.isFailure) return@withContext Result.failure(jsonResult.exceptionOrNull()!!)
+            val jsonString = jsonResult.getOrNull()!!
+
+            // Use DocumentFile to create a file in the directory
+            // Note: Should check if we have write permission, but we took persistable permission.
+            val docFile = androidx.documentfile.provider.DocumentFile.fromTreeUri(context, treeUri)
+            if (docFile == null || !docFile.isDirectory) return@withContext Result.failure(Exception("Invalid directory URI"))
+
+            val dateFormat = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
+            val timestamp = dateFormat.format(java.util.Date())
+            val fileName = "aegis_backup_$timestamp.json"
+            val newFile = docFile.createFile("application/json", fileName)
+                ?: return@withContext Result.failure(Exception("Could not create file in directory"))
+            
+            context.contentResolver.openOutputStream(newFile.uri)?.use { output ->
+                output.write(jsonString.toByteArray())
+            } ?: return@withContext Result.failure(Exception("Could not open output stream"))
+            
+            // Update user config with last backup timestamp
+             val newConfig = userConfig.copy(lastBackupTimestamp = System.currentTimeMillis())
+             database.userConfigDao().insertOrUpdate(newConfig)
+
+            Result.success(newFile.uri.toString())
+        } catch (e: Exception) {
+             Result.failure(e)
+        }
+    }
+
+    override suspend fun createTemporaryBackupFile(): Result<File> = withContext(Dispatchers.IO) {
+        try {
+            val jsonResult = backupRepository.createBackupJson()
+            if (jsonResult.isFailure) return@withContext Result.failure(jsonResult.exceptionOrNull()!!)
+            val jsonString = jsonResult.getOrNull()!!
+
+            val dateFormat = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
+            val timestamp = dateFormat.format(java.util.Date())
+            val fileName = "aegis_data_$timestamp.json"
+            val file = File(context.cacheDir, fileName)
+            
+            FileOutputStream(file).use { output ->
+                output.write(jsonString.toByteArray())
+            }
+            
+            Result.success(file)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

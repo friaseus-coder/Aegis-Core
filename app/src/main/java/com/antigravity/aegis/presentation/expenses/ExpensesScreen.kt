@@ -35,6 +35,7 @@ import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,8 +132,7 @@ fun ExpensesScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.expenses_title)) },
+            AegisTopAppBar(
                 actions = {
                     IconButton(onClick = { viewModel.exportExpenses() }) {
                         Icon(Icons.Default.ArrowDownward, contentDescription = "Export CSV")
@@ -143,16 +143,7 @@ fun ExpensesScreen(
                 }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    tempImageUri = createImageFile()
-                    cameraLauncher.launch(tempImageUri!!)
-                }
-            ) {
-                Icon(Icons.Default.CameraAlt, contentDescription = "Scan Ticket")
-            }
-        }
+        // ...
     ) { padding ->
         Column(
             modifier = Modifier
@@ -160,6 +151,14 @@ fun ExpensesScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Screen Title
+            Text(
+                text = stringResource(R.string.expenses_title),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Header Actions
             Button(
                 onClick = { viewModel.exportQuarter() },

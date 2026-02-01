@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         // Collect Theme Mode
         setContent {
             val themeMode by themeViewModel.themeMode.collectAsState(initial = "dark")
-            val language by themeViewModel.language.collectAsState(initial = "es")
+            val language by themeViewModel.language.collectAsState(initial = null)
 
             // Apply Language (Side Effect)
             // Note: This might cause Activity recreation loop if not handled carefully.
@@ -41,12 +41,14 @@ class MainActivity : AppCompatActivity() {
             // Since we persist in DB, we want to align them.
             // We use LaunchedEffect to trigger only on change.
             androidx.compose.runtime.LaunchedEffect(language) {
-                 val currentLocales = AppCompatDelegate.getApplicationLocales()
-                 val currentLang = if (!currentLocales.isEmpty) currentLocales.get(0)?.language else "es"
-                 
-                 if (currentLang != language) {
-                     val appLocale = LocaleListCompat.forLanguageTags(language)
-                     AppCompatDelegate.setApplicationLocales(appLocale)
+                 language?.let { lang ->
+                     val currentLocales = AppCompatDelegate.getApplicationLocales()
+                     val currentLang = if (!currentLocales.isEmpty) currentLocales.get(0)?.language else "es"
+                     
+                     if (currentLang != lang) {
+                         val appLocale = LocaleListCompat.forLanguageTags(lang)
+                         AppCompatDelegate.setApplicationLocales(appLocale)
+                     }
                  }
             }
             
@@ -60,17 +62,21 @@ class MainActivity : AppCompatActivity() {
             // For this implementation, we assume the user might need to restart app 
             // or we use AppCompatDelegate.setApplicationLocales inside an observer.
             
+            val companyLogoUri by themeViewModel.companyLogoUri.collectAsState(initial = null)
+            
             AegisTheme(darkTheme = isDarkTheme) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    NavigationGraph(
-                        navController = navController,
-                        isDarkTheme = isDarkTheme,
-                        onThemeToggle = { themeViewModel.toggleTheme() }
-                    )
+                androidx.compose.runtime.CompositionLocalProvider(com.antigravity.aegis.ui.theme.LocalCompanyLogoUri provides companyLogoUri) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        val navController = rememberNavController()
+                        NavigationGraph(
+                            navController = navController,
+                            isDarkTheme = isDarkTheme,
+                            onThemeToggle = { themeViewModel.toggleTheme() }
+                        )
+                    }
                 }
             }
         }

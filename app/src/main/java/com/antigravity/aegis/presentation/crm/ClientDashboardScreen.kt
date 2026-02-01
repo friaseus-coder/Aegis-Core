@@ -22,6 +22,7 @@ import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.DocumentEntity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,16 +64,10 @@ fun ClientDashboardScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        if (client!!.tipoCliente == "Particular") "${client!!.firstName} ${client!!.lastName}" 
-                        else client!!.firstName 
-                    ) 
-                },
+            AegisTopAppBar(
                 actions = {
                     IconButton(onClick = onEditClient) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit Client")
+                         Icon(Icons.Default.Edit, contentDescription = "Edit Client")
                     }
                 }
             )

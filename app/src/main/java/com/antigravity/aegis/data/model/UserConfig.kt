@@ -16,7 +16,20 @@ data class UserConfig(
     val entityType: EntityType = EntityType.PARTICULAR,
     val activeRole: ActiveRole = ActiveRole.AUTONOMO,
     val isDualModeEnabled: Boolean = false,
-    val profileImageUri: String? = null
+    val profileImageUri: String? = null,
+    
+    // Company Details
+    val companyName: String = "",
+    val companyAddress: String = "",
+    val companyPostalCode: String = "",
+    val companyCity: String = "",
+    val companyProvince: String = "",
+    val companyDniCif: String = "",
+    val companyLogoUri: String? = null,
+    
+    // Backup Configuration
+    val backupLocationUri: String? = null,
+    val lastBackupTimestamp: Long = 0
 )
 
 enum class EntityType {

@@ -105,4 +105,7 @@ dependencies {
     implementation(libs.camera.camera2)
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
+
+    // File Management
+    implementation("androidx.documentfile:documentfile:1.0.1")
 }

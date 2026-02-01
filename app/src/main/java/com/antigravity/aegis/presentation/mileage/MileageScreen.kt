@@ -30,6 +30,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,10 +116,11 @@ fun MileageScreen(
         )
     }
 
+
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.mileage_log_title)) },
+            AegisTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -144,6 +146,14 @@ fun MileageScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Screen Title
+            Text(
+                text = stringResource(R.string.mileage_log_title),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Calculator Card
             Card(
                 elevation = CardDefaults.cardElevation(2.dp),
