@@ -20,6 +20,7 @@ import com.antigravity.aegis.ui.theme.LocalCompanyLogoUri
 @Composable
 fun AegisTopAppBar(
     modifier: Modifier = Modifier,
+    title: String? = null,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     onNavigateToSettings: (() -> Unit)? = null
@@ -29,10 +30,14 @@ fun AegisTopAppBar(
     TopAppBar(
         modifier = modifier,
         title = { 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                BovedaLogo(logoUri = logoUri, modifier = Modifier.size(32.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Aegis Core", style = MaterialTheme.typography.titleMedium)
+            if (title != null) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BovedaLogo(logoUri = logoUri, modifier = Modifier.size(32.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Aegis Core", style = MaterialTheme.typography.titleMedium)
+                }
             }
         },
         navigationIcon = navigationIcon,

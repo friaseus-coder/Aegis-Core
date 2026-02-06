@@ -5,6 +5,12 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Index
 
+enum class ProjectStatus {
+    ACTIVE,
+    CLOSED,
+    ARCHIVED
+}
+
 @Entity(
     tableName = "projects",
     foreignKeys = [
@@ -21,6 +27,8 @@ data class ProjectEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val clientId: Int,
     val name: String,
-    val status: String, // "Active", "Completed", "Archived"
-    val deadline: Long? = null
+    val status: ProjectStatus, // "Active", "Closed", "Archived"
+    val startDate: Long,
+    val endDate: Long? = null,
+    val isArchived: Boolean = false
 )

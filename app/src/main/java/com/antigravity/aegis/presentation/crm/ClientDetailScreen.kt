@@ -27,6 +27,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -91,7 +95,7 @@ fun ClientDetailScreen(
                 items(projects) { project ->
                     ListItem(
                         headlineContent = { Text(project.name) },
-                        supportingContent = { Text(project.status) },
+                        supportingContent = { Text(project.status.name) },
                         modifier = Modifier.clickable { onNavigateToProject(project.id) }
                     )
                     Divider()
@@ -103,7 +107,7 @@ fun ClientDetailScreen(
             AddProjectDialog(
                 onDismiss = { showAddProjectDialog = false },
                 onConfirm = { name, status, deadline ->
-                    viewModel.createProject(client!!.id, name, status, deadline)
+                    viewModel.createProject(client!!.id, name, status, System.currentTimeMillis(), deadline)
                     showAddProjectDialog = false
                 }
             )

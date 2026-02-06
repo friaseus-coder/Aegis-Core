@@ -117,6 +117,7 @@ class DataTransferManager @Inject constructor(
                                     totalAmount = row["totalAmount"]?.toDoubleOrNull() ?: 0.0,
                                     merchantName = row["merchantName"],
                                     status = row["status"] ?: "Pending",
+                                    category = row["category"] ?: "Material",
                                     imagePath = null // Cannot import images from CSV easily
                                 )
                                 crmDao.insertExpense(entity)

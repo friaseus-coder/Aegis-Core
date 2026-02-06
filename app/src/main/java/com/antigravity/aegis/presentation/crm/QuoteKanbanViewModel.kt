@@ -27,11 +27,13 @@ import android.net.Uri
 @HiltViewModel
 class QuoteKanbanViewModel @Inject constructor(
     private val repository: CrmRepository,
+    private val budgetRepository: com.antigravity.aegis.domain.repository.BudgetRepository,
     private val pdfGenerator: PdfGenerator,
     @ApplicationContext private val context: Context,
     private val transferManager: DataTransferManager,
     private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
 ) : ViewModel() {
+
 
     // Transfer Logic
     private val _transferState = MutableStateFlow<TransferState>(TransferState.Idle)
@@ -119,20 +121,30 @@ class QuoteKanbanViewModel @Inject constructor(
     fun createQuote(
         title: String,
         clientId: Int,
-        amount: Double,
+        lines: List<com.antigravity.aegis.data.model.BudgetLineEntity>,
         description: String
     ) {
         viewModelScope.launch {
+             val calculatedTotal = lines.sumOf { it.quantity * it.unitPrice }
+             
+             // Calculate taxes if needed (assuming 21% or from line)
+             val totalWithTax = calculatedTotal * 1.21 // Simplified
+             
             val newQuote = QuoteEntity(
                 clientId = clientId,
                 date = System.currentTimeMillis(),
-                totalAmount = amount,
+                totalAmount = totalWithTax,
                 status = "Draft",
                 description = description,
-                title = title
+                title = title,
+                calculatedTotal = (totalWithTax * 100).toLong(),
+                version = 1
             )
-            repository.createQuote(newQuote)
-            // No need to refresh manually, Flow will update UI
+            val quoteId = budgetRepository.insertQuote(newQuote)
+            
+            // Insert Lines
+            val linesWithQuoteId = lines.map { it.copy(quoteId = quoteId.toInt()) }
+            budgetRepository.insertBudgetLines(linesWithQuoteId)
         }
     }
 

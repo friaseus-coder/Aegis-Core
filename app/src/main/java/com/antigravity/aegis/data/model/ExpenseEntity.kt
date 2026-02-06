@@ -10,5 +10,7 @@ data class ExpenseEntity(
     val totalAmount: Double,
     val merchantName: String?,
     val imagePath: String?, // Path to the saved image file
-    val status: String = "Pending" // Verified, Pending, etc.
+    val status: String = "Pending", // Verified, Pending, etc.
+    val category: String, // e.g., "Material", "Transport", "Office"
+    val projectId: Int? = null // Optional Foreign Key to Project
 )

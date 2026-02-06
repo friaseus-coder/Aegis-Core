@@ -44,8 +44,12 @@ interface CrmRepository {
 
     // Expenses
     suspend fun createExpense(expense: ExpenseEntity): Long
+    suspend fun updateExpense(expense: ExpenseEntity)
     fun getAllExpenses(): Flow<List<ExpenseEntity>>
+    fun getExpensesForProject(projectId: Int): Flow<List<ExpenseEntity>>
+    suspend fun getExpensesForProjectSync(projectId: Int): List<ExpenseEntity>
     suspend fun getExpensesByDateRange(startDate: Long, endDate: Long): List<ExpenseEntity>
+    suspend fun getGeneralExpensesByDateRange(startDate: Long, endDate: Long): List<ExpenseEntity>
 
     // Inventory
     suspend fun createProduct(product: ProductEntity): Long

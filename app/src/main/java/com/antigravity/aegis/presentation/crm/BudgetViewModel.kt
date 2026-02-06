@@ -1,0 +1,169 @@
+package com.antigravity.aegis.presentation.crm
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.antigravity.aegis.data.model.BudgetLineEntity
+import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.domain.repository.BudgetRepository
+import com.antigravity.aegis.domain.repository.ProjectRepository
+import com.antigravity.aegis.domain.repository.CrmRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class BudgetViewModel @Inject constructor(
+    private val budgetRepository: BudgetRepository,
+    private val projectRepository: ProjectRepository,
+    private val crmRepository: CrmRepository,
+    private val pdfGenerator: com.antigravity.aegis.domain.services.PdfGeneratorService
+) : ViewModel() {
+
+    private val _budgetState = MutableStateFlow<BudgetState>(BudgetState.Loading)
+    val budgetState: StateFlow<BudgetState> = _budgetState
+    
+    private val _pdfFile = MutableStateFlow<java.io.File?>(null)
+    val pdfFile: StateFlow<java.io.File?> = _pdfFile
+
+    private val _lines = MutableStateFlow<List<BudgetLineEntity>>(emptyList())
+    val lines: StateFlow<List<BudgetLineEntity>> = _lines
+
+    // Temporary state for new/editing budget
+    private val _currentQuote = MutableStateFlow<QuoteEntity?>(null)
+    val currentQuote: StateFlow<QuoteEntity?> = _currentQuote
+
+    // ... (initNewBudget, loadBudget, updateQuoteDetails, addLine, removeLine, calculateTotal unchanged) ...
+
+    fun initNewBudget(projectId: Int) {
+        viewModelScope.launch {
+            val project = projectRepository.getProjectById(projectId)
+            if (project != null) {
+                _currentQuote.value = QuoteEntity(
+                    clientId = project.clientId,
+                    projectId = project.id,
+                    date = System.currentTimeMillis(),
+                    totalAmount = 0.0,
+                    status = "Draft",
+                    description = "",
+                    title = "Presupuesto para ${project.name}"
+                )
+                _lines.value = emptyList()
+                _budgetState.value = BudgetState.Editing
+            } else {
+                _budgetState.value = BudgetState.Error("Proyecto no encontrado")
+            }
+        }
+    }
+
+    fun loadBudget(quoteId: Int) {
+        viewModelScope.launch {
+            _budgetState.value = BudgetState.Loading
+            val quote = budgetRepository.getQuoteById(quoteId)
+            if (quote != null) {
+                _currentQuote.value = quote
+                budgetRepository.getBudgetLines(quoteId).collect {
+                    _lines.value = it
+                    calculateTotal()
+                }
+                _budgetState.value = BudgetState.Editing
+            } else {
+                _budgetState.value = BudgetState.Error("Presupuesto no encontrado")
+            }
+        }
+    }
+
+    fun updateQuoteDetails(title: String, description: String) {
+        _currentQuote.value = _currentQuote.value?.copy(title = title, description = description)
+    }
+
+    fun addLine(description: String, quantity: Double, unitPrice: Double, taxRate: Double) {
+        val newLine = BudgetLineEntity(
+            quoteId = _currentQuote.value?.id ?: 0, 
+            description = description,
+            quantity = quantity,
+            unitPrice = unitPrice,
+            taxRate = taxRate
+        )
+        _lines.value = _lines.value + newLine
+        calculateTotal()
+    }
+    
+    fun removeLine(line: BudgetLineEntity) {
+        _lines.value = _lines.value - line
+        calculateTotal()
+    }
+
+    private fun calculateTotal() {
+        val total = _lines.value.sumOf { (it.quantity * it.unitPrice) * (1 + it.taxRate) }
+        _currentQuote.value = _currentQuote.value?.copy(totalAmount = total)
+    }
+
+    fun saveBudget() {
+        viewModelScope.launch {
+            val quote = _currentQuote.value ?: return@launch
+            
+            // 1. Insert/Update Quote
+            val quoteId = if (quote.id == 0) {
+                budgetRepository.insertQuote(quote)
+            } else {
+                budgetRepository.updateQuote(quote)
+                quote.id.toLong()
+            }
+            
+            // 2. Insert Lines
+            if (quote.id != 0) {
+                 budgetRepository.deleteBudgetLines(quote.id)
+            }
+            
+            val linesToSave = _lines.value.map { it.copy(quoteId = quoteId.toInt()) }
+            budgetRepository.insertBudgetLines(linesToSave)
+            
+            _budgetState.value = BudgetState.Saved
+            
+            // Update current quote with ID if needed
+            if (quote.id == 0) {
+                 _currentQuote.value = quote.copy(id = quoteId.toInt())
+            }
+        }
+    }
+    
+    fun generatePdf() {
+        viewModelScope.launch {
+            val quote = _currentQuote.value ?: return@launch
+            if (quote.id == 0) {
+                 _budgetState.value = BudgetState.Error("Save budget before generating PDF")
+                 return@launch
+            }
+            
+            val client = crmRepository.getClientById(quote.clientId)
+            
+            val file = pdfGenerator.generateQuotePdf(quote, _lines.value, client)
+            
+            // Log Event
+            budgetRepository.insertBudgetLog(
+                com.antigravity.aegis.data.model.BudgetLogEntity(
+                    quoteId = quote.id,
+                    timestamp = System.currentTimeMillis(),
+                    action = "PDF Generated",
+                    messageTemplateUsed = "PDF shared/viewed by user."
+                )
+            )
+            
+            _pdfFile.value = file
+        }
+    }
+    
+    fun clearPdfFile() {
+        _pdfFile.value = null
+    }
+
+    sealed class BudgetState {
+        object Loading : BudgetState()
+        object Editing : BudgetState()
+        object Saved : BudgetState()
+        data class Error(val message: String) : BudgetState()
+    }
+}

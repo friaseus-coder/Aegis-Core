@@ -20,7 +20,8 @@ import com.antigravity.aegis.presentation.components.AegisTopAppBar
 @Composable
 fun ProjectDetailScreen(
     viewModel: CrmViewModel,
-    onNavigateToCreateReport: (Int) -> Unit
+    onNavigateToCreateReport: (Int) -> Unit,
+    onNavigateToEditBudget: (Int, Int) -> Unit // projectId, quoteId
 ) {
     val project by viewModel.selectedProject.collectAsState()
     val tasks by viewModel.projectTasks.collectAsState()
@@ -55,6 +56,69 @@ fun ProjectDetailScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
+
+
+            // -- FINANCIAL SUMMARY --
+            val financialSummary by viewModel.financialSummary.collectAsState()
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.financial_summary_title), style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Row 1: Income & Total Expenses
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                         Column {
+                            Text(stringResource(R.string.income_label), style = MaterialTheme.typography.bodySmall)
+                            Text("€${"%.2f".format(financialSummary.totalIncome)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(stringResource(R.string.expenses_label), style = MaterialTheme.typography.bodySmall)
+                            Text("€${"%.2f".format(financialSummary.totalExpenses)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                    
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    
+                    // Row 2: Breakdown
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column {
+                            Text("Gastos Directos", style = MaterialTheme.typography.bodySmall)
+                            Text("€${"%.2f".format(financialSummary.directExpenses)}", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text("Gastos Generales (Imputados)", style = MaterialTheme.typography.bodySmall)
+                            Text("€${"%.2f".format(financialSummary.allocatedGeneralExpenses)}", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                    
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    // Row 3: Profit & Ratios
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column {
+                            Text(stringResource(R.string.profit_label), style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                "€${"%.2f".format(financialSummary.netProfit)}", 
+                                style = MaterialTheme.typography.titleMedium, 
+                                color = if (financialSummary.netProfit >= 0) androidx.compose.ui.graphics.Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
+                            )
+                        }
+                         Column(horizontalAlignment = Alignment.End) {
+                            Text("Beneficio/Hora", style = MaterialTheme.typography.bodySmall)
+                            Text("€${"%.2f".format(financialSummary.profitPerHour)}", style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                     Text(stringResource(R.string.margin_label) + ": ${"%.1f".format(financialSummary.margin)}%", style = MaterialTheme.typography.labelLarge, modifier = Modifier.align(Alignment.End))
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
             Button(
                 onClick = { onNavigateToCreateReport(project!!.id) },
                 modifier = Modifier.fillMaxWidth()
@@ -65,19 +129,50 @@ fun ProjectDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(stringResource(R.string.work_reports_section_title), style = MaterialTheme.typography.titleLarge)
+// ...
+            // -- BUDGETS SECTION --
+            val budgets by viewModel.projectBudgets.collectAsState()
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.module_budgets_title), style = MaterialTheme.typography.titleLarge)
+                TextButton(onClick = { onNavigateToEditBudget(project!!.id, 0) }) {
+                    Text(stringResource(R.string.new_label))
+                }
+            }
             LazyColumn(modifier = Modifier.weight(1f)) {
-                 items(reports) { report ->
+                 items(budgets) { budget ->
                      ListItem(
-                         headlineContent = { Text("Report #${report.id}") },
-                         supportingContent = { Text(java.util.Date(report.date).toString()) }
+                         headlineContent = { Text(budget.title) },
+                         supportingContent = { Text("Total: €${budget.totalAmount} - ${budget.status}") },
+                         trailingContent = {
+                             TextButton(onClick = { onNavigateToEditBudget(0, budget.id) }) { Text(stringResource(R.string.view_label)) }
+                         }
                      )
-                     Divider()
+                     HorizontalDivider()
                  }
-                 if (reports.isEmpty()) {
-                     item { Text("No reports yet.") }
+                 if (budgets.isEmpty()) {
+                     item { Text(stringResource(R.string.no_budgets)) }
                  }
             }
             
+            Spacer(modifier = Modifier.height(16.dp))
+            
+             // -- EXPENSES SECTION --
+            val expenses by viewModel.projectExpenses.collectAsState()
+            Text(stringResource(R.string.expenses_label), style = MaterialTheme.typography.titleLarge)
+             LazyColumn(modifier = Modifier.weight(1f)) {
+                 items(expenses) { expense ->
+                     ListItem(
+                         headlineContent = { Text(expense.category) },
+                         supportingContent = { Text(java.util.Date(expense.date).toString()) },
+                         trailingContent = { Text("-€${expense.totalAmount}", color = MaterialTheme.colorScheme.error) }
+                     )
+                     HorizontalDivider()
+                 }
+                 if (expenses.isEmpty()) {
+                     item { Text(stringResource(R.string.no_expenses)) }
+                 }
+            }
+             
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(stringResource(R.string.tasks_section_title), style = MaterialTheme.typography.titleLarge)

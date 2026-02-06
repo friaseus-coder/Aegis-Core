@@ -234,5 +234,38 @@
     <string name="share_backup_button">Subir a la Nube / Compartir</string>
     <string name="share_backup_loading">Preparando archivo...</string>
     <string name="share_backup_error">Error al generar archivo: %1$s</string>
-    <string name="share_backup_chooser_title">Guardar copia en...</string>
+    <!-- Budget Editor & Financial -->
+    <string name="budget_editor_title">Budget Editor</string>
+    <string name="budget_title_label">Budget Title</string>
+    <string name="budget_desc_label">General Description</string>
+    <string name="budget_lines_title">Budget Lines</string>
+    <string name="line_description_label">Item</string>
+    <string name="quantity_label">Qty</string>
+    <string name="price_label">Price</string>
+    <string name="tax_label">VAT %</string>
+    <string name="add_line_button">Add Line</string>
+    <string name="add_line_fab">Add Line</string>
+    <string name="financial_summary_title">Financial Summary</string>
+    <string name="income_label">Income</string>
+    <string name="expenses_label">Expenses</string>
+    <string name="profit_label">Profit</string>
+    <string name="margin_label">Margin</string>
+    <string name="no_expenses">No expenses recorded.</string>
+    <string name="new_label">New</string>
+    <string name="view_label">View</string>
+    <string name="no_budgets">No budgets.</string>
+    <string name="budget_default_title">Budget for %1$s</string>
+    <string name="delete_content_desc">Delete</string>
+    <string name="add_line_dialog_title">Add Line</string>
+    
+    <string name="share_backup_chooser_title">Save backup to...</string>
+    <string name="share_pdf_title">Share PDF</string>
+    <string name="share_content_desc">Share</string>
+    <string name="distribute_button">Distribute (Proportional Split)</string>
+    <string name="distributed_label">Distributed</string>
+    
+    <!-- Archived Projects -->
+    <string name="archived_projects_title">Archived Projects</string>
+    <string name="no_archived_projects">No archived projects found.</string>
+    <string name="reactivate_button">Reactivate</string>
 </resources>

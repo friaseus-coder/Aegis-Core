@@ -74,8 +74,8 @@ fun DashboardScreen(
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(project.name, style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(R.string.status_label, project.status), style = MaterialTheme.typography.bodyMedium)
-                            project.deadline?.let {
-                                Text(stringResource(R.string.deadline_label, it), style = MaterialTheme.typography.bodySmall) // Format date properly later
+                            project.endDate?.let {
+                                Text(stringResource(R.string.deadline_label, it), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }

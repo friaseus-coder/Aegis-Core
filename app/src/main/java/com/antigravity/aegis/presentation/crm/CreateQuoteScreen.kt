@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,6 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.Alignment
 import com.antigravity.aegis.R
 import com.antigravity.aegis.data.model.ClientEntity
 
@@ -25,11 +27,21 @@ fun CreateQuoteScreen(
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var amountText by remember { mutableStateOf("") }
+    
+    // Line Items State
+    val budgetLines = remember { mutableStateListOf<com.antigravity.aegis.data.model.BudgetLineEntity>() }
+    
+    // New Item Inputs
+    var newItemDesc by remember { mutableStateOf("") }
+    var newItemQty by remember { mutableStateOf("") }
+    var newItemPrice by remember { mutableStateOf("") }
     
     val clients by viewModel.allClients.collectAsState()
     var selectedClient by remember { mutableStateOf<ClientEntity?>(null) }
     var expandedClientDropdown by remember { mutableStateOf(false) }
+
+    // Constants
+    val taxRate = 0.21
 
     Scaffold(
         topBar = {
@@ -43,17 +55,17 @@ fun CreateQuoteScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            if (selectedClient != null && title.isNotBlank()) {
+                            if (selectedClient != null && title.isNotBlank() && budgetLines.isNotEmpty()) {
                                 viewModel.createQuote(
                                     title = title,
                                     clientId = selectedClient!!.id,
-                                    amount = amountText.toDoubleOrNull() ?: 0.0,
+                                    lines = budgetLines.toList(),
                                     description = description
                                 )
                                 onNavigateBack()
                             }
                         },
-                        enabled = selectedClient != null && title.isNotBlank()
+                        enabled = selectedClient != null && title.isNotBlank() && budgetLines.isNotEmpty()
                     ) {
                         Icon(Icons.Default.Check, contentDescription = stringResource(R.string.save_content_desc))
                     }
@@ -68,7 +80,7 @@ fun CreateQuoteScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Client Selection
+            // Client and Info Section
             ExposedDropdownMenuBox(
                 expanded = expandedClientDropdown,
                 onExpandedChange = { expandedClientDropdown = !expandedClientDropdown }
@@ -113,22 +125,100 @@ fun CreateQuoteScreen(
             )
 
             OutlinedTextField(
-                value = amountText,
-                onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) amountText = it },
-                label = { Text(stringResource(R.string.total_amount_label)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text(stringResource(R.string.quote_description_label)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                maxLines = 10
+                modifier = Modifier.fillMaxWidth().height(100.dp),
+                maxLines = 3
             )
+            
+            Divider()
+            
+            // Add Item Section
+            Text("Añadir Partida", style = MaterialTheme.typography.titleMedium)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = newItemDesc,
+                    onValueChange = { newItemDesc = it },
+                    label = { Text("Descripción") },
+                    modifier = Modifier.weight(2f)
+                )
+                OutlinedTextField(
+                    value = newItemQty,
+                    onValueChange = { if(it.all { c -> c.isDigit() || c == '.'}) newItemQty = it },
+                    label = { Text("Cant.") },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                 OutlinedTextField(
+                    value = newItemPrice,
+                    onValueChange = { if(it.all { c -> c.isDigit() || c == '.'}) newItemPrice = it },
+                    label = { Text("Precio (€)") },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+            Button(
+                onClick = {
+                    val qty = newItemQty.toDoubleOrNull()
+                    val price = newItemPrice.toDoubleOrNull()
+                    if (newItemDesc.isNotBlank() && qty != null && price != null) {
+                        budgetLines.add(
+                            com.antigravity.aegis.data.model.BudgetLineEntity(
+                                quoteId = 0, // Temp
+                                description = newItemDesc,
+                                quantity = qty,
+                                unitPrice = price,
+                                taxRate = taxRate
+                            )
+                        )
+                        newItemDesc = ""
+                        newItemQty = ""
+                        newItemPrice = ""
+                    }
+                },
+                modifier = Modifier.align(Alignment.End),
+                enabled = newItemDesc.isNotBlank() && newItemQty.isNotBlank() && newItemPrice.isNotBlank()
+            ) {
+                Text("Añadir")
+            }
+            
+            // List of Items
+            androidx.compose.foundation.lazy.LazyColumn(
+                modifier = Modifier.weight(1f).fillMaxWidth()
+            ) {
+                items(budgetLines.size) { index ->
+                    val line = budgetLines[index]
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(line.description, modifier = Modifier.weight(2f))
+                        Text("${line.quantity} x ${line.unitPrice}€", modifier = Modifier.weight(1f))
+                        Text("${"%.2f".format(line.quantity * line.unitPrice)}€", modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.primary)
+                        IconButton(onClick = { budgetLines.removeAt(index) }, modifier = Modifier.size(24.dp)) {
+                             Icon(Icons.Default.Delete, contentDescription = "Remove")
+                        }
+                    }
+                    Divider()
+                }
+            }
+            
+            // Total
+            val subtotal = budgetLines.sumOf { it.quantity * it.unitPrice }
+            val totalTax = subtotal * taxRate
+            val total = subtotal + totalTax
+            
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Subtotal: ${"%.2f".format(subtotal)}€")
+                    Text("IVA (21%): ${"%.2f".format(totalTax)}€")
+                    Text("TOTAL: ${"%.2f".format(total)}€", style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                }
+            }
         }
     }
 }

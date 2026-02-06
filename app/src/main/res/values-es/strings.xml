@@ -169,5 +169,33 @@
     <string name="share_backup_button">Subir a la Nube / Compartir</string>
     <string name="share_backup_loading">Preparando archivo...</string>
     <string name="share_backup_error">Error al generar archivo: %1$s</string>
+    <!-- Budget Editor & Financial -->
+    <string name="budget_editor_title">Editor de Presupuestos</string>
+    <string name="budget_title_label">Título del Presupuesto</string>
+    <string name="budget_desc_label">Descripción General</string>
+    <string name="budget_lines_title">Líneas de Presupuesto</string>
+    <string name="line_description_label">Concepto</string>
+    <string name="quantity_label">Cant.</string>
+    <string name="price_label">Precio</string>
+    <string name="tax_label">% IVA</string>
+    <string name="add_line_button">Añadir Línea</string>
+    <string name="add_line_fab">Añadir Línea</string>
+    <string name="financial_summary_title">Resumen Financiero</string>
+    <string name="income_label">Ingresos</string>
+    <string name="expenses_label">Gastos</string>
+    <string name="profit_label">Beneficio</string>
+    <string name="margin_label">Margen</string>
+    <string name="no_expenses">No hay gastos registrados.</string>
+    <string name="new_label">Nuevo</string>
+    <string name="view_label">Ver</string>
+    <string name="no_budgets">No hay presupuestos.</string>
+    <string name="budget_default_title">Presupuesto para %1$s</string>
+    <string name="delete_content_desc">Eliminar</string>
+    <string name="add_line_dialog_title">Añadir Línea</string>
+
     <string name="share_backup_chooser_title">Guardar copia en...</string>
+    <string name="share_pdf_title">Compartir PDF</string>
+    <string name="share_content_desc">Compartir</string>
+    <string name="distribute_button">Distribuir (Reparto Proporcional)</string>
+    <string name="distributed_label">Distribuido</string>
 </resources>

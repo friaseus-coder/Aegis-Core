@@ -88,7 +88,7 @@ fun ClientDashboardScreen(
             // 2. Metrics (Placeholders)
             item {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricCard("Proyectos Activos", "${projects.filter { it.status == "Active" }.size}")
+                    MetricCard("Proyectos Activos", "${projects.filter { it.status == com.antigravity.aegis.data.model.ProjectStatus.ACTIVE }.size}")
                     MetricCard("Presupuestos", "€ 0.00") // Placeholder
                     MetricCard("Horas Mes", "0h") // Placeholder
                 }
@@ -107,15 +107,15 @@ fun ClientDashboardScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            items(projects) { project ->
-                ListItem(
-                    headlineContent = { Text(project.name) },
-                    supportingContent = { Text(project.status) },
-                    leadingContent = { Icon(Icons.Default.Work, contentDescription = null) },
-                    modifier = Modifier.clickable { onNavigateToProject(project.id) }
-                )
-                Divider()
-            }
+                items(projects) { project ->
+                    ListItem(
+                        headlineContent = { Text(project.name) },
+                        supportingContent = { Text(project.status.name) },
+                        leadingContent = { Icon(Icons.Default.Work, contentDescription = null) },
+                        modifier = Modifier.clickable { onNavigateToProject(project.id) }
+                    )
+                    Divider()
+                }
             
             // 5. Documents Section
             item {

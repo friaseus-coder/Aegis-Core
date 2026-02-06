@@ -163,6 +163,9 @@ fun NavigationGraph(
                 onNavigateToCreateReport = { projectId ->
                     // crmViewModel.selectProject(projectId) // Already selected
                     navController.navigate(Screen.CreateReport.createRoute(projectId))
+                },
+                onNavigateToEditBudget = { projectId, quoteId ->
+                    navController.navigate(Screen.EditBudget.createRoute(projectId, quoteId))
                 }
             )
         }
@@ -179,8 +182,18 @@ fun NavigationGraph(
             )
         }
 
-        composable(Screen.CreateQuote.route) {
-            com.antigravity.aegis.presentation.crm.CreateQuoteScreen(
+        composable(
+            route = Screen.EditBudget.route,
+            arguments = listOf(
+                androidx.navigation.navArgument("projectId") { type = androidx.navigation.NavType.IntType; defaultValue = 0 },
+                androidx.navigation.navArgument("quoteId") { type = androidx.navigation.NavType.IntType; defaultValue = 0 }
+            )
+        ) { backStackEntry ->
+            val projectId = backStackEntry.arguments?.getInt("projectId") ?: 0
+            val quoteId = backStackEntry.arguments?.getInt("quoteId") ?: 0
+            com.antigravity.aegis.presentation.crm.BudgetEditorScreen(
+                projectId = if (projectId == 0) null else projectId,
+                quoteId = if (quoteId == 0) null else quoteId,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -199,7 +212,7 @@ fun NavigationGraph(
         composable(Screen.Budgets.route) {
              com.antigravity.aegis.presentation.crm.QuoteKanbanScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToCreateQuote = { navController.navigate(Screen.CreateQuote.route) }
+                onNavigateToCreateQuote = { navController.navigate(Screen.EditBudget.createRoute(0, 0)) }
             )
         }
 

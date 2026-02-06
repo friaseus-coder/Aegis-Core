@@ -44,11 +44,13 @@ fun ExpensesScreen(
     onNavigateBack: () -> Unit
 ) {
     val expenses by viewModel.allExpenses.collectAsState()
+    val projects by viewModel.activeProjects.collectAsState()
     val scannedData by viewModel.scannedData.collectAsState()
     val exportStatus by viewModel.exportStatus.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
     
     val context = LocalContext.current
+    var showAddDialog by remember { mutableStateOf(false) }
     
     // Import Picker
     val importLauncher = rememberLauncherForActivityResult(
@@ -59,7 +61,8 @@ fun ExpensesScreen(
         }
     }
 
-    // Handling Transfer States
+    // Apply Transfer Logic, Export Logic as before...
+     // Handling Transfer States
     when (val state = transferState) {
         is ExpensesViewModel.TransferState.Success -> {
             Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
@@ -86,9 +89,8 @@ fun ExpensesScreen(
         else -> {}
     }
 
-    // Camera Logic
+    // Camera Logic ...
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
-    
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
@@ -96,37 +98,28 @@ fun ExpensesScreen(
             viewModel.processImage(tempImageUri!!)
         }
     }
-
-    // Helper to create temp file
-    fun createImageFile(): Uri {
-        val storageDir = context.cacheDir
-        val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
-        return FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
-    }
-
-    // Export Effect
+    
+     // Export Effect
     LaunchedEffect(exportStatus) {
         if (exportStatus != null) {
             Toast.makeText(context, exportStatus, Toast.LENGTH_LONG).show()
-            // ToDo: Launch Share Intent if path is valid file...
             viewModel.clearExportStatus()
         }
     }
 
-    if (scannedData != null) {
-        // Show Form to Review Scanned Data
-        ReviewScanDialog(
-            data = scannedData!!,
-            imageUri = tempImageUri,
-            onSave = { amount, merchant -> 
-                 viewModel.saveExpense(
-                     date = scannedData!!.date ?: System.currentTimeMillis(),
-                     amount = amount,
-                     merchant = merchant,
-                     imageUri = tempImageUri
-                 )
+    if (scannedData != null || showAddDialog) {
+        AddExpenseDialog(
+            projects = projects,
+            scannedData = scannedData,
+            imageUri = if (scannedData != null) tempImageUri else null,
+            onSave = { date, amount, merchant, category, projectId ->
+                 viewModel.saveExpense(date, amount, merchant, if (scannedData != null) tempImageUri else null, category, projectId)
+                 showAddDialog = false
             },
-            onDismiss = { viewModel.clearScannedData() }
+            onDismiss = { 
+                viewModel.clearScannedData() 
+                showAddDialog = false
+            }
         )
     }
 
@@ -135,15 +128,19 @@ fun ExpensesScreen(
             AegisTopAppBar(
                 actions = {
                     IconButton(onClick = { viewModel.exportExpenses() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = "Export CSV")
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.export_csv))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = "Import CSV")
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.import_csv))
                     }
                 }
             )
         },
-        // ...
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showAddDialog = true }) {
+                Text("+", style = MaterialTheme.typography.headlineLarge)
+            }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -159,14 +156,32 @@ fun ExpensesScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Header Actions
-            Button(
-                onClick = { viewModel.exportQuarter() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Share, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.export_quarter))
+            // Quick Actions Row
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { viewModel.exportQuarter() },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.export_quarter))
+                }
+                
+                Button(
+                    onClick = { 
+                        // Launch Camera
+                        val storageDir = context.cacheDir
+                        val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
+                        tempImageUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
+                        cameraLauncher.launch(tempImageUri)
+                    },
+                    modifier = Modifier.weight(1f),
+                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.scan_label))
+                }
             }
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -175,7 +190,12 @@ fun ExpensesScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(expenses) { expense ->
-                    ExpenseCard(expense)
+                    ExpenseCard(expense, onDistribute = {
+                         // Distribute Logic: For now, splitting equally among all active projects if it's general
+                         // In reality, we'd show a dialog to select projects.
+                         // For MVP: Passing all active project IDs
+                         viewModel.distributeExpense(expense, projects.map { it.id })
+                    })
                 }
             }
         }
@@ -183,18 +203,27 @@ fun ExpensesScreen(
 }
 
 @Composable
-fun ReviewScanDialog(
-    data: com.antigravity.aegis.domain.expenses.OcrManager.ExtractedData,
+fun AddExpenseDialog(
+    projects: List<com.antigravity.aegis.data.model.ProjectEntity>,
+    scannedData: com.antigravity.aegis.domain.expenses.OcrManager.ExtractedData?,
     imageUri: Uri?,
-    onSave: (Double, String) -> Unit,
+    onSave: (Long, Double, String, String, Int?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var amount by remember { mutableStateOf(data.totalAmount?.toString() ?: "") }
     var merchant by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf(scannedData?.totalAmount?.toString() ?: "") }
+    var category by remember { mutableStateOf("Material") }
+    var selectedProject by remember { mutableStateOf<com.antigravity.aegis.data.model.ProjectEntity?>(null) }
+    var date by remember { mutableStateOf(scannedData?.date ?: System.currentTimeMillis()) }
     
+    // Simple Category Dropdown logic (could be improved)
+    val categories = listOf("Material", "Transport", "Office", "Food", "Other")
+    var expandedCat by remember { mutableStateOf(false) }
+    var expandedProj by remember { mutableStateOf(false) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.review_ticket)) },
+        title = { Text(if (scannedData != null) stringResource(R.string.review_ticket) else "Nueva Entrada") },
         text = {
             Column {
                 if (imageUri != null) {
@@ -213,29 +242,50 @@ fun ReviewScanDialog(
                 OutlinedTextField(
                     value = merchant,
                     onValueChange = { merchant = it },
-                    label = { Text(stringResource(R.string.merchant_concept)) }
+                    label = { Text(stringResource(R.string.merchant_concept)) },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
                     label = { Text(stringResource(R.string.amount_label)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 
-                if (data.date != null) {
-                    Text(
-                        text = "Date detected: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(data.date))}",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                // Category Dropdown
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(onClick = { expandedCat = true }, modifier = Modifier.fillMaxWidth()) {
+                        Text(category)
+                    }
+                    DropdownMenu(expanded = expandedCat, onDismissRequest = { expandedCat = false }) {
+                        categories.forEach { cat ->
+                            DropdownMenuItem(text = { Text(cat) }, onClick = { category = cat; expandedCat = false })
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Project Dropdown
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(onClick = { expandedProj = true }, modifier = Modifier.fillMaxWidth()) {
+                        Text(selectedProject?.name ?: "General (Sin Proyecto)")
+                    }
+                    DropdownMenu(expanded = expandedProj, onDismissRequest = { expandedProj = false }) {
+                        DropdownMenuItem(text = { Text("General (Sin Proyecto)") }, onClick = { selectedProject = null; expandedProj = false })
+                        projects.forEach { proj ->
+                            DropdownMenuItem(text = { Text(proj.name) }, onClick = { selectedProject = proj; expandedProj = false })
+                        }
+                    }
                 }
             }
         },
         confirmButton = {
-            TextButton(
+            Button(
                  onClick = {
-                     onSave(amount.toDoubleOrNull() ?: 0.0, merchant)
+                     onSave(date, amount.toDoubleOrNull() ?: 0.0, merchant, category, selectedProject?.id)
                  }
             ) { Text(stringResource(R.string.save_button)) }
         },
@@ -246,35 +296,51 @@ fun ReviewScanDialog(
 }
 
 @Composable
-fun ExpenseCard(expense: com.antigravity.aegis.data.model.ExpenseEntity) {
+fun ExpenseCard(
+    expense: com.antigravity.aegis.data.model.ExpenseEntity, 
+    onDistribute: () -> Unit = {}
+) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
          modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = expense.merchantName ?: "Unknown",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${expense.category} • ${SimpleDateFormat("dd MMM", Locale.getDefault()).format(Date(expense.date))}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
                 Text(
-                    text = expense.merchantName ?: "Unknown",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(expense.date)),
-                    style = MaterialTheme.typography.bodySmall
+                    text = String.format("€%.2f", expense.totalAmount),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
-            Text(
-                text = String.format("$%.2f", expense.totalAmount),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            
+            if (expense.projectId == null && expense.status != "Distributed") {
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider()
+                TextButton(
+                    onClick = onDistribute,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(stringResource(R.string.distribute_button))
+                }
+            } else if (expense.status == "Distributed") {
+                 Text(stringResource(R.string.distributed_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.align(Alignment.End))
+            }
         }
     }
 }

@@ -10,7 +10,9 @@ data class QuoteEntity(
     val projectId: Int? = null, // Optional Foreign key to Project
     val date: Long,
     val totalAmount: Double,
-    val status: String, // "Draft", "Sent", "Won", "Lost"
+    val status: String, // "Draft", "Sent", "Accepted", "Rejected", "Lost"
     val description: String,
-    val title: String // A brief title for the quote
+    val title: String, // A brief title for the quote
+    val calculatedTotal: Long = 0,
+    val version: Int = 1
 )

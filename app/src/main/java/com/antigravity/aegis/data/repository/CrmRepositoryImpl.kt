@@ -1,5 +1,6 @@
 package com.antigravity.aegis.data.repository
 
+import com.antigravity.aegis.data.local.dao.ExpenseDao
 import com.antigravity.aegis.data.local.dao.CrmDao
 import com.antigravity.aegis.data.local.dao.DocumentDao
 import com.antigravity.aegis.data.model.ClientEntity
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 class CrmRepositoryImpl @Inject constructor(
     private val dao: CrmDao,
-    private val documentDao: DocumentDao
+    private val documentDao: DocumentDao,
+    private val expenseDao: ExpenseDao
 ) : CrmRepository {
 
     override suspend fun createClient(client: ClientEntity): Long {
@@ -104,15 +106,31 @@ class CrmRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createExpense(expense: ExpenseEntity): Long {
-        return dao.insertExpense(expense)
+        return expenseDao.insertExpense(expense)
+    }
+
+    override suspend fun updateExpense(expense: ExpenseEntity) {
+        expenseDao.updateExpense(expense)
     }
 
     override fun getAllExpenses(): Flow<List<ExpenseEntity>> {
-        return dao.getAllExpenses()
+        return expenseDao.getAllExpenses()
     }
 
     override suspend fun getExpensesByDateRange(startDate: Long, endDate: Long): List<ExpenseEntity> {
-        return dao.getExpensesByDateRange(startDate, endDate)
+        return expenseDao.getExpensesByDateRangeSync(startDate, endDate)
+    }
+
+    override suspend fun getGeneralExpensesByDateRange(startDate: Long, endDate: Long): List<ExpenseEntity> {
+        return expenseDao.getGeneralExpensesByDateRangeSync(startDate, endDate)
+    }
+
+    override fun getExpensesForProject(projectId: Int): Flow<List<ExpenseEntity>> {
+        return expenseDao.getExpensesByProject(projectId)
+    }
+
+    override suspend fun getExpensesForProjectSync(projectId: Int): List<ExpenseEntity> {
+        return expenseDao.getExpensesByProjectSync(projectId)
     }
 
     override suspend fun createProduct(product: ProductEntity): Long {

@@ -16,6 +16,11 @@ import com.antigravity.aegis.data.model.MileageLogEntity
 import com.antigravity.aegis.data.model.DocumentEntity
 import com.antigravity.aegis.data.local.dao.DocumentDao
 import com.antigravity.aegis.data.local.dao.UserConfigDao
+import com.antigravity.aegis.data.model.BudgetLineEntity
+import com.antigravity.aegis.data.model.BudgetLogEntity
+import com.antigravity.aegis.data.local.dao.ProjectDao
+import com.antigravity.aegis.data.local.dao.BudgetDao
+import com.antigravity.aegis.data.local.dao.ExpenseDao
 import com.antigravity.aegis.data.model.UserConfig
 
 @Database(
@@ -30,9 +35,11 @@ import com.antigravity.aegis.data.model.UserConfig
         ProductEntity::class,
         MileageLogEntity::class,
         UserConfig::class,
-        DocumentEntity::class
+        DocumentEntity::class,
+        BudgetLineEntity::class,
+        BudgetLogEntity::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -41,4 +48,7 @@ abstract class AegisDatabase : RoomDatabase() {
     abstract fun crmDao(): CrmDao
     abstract fun userConfigDao(): UserConfigDao
     abstract fun documentDao(): DocumentDao
+    abstract fun projectDao(): ProjectDao
+    abstract fun budgetDao(): BudgetDao
+    abstract fun expenseDao(): ExpenseDao
 }

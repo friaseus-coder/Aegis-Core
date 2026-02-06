@@ -70,4 +70,19 @@ object DatabaseModule {
     fun provideDocumentDao(database: AegisDatabase): DocumentDao {
         return database.documentDao()
     }
+
+    @Provides
+    fun provideProjectDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.ProjectDao {
+        return database.projectDao()
+    }
+
+    @Provides
+    fun provideBudgetDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.BudgetDao {
+        return database.budgetDao()
+    }
+
+    @Provides
+    fun provideExpenseDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.ExpenseDao {
+        return database.expenseDao()
+    }
 }

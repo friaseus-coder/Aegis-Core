@@ -20,6 +20,9 @@ import androidx.room.Index
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val projectId: Int,
+    val title: String,
     val description: String,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val isActive: Boolean = true,
+    val status: String = "Pending" // "Pending", "InProgress", "Completed", "Cancelled"
 )

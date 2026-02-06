@@ -22,6 +22,7 @@ data class WorkReportEntity(
     val projectId: Int,
     val date: Long,
     val description: String,
+    val hours: Double = 0.0,
     val signaturePath: String? = null,
     val photoPaths: String? = null // Storing as JSON string or comma separated for simplicity in this iteration
 )

@@ -32,4 +32,18 @@ class Converters {
             ActiveRole.AUTONOMO // Fallback
         }
     }
+
+    @TypeConverter
+    fun fromProjectStatus(value: com.antigravity.aegis.data.model.ProjectStatus): String {
+        return value.name
+    }
+
+    @TypeConverter
+    fun toProjectStatus(value: String): com.antigravity.aegis.data.model.ProjectStatus {
+        return try {
+            com.antigravity.aegis.data.model.ProjectStatus.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            com.antigravity.aegis.data.model.ProjectStatus.ACTIVE // Fallback
+        }
+    }
 }

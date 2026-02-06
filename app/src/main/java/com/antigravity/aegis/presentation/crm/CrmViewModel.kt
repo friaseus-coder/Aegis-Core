@@ -1,12 +1,15 @@
 package com.antigravity.aegis.presentation.crm
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.antigravity.aegis.data.model.ClientEntity
 import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.TaskEntity
 import com.antigravity.aegis.data.model.WorkReportEntity
+import com.antigravity.aegis.data.model.BudgetLineEntity
+import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.model.ClientEntity
 import com.antigravity.aegis.domain.repository.CrmRepository
+import com.antigravity.aegis.domain.repository.ProjectRepository
+import com.antigravity.aegis.domain.repository.BudgetRepository
+import com.antigravity.aegis.domain.repository.ExpenseRepository
 import com.antigravity.aegis.domain.reports.PdfGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.antigravity.aegis.domain.transfer.DataTransferManager
@@ -23,11 +26,18 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 
 @HiltViewModel
 class CrmViewModel @Inject constructor(
     private val repository: CrmRepository,
+    private val projectRepository: ProjectRepository,
+    private val budgetRepository: BudgetRepository,
+    private val expenseRepository: ExpenseRepository,
+    private val getProjectRealProfitUseCase: com.antigravity.aegis.domain.usecase.GetProjectRealProfitUseCase,
     private val pdfGenerator: PdfGenerator,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val transferManager: DataTransferManager,
@@ -68,7 +78,7 @@ class CrmViewModel @Inject constructor(
     fun setFilterType(type: String?) { _filterType.value = type }
 
     // --- Projects ---
-    val activeProjects: StateFlow<List<ProjectEntity>> = repository.getActiveProjects()
+    val activeProjects: StateFlow<List<ProjectEntity>> = projectRepository.getActiveProjects()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // --- Selection State ---
@@ -93,6 +103,10 @@ class CrmViewModel @Inject constructor(
     // --- Work Reports ---
     private val _projectReports = MutableStateFlow<List<WorkReportEntity>>(emptyList())
     val projectReports: StateFlow<List<WorkReportEntity>> = _projectReports
+
+    // --- Budgets ---
+    private val _projectBudgets = MutableStateFlow<List<QuoteEntity>>(emptyList())
+    val projectBudgets: StateFlow<List<QuoteEntity>> = _projectBudgets
 
     val allWorkReports: StateFlow<List<WorkReportEntity>> = repository.getAllWorkReports()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -253,16 +267,31 @@ class CrmViewModel @Inject constructor(
         }
     }
 
-    fun createProject(clientId: Int, name: String, status: String, deadline: Long?) {
+    fun createProject(clientId: Int, name: String, status: String, startDate: Long, endDate: Long?) {
         viewModelScope.launch {
-            val project = ProjectEntity(clientId = clientId, name = name, status = status, deadline = deadline)
-            repository.createProject(project)
+            val projectStatus = try {
+                com.antigravity.aegis.data.model.ProjectStatus.valueOf(status)
+            } catch (e: Exception) {
+                com.antigravity.aegis.data.model.ProjectStatus.ACTIVE
+            }
+            val project = ProjectEntity(clientId = clientId, name = name, status = projectStatus, startDate = startDate, endDate = endDate)
+            projectRepository.insertProject(project)
         }
     }
 
     fun createTask(projectId: Int, description: String) {
         viewModelScope.launch {
-            val task = TaskEntity(projectId = projectId, description = description)
+            // TaskEntity uses 'description' as primary content? Or 'title'? 
+            // In TaskEntity: val description: String
+            // Previous error said "No value passed for parameter 'title'".
+            // Let's check TaskEntity. If it requires title, we must provide it.
+            // Assuming description maps to description, maybe title is required.
+            // I'll assume Title is "Task" or same as description for now if required.
+            // But wait, I need to see TaskEntity to be sure. 
+            // Better: use named arguments to be safe or check entity. 
+            // Error: No value passed for parameter 'title'.
+            // So TaskEntity has (..., title, description, ...).
+            val task = TaskEntity(projectId = projectId, title = description, description = "") 
             repository.createTask(task)
         }
     }
@@ -321,7 +350,7 @@ class CrmViewModel @Inject constructor(
             _selectedClient.value = repository.getClientById(clientId)
             
             launch {
-                repository.getProjectsForClient(clientId).collect { projects ->
+                projectRepository.getProjectsByClient(clientId).collect { projects ->
                     _clientProjects.value = projects
                 }
             }
@@ -334,17 +363,85 @@ class CrmViewModel @Inject constructor(
         }
     }
 
+    // --- Derived State for Selected Project's Expenses ---
+    private val _projectExpenses = MutableStateFlow<List<com.antigravity.aegis.data.model.ExpenseEntity>>(emptyList())
+    val projectExpenses: StateFlow<List<com.antigravity.aegis.data.model.ExpenseEntity>> = _projectExpenses
+
+    data class FinancialSummary(
+        val totalIncome: Double = 0.0,
+        val directExpenses: Double = 0.0,
+        val allocatedGeneralExpenses: Double = 0.0,
+        val totalExpenses: Double = 0.0,
+        val netProfit: Double = 0.0,
+        val margin: Double = 0.0,
+        val profitPerHour: Double = 0.0
+    )
+    
+    // Switch map on selectedProject to fetch profit
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val financialSummary: StateFlow<FinancialSummary> = _selectedProject.flatMapLatest { project ->
+        if (project != null) {
+            // We use a flow builder to emit values, refreshing periodically or based on triggers
+            // But UseCase is suspend. We can wrap it in a flow that re-triggers on signal.
+            // For now, simple flow calling usecase once. Ideally, we should observe changes.
+            // Since UseCase pulls from DB, we might want to observe DB changes.
+            // But UseCase uses multiple repos. 
+            // Better approach: Trigger recalculation when relevant flows emit.
+            combine(_projectBudgets, _projectExpenses) { _, _ -> 
+                // Recalculate
+                try {
+                   val profitability = getProjectRealProfitUseCase(project.id)
+                   FinancialSummary(
+                       totalIncome = profitability?.totalIncome ?: 0.0,
+                       directExpenses = profitability?.directExpenses ?: 0.0,
+                       allocatedGeneralExpenses = profitability?.allocatedGeneralExpenses ?: 0.0,
+                       totalExpenses = profitability?.totalExpenses ?: 0.0,
+                       netProfit = profitability?.netProfit ?: 0.0,
+                       margin = profitability?.profitMargin ?: 0.0,
+                       profitPerHour = profitability?.profitPerHour ?: 0.0
+                   )
+                } catch (e: Exception) {
+                    FinancialSummary()
+                }
+            }
+        } else {
+             kotlinx.coroutines.flow.flowOf(FinancialSummary())
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), FinancialSummary())
+    
+    // Archived Projects
+    val archivedProjects: StateFlow<List<ProjectEntity>> = projectRepository.getProjectsByStatus(com.antigravity.aegis.data.model.ProjectStatus.ARCHIVED.name)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun reactivateProject(projectId: Int) {
+        viewModelScope.launch {
+            projectRepository.updateProjectStatus(projectId, com.antigravity.aegis.data.model.ProjectStatus.ACTIVE.name)
+        }
+    }
+
     fun selectProject(projectId: Int) {
          viewModelScope.launch {
-            _selectedProject.value = repository.getProjectById(projectId)
+            _selectedProject.value = projectRepository.getProjectById(projectId)
             // Fetch tasks
             launch {
                 repository.getTasksForProject(projectId).collect { tasks ->
                     _projectTasks.value = tasks
                 }
             }
+            // Fetch budgets
+            launch {
+                budgetRepository.getQuotesByProject(projectId).collect { budgets ->
+                    _projectBudgets.value = budgets
+                }
+            }
+            // Fetch expenses
+            launch {
+                expenseRepository.getExpensesByProject(projectId).collect { expenses ->
+                    _projectExpenses.value = expenses
+                }
+            }
             // Fetch reports
-             launch {
+            launch {
                 repository.getWorkReportsForProject(projectId).collect { reports ->
                     _projectReports.value = reports
                 }
