@@ -3,7 +3,7 @@ package com.antigravity.aegis.data.repository
 import com.antigravity.aegis.data.local.dao.ExpenseDao
 import com.antigravity.aegis.data.local.dao.CrmDao
 import com.antigravity.aegis.data.local.dao.DocumentDao
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.TaskEntity
 import com.antigravity.aegis.data.model.WorkReportEntity
@@ -15,6 +15,20 @@ import com.antigravity.aegis.domain.repository.CrmRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/**
+ * @deprecated Esta implementación monolítica está siendo reemplazada por implementaciones segregadas:
+ * - ClientRepositoryImpl para operaciones de clientes
+ * - ProjectRepositoryImpl para operaciones de proyectos
+ * - TaskRepositoryImpl para operaciones de tareas
+ * - ExpenseRepositoryImpl para operaciones de gastos
+ * - BudgetRepositoryImpl para operaciones de presupuestos
+ * 
+ * Por favor, migra tu código a las implementaciones específicas correspondientes.
+ */
+@Deprecated(
+    message = "Usar ClientRepositoryImpl, ProjectRepositoryImpl, TaskRepositoryImpl, ExpenseRepositoryImpl o BudgetRepositoryImpl según el dominio"
+)
+@Suppress("DEPRECATION")
 class CrmRepositoryImpl @Inject constructor(
     private val dao: CrmDao,
     private val documentDao: DocumentDao,

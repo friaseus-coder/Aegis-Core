@@ -7,7 +7,7 @@ import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import com.antigravity.aegis.data.model.BudgetLineEntity
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.model.QuoteEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File

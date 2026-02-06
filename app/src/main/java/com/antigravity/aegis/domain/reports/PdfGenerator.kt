@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.WorkReportEntity
 import com.antigravity.aegis.data.model.QuoteEntity

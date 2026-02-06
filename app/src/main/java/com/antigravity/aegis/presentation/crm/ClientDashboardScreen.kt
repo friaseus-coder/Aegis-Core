@@ -17,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.antigravity.aegis.R
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.DocumentEntity
 import androidx.activity.compose.rememberLauncherForActivityResult

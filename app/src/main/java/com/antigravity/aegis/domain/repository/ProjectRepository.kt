@@ -13,4 +13,5 @@ interface ProjectRepository {
     fun getProjectsByClient(clientId: Int): Flow<List<ProjectEntity>>
     suspend fun updateProjectStatus(projectId: Int, status: String)
     suspend fun getProjectsActiveInPeriod(periodStart: Long, periodEnd: Long): List<ProjectEntity>
+    suspend fun deleteProject(project: ProjectEntity)
 }

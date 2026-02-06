@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.TaskEntity
 import com.antigravity.aegis.data.model.WorkReportEntity
@@ -15,6 +15,20 @@ import com.antigravity.aegis.data.model.ProductEntity
 import com.antigravity.aegis.data.model.MileageLogEntity
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * @deprecated Este DAO monolítico está siendo reemplazado por DAOs segregados:
+ * - ClientDao para operaciones de clientes
+ * - ProjectDao para operaciones de proyectos
+ * - TaskDao para operaciones de tareas
+ * - ExpenseDao para operaciones de gastos
+ * - BudgetDao para operaciones de presupuestos
+ * 
+ * Por favor, migra tu código a los DAOs específicos correspondientes.
+ */
+@Deprecated(
+    message = "Usar ClientDao, ProjectDao, TaskDao, ExpenseDao o BudgetDao según el dominio",
+    replaceWith = ReplaceWith("ClientDao, ProjectDao, TaskDao")
+)
 @Dao
 interface CrmDao {
     // Clients

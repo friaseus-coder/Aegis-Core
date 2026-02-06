@@ -38,15 +38,16 @@ object DatabaseModule {
         // If the key is not set (first launch), we might crash or need a default setup.
         // For this task, we assume the user flow ensures setKey() is called.
         
-//        val passphrase = keyManager.getKey()
-//        val factory = SupportOpenHelperFactory(passphrase)
+        // TODO: Restaurar SQLCipher con dependencia correcta
+        // val passphrase = keyManager.getKey()
+        // val factory = SupportOpenHelperFactory(passphrase)
 
         return Room.databaseBuilder(
             context,
             AegisDatabase::class.java,
             "aegis_core.db"
         )
-//            .openHelperFactory(factory)
+            // .openHelperFactory(factory)
             .fallbackToDestructiveMigration() // For development
             .build()
     }
@@ -84,5 +85,10 @@ object DatabaseModule {
     @Provides
     fun provideExpenseDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.ExpenseDao {
         return database.expenseDao()
+    }
+
+    @Provides
+    fun provideTaskDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.TaskDao {
+        return database.taskDao()
     }
 }

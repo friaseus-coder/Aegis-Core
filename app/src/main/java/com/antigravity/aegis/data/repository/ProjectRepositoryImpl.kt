@@ -18,4 +18,5 @@ class ProjectRepositoryImpl @Inject constructor(
     override fun getProjectsByClient(clientId: Int): Flow<List<ProjectEntity>> = dao.getProjectsByClient(clientId)
     override suspend fun updateProjectStatus(projectId: Int, status: String) = dao.updateProjectStatus(projectId, status)
     override suspend fun getProjectsActiveInPeriod(periodStart: Long, periodEnd: Long): List<ProjectEntity> = dao.getProjectsActiveInPeriod(periodStart, periodEnd)
+    override suspend fun deleteProject(project: ProjectEntity) = dao.deleteProject(project)
 }

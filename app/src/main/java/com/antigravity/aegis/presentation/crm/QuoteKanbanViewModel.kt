@@ -5,7 +5,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.model.QuoteEntity
 import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.reports.PdfGenerator

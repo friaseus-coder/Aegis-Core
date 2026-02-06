@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
+import com.antigravity.aegis.data.local.entity.ClientEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

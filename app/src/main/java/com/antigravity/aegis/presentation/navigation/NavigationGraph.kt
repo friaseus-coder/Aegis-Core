@@ -120,8 +120,7 @@ fun NavigationGraph(
         }
 
         composable(Screen.Clients.route) {
-            com.antigravity.aegis.presentation.crm.ClientListScreen(
-                viewModel = crmViewModel,
+            com.antigravity.aegis.presentation.feature.clients.ClientListScreen(
                 onNavigateToClientDetail = { clientId ->
                     crmViewModel.selectClient(clientId)
                     navController.navigate(Screen.ClientDetail.route)

@@ -5,7 +5,7 @@ import com.antigravity.aegis.data.model.TaskEntity
 import com.antigravity.aegis.data.model.WorkReportEntity
 import com.antigravity.aegis.data.model.BudgetLineEntity
 import com.antigravity.aegis.data.model.QuoteEntity
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.repository.ProjectRepository
 import com.antigravity.aegis.domain.repository.BudgetRepository

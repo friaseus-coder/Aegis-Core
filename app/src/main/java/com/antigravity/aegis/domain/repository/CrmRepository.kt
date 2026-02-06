@@ -1,6 +1,6 @@
 package com.antigravity.aegis.domain.repository
 
-import com.antigravity.aegis.data.model.ClientEntity
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.model.ProjectEntity
 import com.antigravity.aegis.data.model.TaskEntity
 import com.antigravity.aegis.data.model.WorkReportEntity
@@ -10,6 +10,19 @@ import com.antigravity.aegis.data.model.ProductEntity
 import com.antigravity.aegis.data.model.DocumentEntity
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * @deprecated Este repositorio monolítico está siendo reemplazado por repositorios segregados:
+ * - ClientRepository para operaciones de clientes
+ * - ProjectRepository para operaciones de proyectos
+ * - TaskRepository para operaciones de tareas
+ * - ExpenseRepository para operaciones de gastos
+ * - BudgetRepository para operaciones de presupuestos
+ * 
+ * Por favor, migra tu código a los repositorios específicos correspondientes.
+ */
+@Deprecated(
+    message = "Usar ClientRepository, ProjectRepository, TaskRepository, ExpenseRepository o BudgetRepository según el dominio"
+)
 interface CrmRepository {
     // Clients
     suspend fun createClient(client: ClientEntity): Long

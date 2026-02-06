@@ -32,4 +32,17 @@ interface ProjectDao {
 
     @Query("SELECT * FROM projects WHERE startDate <= :periodEnd AND (endDate IS NULL OR endDate >= :periodStart)")
     suspend fun getProjectsActiveInPeriod(periodStart: Long, periodEnd: Long): List<ProjectEntity>
+
+    @Delete
+    suspend fun deleteProject(project: ProjectEntity)
+
+    // Métodos sync para backup/restore
+    @Query("SELECT * FROM projects")
+    suspend fun getAllProjectsSync(): List<ProjectEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProjects(projects: List<ProjectEntity>)
+
+    @Query("DELETE FROM projects")
+    suspend fun deleteAllProjects()
 }

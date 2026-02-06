@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 
 import com.antigravity.aegis.data.local.AegisDatabase
 import com.antigravity.aegis.data.model.*
+import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.domain.repository.BackupRepository
 import com.google.gson.Gson
 import javax.inject.Inject
