@@ -1,7 +1,7 @@
 package com.antigravity.aegis.domain.expenses
 
 import android.content.Context
-import com.antigravity.aegis.data.model.ExpenseEntity
+import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File

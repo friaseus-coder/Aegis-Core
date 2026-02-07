@@ -6,8 +6,8 @@ import com.antigravity.aegis.domain.repository.AuthRepository
 import javax.inject.Inject
 
 import com.antigravity.aegis.data.local.dao.UserEntityDao
-import com.antigravity.aegis.data.model.UserEntity
-import com.antigravity.aegis.data.model.UserRole
+import com.antigravity.aegis.data.local.entity.UserEntity
+import com.antigravity.aegis.data.local.entity.UserRole
 import kotlinx.coroutines.flow.Flow
 
 class AuthRepositoryImpl @Inject constructor(

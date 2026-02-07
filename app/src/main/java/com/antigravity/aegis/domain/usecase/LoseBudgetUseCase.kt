@@ -1,6 +1,6 @@
 package com.antigravity.aegis.domain.usecase
 
-import com.antigravity.aegis.data.model.ProjectStatus
+import com.antigravity.aegis.data.local.entity.ProjectStatus
 import com.antigravity.aegis.domain.repository.BudgetRepository
 import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.repository.ProjectRepository

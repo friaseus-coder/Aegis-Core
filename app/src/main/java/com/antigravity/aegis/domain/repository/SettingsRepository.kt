@@ -2,7 +2,7 @@ package com.antigravity.aegis.domain.repository
 
 import android.net.Uri
 
-import com.antigravity.aegis.data.model.UserConfig
+import com.antigravity.aegis.data.local.entity.UserConfig
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {

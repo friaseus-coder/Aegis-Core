@@ -6,12 +6,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import com.antigravity.aegis.data.local.entity.ClientEntity
-import com.antigravity.aegis.data.model.ProjectEntity
-import com.antigravity.aegis.data.model.WorkReportEntity
-import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.local.entity.ProjectEntity
+import com.antigravity.aegis.data.local.entity.WorkReportEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
 import java.io.File
 import java.io.FileOutputStream
-import com.antigravity.aegis.data.model.UserConfig
+import com.antigravity.aegis.data.local.entity.UserConfig
 import android.graphics.BitmapFactory
 import javax.inject.Inject
 

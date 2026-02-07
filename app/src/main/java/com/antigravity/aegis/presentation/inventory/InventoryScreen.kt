@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.antigravity.aegis.data.model.ProductEntity
+import com.antigravity.aegis.data.local.entity.ProductEntity
 import com.antigravity.aegis.domain.inventory.BarcodeAnalyzer
 import java.util.concurrent.Executors
 
@@ -79,9 +79,9 @@ fun InventoryScreen(
         is InventoryViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text(stringResource(R.string.import_errors_title)) },
+                title = { Text(stringResource(R.string.data_import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.ok_button)) } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.inventory_scan_label)) } }
             )
         }
         is InventoryViewModel.TransferState.ValidationSuccess -> {
@@ -119,13 +119,13 @@ fun InventoryScreen(
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    label = { Text(stringResource(R.string.stock_list)) },
+                    label = { Text(stringResource(R.string.inventory_stock_list_title)) },
                     icon = { Text("📋") } // Placeholder icon
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    label = { Text(stringResource(R.string.scan_label)) },
+                    label = { Text(stringResource(R.string.inventory_barcode_label)) },
                     icon = { Text("📷") } // Placeholder icon
                 )
             }

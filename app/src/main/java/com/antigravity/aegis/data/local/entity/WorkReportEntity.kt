@@ -1,12 +1,12 @@
-package com.antigravity.aegis.data.model
+package com.antigravity.aegis.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "tasks",
+    tableName = "work_reports",
     foreignKeys = [
         ForeignKey(
             entity = ProjectEntity::class,
@@ -17,12 +17,12 @@ import androidx.room.Index
     ],
     indices = [Index("projectId")]
 )
-data class TaskEntity(
+data class WorkReportEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val projectId: Int,
-    val title: String,
+    val date: Long,
     val description: String,
-    val isCompleted: Boolean = false,
-    val isActive: Boolean = true,
-    val status: String = "Pending" // "Pending", "InProgress", "Completed", "Cancelled"
+    val hours: Double = 0.0,
+    val signaturePath: String? = null,
+    val photoPaths: String? = null // Storing as JSON string or comma separated for simplicity in this iteration
 )

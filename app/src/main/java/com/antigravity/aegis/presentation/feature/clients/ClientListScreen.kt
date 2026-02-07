@@ -33,12 +33,12 @@ fun ClientListScreen(
     Scaffold(
         topBar = {
             AegisTopAppBar(
-                title = stringResource(R.string.clients_title)
+                title = stringResource(R.string.data_import_errors_title)
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToClientCreate) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_client_fab))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.crm_clients_add_button))
             }
         }
     ) { padding ->
@@ -134,7 +134,7 @@ fun ClientListScreen(
                     if (uiState.clients.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
-                                Text(stringResource(R.string.no_clients))
+                                Text(stringResource(R.string.crm_clients_empty))
                             }
                         }
                     }

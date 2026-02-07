@@ -1,13 +1,19 @@
-package com.antigravity.aegis.data.model
+package com.antigravity.aegis.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.Index
 import com.antigravity.aegis.data.local.entity.ClientEntity
 
+enum class ProjectStatus {
+    ACTIVE,
+    CLOSED,
+    ARCHIVED
+}
+
 @Entity(
-    tableName = "documents",
+    tableName = "projects",
     foreignKeys = [
         ForeignKey(
             entity = ClientEntity::class,
@@ -16,14 +22,15 @@ import com.antigravity.aegis.data.local.entity.ClientEntity
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["clientId"])]
+    indices = [Index("clientId")]
 )
-data class DocumentEntity(
+data class ProjectEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val clientId: Int,
-    val fileName: String, // Internal encrypted filename
-    val originalName: String,
-    val mimeType: String,
-    val size: Long,
-    val dateAdded: Long
+    val name: String,
+    val status: ProjectStatus, // "Active", "Closed", "Archived"
+    val startDate: Long,
+    val endDate: Long? = null,
+    val isArchived: Boolean = false,
+    val isSynced: Boolean = false
 )

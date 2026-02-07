@@ -29,7 +29,7 @@ fun ProjectDetailScreen(
     var showAddTaskDialog by remember { mutableStateOf(false) }
 
     if (project == null) {
-        Text(stringResource(R.string.project_not_found))
+        Text(stringResource(R.string.crm_project_not_found))
         return
     }
 
@@ -39,7 +39,7 @@ fun ProjectDetailScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddTaskDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_task_fab))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.crm_task_add_button))
             }
         }
     ) { padding ->
@@ -52,7 +52,7 @@ fun ProjectDetailScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             
-            Text(stringResource(R.string.status_label, project!!.status), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.dashboard_status_label, project!!.status), style = MaterialTheme.typography.titleMedium)
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -65,17 +65,17 @@ fun ProjectDetailScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.financial_summary_title), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.quotes_financial_summary_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     // Row 1: Income & Total Expenses
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                          Column {
-                            Text(stringResource(R.string.income_label), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.quotes_summary_income), style = MaterialTheme.typography.bodySmall)
                             Text("€${"%.2f".format(financialSummary.totalIncome)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text(stringResource(R.string.expenses_label), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.quotes_summary_income), style = MaterialTheme.typography.bodySmall)
                             Text("€${"%.2f".format(financialSummary.totalExpenses)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                         }
                     }
@@ -99,7 +99,7 @@ fun ProjectDetailScreen(
                     // Row 3: Profit & Ratios
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
-                            Text(stringResource(R.string.profit_label), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.quotes_summary_profit), style = MaterialTheme.typography.bodySmall)
                             Text(
                                 "€${"%.2f".format(financialSummary.netProfit)}", 
                                 style = MaterialTheme.typography.titleMedium, 
@@ -113,7 +113,7 @@ fun ProjectDetailScreen(
                     }
                     
                     Spacer(modifier = Modifier.height(8.dp))
-                     Text(stringResource(R.string.margin_label) + ": ${"%.1f".format(financialSummary.margin)}%", style = MaterialTheme.typography.labelLarge, modifier = Modifier.align(Alignment.End))
+                     Text(stringResource(R.string.quotes_summary_margin) + ": ${"%.1f".format(financialSummary.margin)}%", style = MaterialTheme.typography.labelLarge, modifier = Modifier.align(Alignment.End))
                 }
             }
             
@@ -123,19 +123,19 @@ fun ProjectDetailScreen(
                 onClick = { onNavigateToCreateReport(project!!.id) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.create_work_report_button))
+                Text(stringResource(R.string.crm_report_create_button))
             }
             
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(stringResource(R.string.work_reports_section_title), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.crm_reports_section_title), style = MaterialTheme.typography.titleLarge)
 // ...
             // -- BUDGETS SECTION --
             val budgets by viewModel.projectBudgets.collectAsState()
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.module_budgets_title), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.home_module_budgets_title), style = MaterialTheme.typography.titleLarge)
                 TextButton(onClick = { onNavigateToEditBudget(project!!.id, 0) }) {
-                    Text(stringResource(R.string.new_label))
+                    Text(stringResource(R.string.quotes_list_new_tab))
                 }
             }
             LazyColumn(modifier = Modifier.weight(1f)) {
@@ -144,13 +144,13 @@ fun ProjectDetailScreen(
                          headlineContent = { Text(budget.title) },
                          supportingContent = { Text("Total: €${budget.totalAmount} - ${budget.status}") },
                          trailingContent = {
-                             TextButton(onClick = { onNavigateToEditBudget(0, budget.id) }) { Text(stringResource(R.string.view_label)) }
+                             TextButton(onClick = { onNavigateToEditBudget(0, budget.id) }) { Text(stringResource(R.string.quotes_list_view_tab)) }
                          }
                      )
                      HorizontalDivider()
                  }
                  if (budgets.isEmpty()) {
-                     item { Text(stringResource(R.string.no_budgets)) }
+                     item { Text(stringResource(R.string.quotes_list_empty)) }
                  }
             }
             
@@ -158,7 +158,7 @@ fun ProjectDetailScreen(
             
              // -- EXPENSES SECTION --
             val expenses by viewModel.projectExpenses.collectAsState()
-            Text(stringResource(R.string.expenses_label), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.home_module_expenses_title), style = MaterialTheme.typography.titleLarge)
              LazyColumn(modifier = Modifier.weight(1f)) {
                  items(expenses) { expense ->
                      ListItem(
@@ -169,13 +169,13 @@ fun ProjectDetailScreen(
                      HorizontalDivider()
                  }
                  if (expenses.isEmpty()) {
-                     item { Text(stringResource(R.string.no_expenses)) }
+                     item { Text(stringResource(R.string.expenses_empty)) }
                  }
             }
              
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(stringResource(R.string.tasks_section_title), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.crm_tasks_section_title), style = MaterialTheme.typography.titleLarge)
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(tasks) { task ->
                     Row(
@@ -216,23 +216,23 @@ fun AddTaskDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_task_dialog_title)) },
+        title = { Text(stringResource(R.string.crm_task_new_dialog_title)) },
         text = {
             OutlinedTextField(
                 value = description, 
                 onValueChange = { description = it }, 
-                label = { Text(stringResource(R.string.task_description_label)) }
+                label = { Text(stringResource(R.string.crm_task_description_label)) }
             )
         },
         confirmButton = {
             Button(onClick = { 
                 if (description.isNotBlank()) onConfirm(description) 
             }) {
-                Text(stringResource(R.string.add_button))
+                Text(stringResource(R.string.general_add))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
         }
     )
 }

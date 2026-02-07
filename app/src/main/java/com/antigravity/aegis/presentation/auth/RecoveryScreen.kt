@@ -115,9 +115,10 @@ fun RecoveryScreen(
             }
         }
         
-        if (loginError != null) {
+        val error = loginError
+        if (error != null) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(loginError ?: "", color = MaterialTheme.colorScheme.error)
+            Text(text = error as String, color = MaterialTheme.colorScheme.error)
         }
         
         Spacer(modifier = Modifier.height(24.dp))

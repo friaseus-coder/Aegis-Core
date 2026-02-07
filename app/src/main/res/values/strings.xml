@@ -1,271 +1,267 @@
 <resources>
     <string name="app_name">Aegis Core</string>
-    
-    <!-- Main Menu -->
+
+    <!-- General Actions & Labels -->
+    <string name="general_loading">Loading...</string>
+    <string name="general_save">Save</string>
+    <string name="general_cancel">Cancel</string>
+    <string name="general_delete">Delete</string>
+    <string name="general_edit">Edit</string>
+    <string name="general_create">Create</string>
+    <string name="general_add">Add</string>
+    <string name="general_back">Back</string>
+    <string name="general_ok">OK</string>
+    <string name="general_error_prefix">Error: %1$s</string>
+    <string name="general_success">Success</string>
+    <string name="general_na">N/A</string>
+    <string name="general_language">Language</string>
+    <string name="general_theme">Theme</string>
+    <string name="general_name">Name</string>
+    <string name="general_email">Email</string>
+    <string name="general_phone">Phone</string>
+
+    <!-- Feature: Auth - Login -->
+    <string name="auth_login_title">Locked</string>
+    <string name="auth_login_pin_label">Enter PIN</string>
+    <string name="auth_login_pin_hint">PIN</string>
+    <string name="auth_login_unlock_button">Unlock</string>
+    <string name="auth_login_create_user_button">Create User</string>
+    <string name="auth_login_select_user_title">Select User</string>
+    <string name="auth_login_biometric_button">Biometric Login</string>
+    <string name="auth_login_enable_biometrics_button">Enable Biometrics (Must be logged in)</string>
+    <string name="auth_login_forgot_pin_button">Forgot PIN?</string>
+    <string name="auth_login_import_backup_button">Import Backup</string>
+    <string name="auth_login_biometric_prompt_title">Biometric Login</string>
+    <string name="auth_login_biometric_prompt_desc">Authenticate to unlock</string>
+    <string name="auth_login_biometric_enable_title">Enable Biometrics</string>
+    <string name="auth_login_biometric_enable_desc">Authenticate to enable biometric login</string>
+
+    <!-- Feature: Auth - Create User/Setup -->
+    <string name="auth_setup_welcome_title">Welcome to Aegis Core</string>
+    <string name="auth_setup_recovery_kit_title">Your Recovery Kit (Seed Phrase)</string>
+    <string name="auth_setup_recovery_kit_desc">Write these words down in order. They are the ONLY way to recover your data if you forget your PIN.</string>
+    <string name="auth_setup_init_vault_button">Initialize Vault</string>
+    <string name="auth_create_user_title">Create New User</string>
+    <string name="auth_create_user_button">Create &amp; Enter</string>
+    <string name="auth_create_user_pin_instruction">Create PIN (4-6 digits)</string>
+
+    <!-- Feature: Auth - Messages -->
+    <string name="auth_error_pin_incorrect">Incorrect PIN</string>
+    <string name="auth_error_invalid_seed">Invalid words</string>
+    <string name="auth_error_invalid_credentials">Invalid data</string>
+    <string name="auth_error_biometric_unavailable">Biometrics not available for this user</string>
+    <string name="auth_error_biometric_generic">Biometric error: %1$s</string>
+    <string name="auth_error_session_locked">Session locked. Cannot create user.</string>
+    <string name="auth_error_user_create_failed">Failed to create user: %1$s</string>
+    <string name="auth_success_user_created">User created successfully</string>
+    <string name="auth_success_biometric_enabled">Biometrics enabled successfully</string>
+    <string name="auth_success_biometric_enable_error">Error enabling biometrics</string>
+    <string name="auth_success_session_expired">Session expired. Please log in again.</string>
+
+    <!-- Feature: Main Menu -->
     <string name="main_menu_title">Aegis Core</string>
-    <string name="select_module">Select Module</string>
-    <string name="module_crm_title">Project Hub</string>
-    <string name="module_crm_subtitle">CRM &amp; Task Management</string>
-    <string name="module_field_title">Work Reports</string>
-    <string name="module_field_subtitle">Field Service &amp; Signatures</string>
-    <string name="module_budgets_title">Budgets</string>
-    <string name="module_budgets_subtitle">Kanban &amp; Quotes</string>
-    <string name="module_expenses_title">Expenses</string>
-    <string name="module_expenses_subtitle">Smart Scan &amp; Export</string>
-    <string name="module_inventory_title">Inventory</string>
-    <string name="module_inventory_subtitle">Barcode Scanner Stock</string>
-    <string name="module_mileage_title">Mileage</string>
-    <string name="module_mileage_subtitle">Trip Log &amp; Calculator</string>
+    <string name="main_menu_select_module">Select Module</string>
+    <string name="home_module_crm_title">Project Hub</string>
+    <string name="home_module_crm_subtitle">CRM &amp; Task Management</string>
+    <string name="home_module_field_title">Work Reports</string>
+    <string name="home_module_field_subtitle">Field Service &amp; Signatures</string>
+    <string name="home_module_budgets_title">Budgets</string>
+    <string name="home_module_budgets_subtitle">Kanban &amp; Quotes</string>
+    <string name="home_module_expenses_title">Expenses</string>
+    <string name="home_module_expenses_subtitle">Smart Scan &amp; Export</string>
+    <string name="home_module_inventory_title">Inventory</string>
+    <string name="home_module_inventory_subtitle">Barcode Scanner Stock</string>
+    <string name="home_module_mileage_title">Mileage</string>
+    <string name="home_module_mileage_subtitle">Trip Log &amp; Calculator</string>
 
-    <!-- Dashboard -->
+    <!-- Feature: Dashboard -->
     <string name="dashboard_title">Project Hub Dashboard</string>
-    <string name="manage_clients">Manage Clients</string>
-    <string name="active_projects">Active Projects</string>
-    <string name="no_active_projects">No active projects.</string>
-    <string name="status_label">Status: %1$s</string>
-    <string name="deadline_label">Deadline: %1$s</string>
-
-    <!-- Auth -->
-    <string name="locked_title">Locked</string>
-    <string name="enter_pin_label">Enter PIN</string>
-    <string name="unlock_button">Unlock</string>
-    <string name="create_user_label">Create User</string>
-    <string name="select_user_label">Select User</string>
-    <string name="create_user_button">Create User</string>
-    <string name="loading_label">Loading...</string>
-    <string name="biometric_login_button">Biometric Login</string>
-    <string name="enable_biometrics_button">Enable Biometrics (Must be logged in)</string>
-    <string name="biometric_login_title">Biometric Login</string>
-    <string name="biometric_login_desc">Authenticate to unlock</string>
-    <string name="biometric_enable_title">Enable Biometrics</string>
-    <string name="biometric_enable_desc">Authenticate to enable biometric login</string>
-
-    <!-- Clients -->
-    <string name="clients_title">Clients</string>
-    <string name="export_csv">Export CSV</string>
-    <string name="import_csv">Import CSV</string>
-    <string name="add_client_fab">Add Client</string>
-    <string name="no_clients">No clients yet.</string>
-    <string name="client_email_placeholder">No email</string>
+    <string name="dashboard_manage_clients">Manage Clients</string>
+    <string name="dashboard_active_projects">Active Projects</string>
+    <string name="dashboard_no_projects">No active projects.</string>
+    <string name="dashboard_status_label">Status: %1$s</string>
+    <string name="dashboard_deadline_label">Deadline: %1$s</string>
     
-    <!-- Add Client Dialog -->
-    <string name="add_client_dialog_title">Add Client</string>
-    <string name="name_label">Name</string>
-    <string name="email_label">Email</string>
-    <string name="phone_label">Phone</string>
-    <string name="notes_label">Notes</string>
-    <string name="add_button">Add</string>
-    <string name="cancel_button">Cancel</string>
-
-    <!-- Import/Export -->
-    <string name="import_errors_title">Import Errors</string>
-    <string name="ok_button">OK</string>
-    <string name="import_success">Import Successful</string>
-    <string name="import_error_prefix">Error: %1$s</string>
-    <!-- Setup -->
-    <string name="welcome_title">Welcome to Aegis Core</string>
-    <string name="recovery_kit_title">Your Recovery Kit (Seed Phrase)</string>
-    <string name="recovery_kit_desc">Write these words down in order. They are the ONLY way to recover your data if you forget your PIN.</string>
-    <string name="create_pin_label">Create PIN (6 digits)</string>
-    <string name="pin_hint">PIN</string>
-    <string name="init_vault_button">Initialize Vault</string>
-    <!-- Reports -->
-    <string name="create_report_title">New Work Report</string>
-    <string name="desc_work_label">Description of Work</string>
-    <string name="attach_photo_button">Attach Photo</string>
-    <string name="customer_signature_title">Customer Signature</string>
-    <string name="clear_signature_button">Clear Signature</string>
-    <string name="finish_sign_button">Finish &amp; Sign</string>
-    <string name="photo_captured_toast">Photo captured (simulated)</string>
-    <string name="desc_required_toast">Description required</string>
-    <!-- CRM Details -->
-    <string name="client_not_found">Client not found or loading...</string>
-    <string name="add_project_fab">Add Project</string>
-    <string name="client_email_label">Email: %1$s</string>
-    <string name="client_phone_label">Phone: %1$s</string>
-    <string name="client_notes_label">Notes: %1$s</string>
-    <string name="not_available_short">N/A</string>
-    <string name="projects_section_title">Projects</string>
-    <string name="add_project_dialog_title">New Project</string>
-    <string name="project_name_label">Project Name</string>
-    <string name="create_button">Create</string>
+    <!-- Feature: CRM/Clients -->
+    <string name="crm_clients_title">Clients</string>
+    <string name="crm_clients_add_button">Add Client</string>
+    <string name="crm_clients_empty">No clients yet.</string>
+    <string name="crm_client_email_placeholder">No email</string>
+    <string name="crm_client_detail_email">Email: %1$s</string>
+    <string name="crm_client_detail_phone">Phone: %1$s</string>
+    <string name="crm_client_detail_notes">Notes: %1$s</string>
+    <string name="crm_client_not_found">Client not found or loading...</string>
     
-    <!-- Project Details -->
-    <string name="project_not_found">Project not found...</string>
-    <string name="add_task_fab">Add Task</string>
-    <string name="create_work_report_button">Create Work Report</string>
-    <string name="work_reports_section_title">Work Reports</string>
-    <string name="report_item_title">Report #%1$d</string>
-    <string name="no_reports_yet">No reports yet.</string>
-    <string name="tasks_section_title">Tasks</string>
-    <string name="add_task_dialog_title">New Task</string>
-    <string name="task_description_label">Description</string>
+    <!-- Feature: CRM/Projects -->
+    <string name="crm_projects_section_title">Projects</string>
+    <string name="crm_project_add_button">Add Project</string>
+    <string name="crm_project_new_dialog_title">New Project</string>
+    <string name="crm_project_name_label">Project Name</string>
+    <string name="crm_project_not_found">Project not found...</string>
+    <string name="crm_project_id_label">Project ID: %1$d</string>
+    <string name="crm_archived_projects_title">Archived Projects</string>
+    <string name="crm_archived_projects_empty">No archived projects found.</string>
+    <string name="crm_project_reactivate_button">Reactivate</string>
 
-    <!-- Quotes -->
-    <string name="new_quote_title">New Quote</string>
-    <string name="back_content_desc">Back</string>
-    <string name="save_content_desc">Save</string>
-    <string name="select_client_placeholder">Select Client</string>
-    <string name="client_label">Client</string>
-    <string name="no_clients_found">No clients found</string>
-    <string name="quote_title_label">Quote Title</string>
-    <string name="total_amount_label">Total Amount ($)</string>
-    <string name="quote_description_label">Description / Items</string>
+    <!-- Feature: CRM/Tasks & Reports -->
+    <string name="crm_tasks_section_title">Tasks</string>
+    <string name="crm_task_add_button">Add Task</string>
+    <string name="crm_task_new_dialog_title">New Task</string>
+    <string name="crm_task_description_label">Description</string>
+    <string name="crm_reports_section_title">Work Reports</string>
+    <string name="crm_report_create_button">Create Work Report</string>
+    <string name="crm_report_item_title">Report #%1$d</string>
+    <string name="crm_report_empty">No reports yet.</string>
 
-    <!-- Settings Screen -->
+    <!-- Feature: Add Client Dialog -->
+    <string name="dialog_add_client_title">Add Client</string>
+    <string name="dialog_add_client_name_label">Name</string>
+    <string name="dialog_add_client_email_label">Email</string>
+    <string name="dialog_add_client_phone_label">Phone</string>
+    <string name="dialog_add_client_notes_label">Notes</string>
+
+    <!-- Feature: Import/Export -->
+    <string name="data_import_errors_title">Import Errors</string>
+    <string name="data_import_success">Import Successful</string>
+    <string name="data_export_csv">Export CSV</string>
+    <string name="data_import_csv">Import CSV</string>
+    <string name="data_export_db_loading">Exporting Database...</string>
+    <string name="data_export_db_success">Database exported successfully</string>
+    <string name="data_export_db_error">Error exporting: %1$s</string>
+    <string name="data_import_db_loading">Importing Database...</string>
+    <string name="data_import_db_success">Import successful. Please log in again.</string>
+    <string name="data_import_db_error">Error importing: %1$s</string>
+
+    <!-- Feature: Field Service -->
+    <string name="field_service_title">Field Service Console</string>
+    <string name="field_report_create_title">New Work Report</string>
+    <string name="field_report_desc_label">Description of Work</string>
+    <string name="field_report_attach_photo_button">Attach Photo</string>
+    <string name="field_report_signature_title">Customer Signature</string>
+    <string name="field_report_clear_signature">Clear Signature</string>
+    <string name="field_report_finish_button">Finish &amp; Sign</string>
+    <string name="field_report_photo_captured">Photo captured (simulated)</string>
+    <string name="field_report_desc_required">Description required</string>
+    <string name="field_reports_not_found">No work reports found.</string>
+
+    <!-- Feature: Mileage -->
+    <string name="mileage_title">Mileage Log</string>
+    <string name="mileage_price_per_km">Price per Km (€)</string>
+    <string name="mileage_calculator_title">New Trip Calculator</string>
+    <string name="mileage_origin_label">Origin</string>
+    <string name="mileage_destination_label">Destination</string>
+    <string name="mileage_start_odo_label">Start Odo</string>
+    <string name="mileage_end_odo_label">End Odo</string>
+    <string name="mileage_distance_result">Distance: %1$d km</string>
+    <string name="mileage_cost_result">Est. Cost: €%1$.2f</string>
+    <string name="mileage_log_trip_button">Log Trip</string>
+    <string name="mileage_recent_trips_title">Recent Trips</string>
+    <string name="mileage_export_annual_button">Export Annual CSV</string>
+
+    <!-- Feature: Expenses -->
+    <string name="expenses_title">Expenses &amp; Tickets</string>
+    <string name="expenses_export_quarter_button">Export This Quarter</string>
+    <string name="expenses_review_ticket_title">Review Ticket</string>
+    <string name="expenses_merchant_label">Merchant / Concept</string>
+    <string name="expenses_amount_label">Amount</string>
+    <string name="expenses_empty">No expenses recorded.</string>
+
+    <!-- Feature: Inventory -->
+    <string name="inventory_title">Inventory Control</string>
+    <string name="inventory_stock_list_title">Stock List</string>
+    <string name="inventory_scan_label">Scan</string>
+    <string name="inventory_barcode_label">Barcode: %1$s</string>
+
+    <!-- Feature: Quotes/Budgets -->
+    <string name="quotes_title_new">New Quote</string>
+    <string name="quotes_select_client_placeholder">Select Client</string>
+    <string name="quotes_client_label">Client</string>
+    <string name="quotes_no_clients_found">No clients found</string>
+    <string name="quotes_title_label">Quote Title</string>
+    <string name="quotes_total_amount_label">Total Amount ($)</string>
+    <string name="quotes_description_label">Description / Items</string>
+    <string name="quotes_budget_editor_title">Budget Editor</string>
+    <string name="quotes_budget_lines_title">Budget Lines</string>
+    <string name="quotes_item_desc_label">Item</string>
+    <string name="quotes_item_qty_label">Qty</string>
+    <string name="quotes_item_price_label">Price</string>
+    <string name="quotes_item_tax_label">VAT %</string>
+    <string name="quotes_add_line_button">Add Line</string>
+    <string name="quotes_financial_summary_title">Financial Summary</string>
+    <string name="quotes_summary_income">Income</string>
+    <string name="quotes_summary_expenses">Expenses</string>
+    <string name="quotes_summary_profit">Profit</string>
+    <string name="quotes_summary_margin">Margin</string>
+    <string name="quotes_list_new_tab">New</string>
+    <string name="quotes_list_view_tab">View</string>
+    <string name="quotes_list_empty">No budgets.</string>
+    <string name="quotes_default_title">Budget for %1$s</string>
+    
+    <!-- Feature: Settings -->
     <string name="settings_title">Settings</string>
-    <string name="export_database">Export Database</string>
-    <string name="import_database_overwrite">Import Database (Overwrite)</string>
-    <string name="create_new_user">Create New User</string>
-    <string name="logout">Logout</string>
-    <string name="new_user">New User</string>
-    <string name="pin_digits_label">PIN (4-6 digits)</string>
-    <string name="create_and_enter">Create &amp; Enter</string>
-    <string name="security_section_title">Security</string>
-    <string name="database_section_title">Database</string>
-    <string name="user_management_section_title">User Management</string>
-    <string name="session_section_title">Session</string>
-    <string name="biometric_already_enabled">✓ Biometric authentication enabled</string>
-    <string name="general_section_title">General / Appearance</string>
+    <string name="settings_section_security">Security</string>
+    <string name="settings_section_database">Database</string>
+    <string name="settings_section_users">User Management</string>
+    <string name="settings_section_session">Session</string>
+    <string name="settings_section_general">General / Appearance</string>
+    <string name="settings_db_export_button">Export Database</string>
+    <string name="settings_db_import_button">Import Database (Overwrite)</string>
+    <string name="settings_create_user_button">Create New User</string>
+    <string name="settings_logout_button">Logout</string>
+    <string name="settings_biometric_status_enabled">✓ Biometric authentication enabled</string>
+    <string name="settings_backup_manage_button">Manage Backups (Import / Export)</string>
+    <string name="settings_users_list_title">Registered Users (Click to edit)</string>
+    <string name="settings_role_admin_desc">Both Profiles (Company + Worker)</string>
+    <string name="settings_role_manager_title">Company / Freelance</string>
+    <string name="settings_role_worker_title">Individual / Worker</string>
+    <string name="settings_role_manager_desc">Full access &amp; management</string>
+    <string name="settings_role_worker_desc">Limited operational access</string>
+    <string name="settings_company_details_title">Company Details (for PDF Reports)</string>
+    <string name="settings_company_name_label">Company Name</string>
+    <string name="settings_company_dni_label">ID / Tax ID</string>
+    <string name="settings_company_address_label">Address</string>
+    <string name="settings_company_postal_code_label">Postal Code</string>
+    <string name="settings_company_city_label">City</string>
+    <string name="settings_company_province_label">Province</string>
+    <string name="settings_company_save_button">Guardar Datos Empresa</string>
+    <string name="settings_logo_title">Logo</string>
+    <string name="settings_logo_none">No Logo</string>
+    <string name="settings_logo_select_button">Select Logo</string>
+    <string name="settings_logo_delete_button">Delete Logo</string>
+    <string name="settings_logo_deleted">Logo deleted</string>
+    <string name="settings_logo_updated">Logo updated successfully</string>
+    <string name="settings_logo_saving">Saving logo...</string>
+    <string name="settings_share_backup_button">Upload Cloud / Share</string>
+    <string name="settings_share_backup_loading">Preparing file...</string>
+    <string name="settings_share_backup_error">Error generating file: %1$s</string>
+    <string name="settings_share_chooser_title">Save backup to...</string>
+    <string name="settings_share_pdf_title">Share PDF</string>
+    <string name="settings_distribute_button">Distribute (Proportional Split)</string>
+    <string name="settings_distributed_label">Distributed</string>
+    <string name="settings_profile_active_label">Active Profiles</string>
+    <string name="settings_role_edit_prefix">Edit Role: %1$s</string>
+    <string name="settings_role_update_success">Role updated successfully</string>
+    <string name="settings_role_update_error">Error updating role</string>
 
-    <!-- Create User Screen -->
-    <string name="create_new_user_title">Create New User</string>
-    <string name="language_label">Language</string>
+    <!-- Language Definitions -->
     <string name="language_spanish">Español</string>
     <string name="language_english">English</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="msg_language_changed">Language changed to %1$s</string>
+    <string name="msg_theme_changed">Theme changed</string>
 
-    <!-- Field Service Screen -->
-    <string name="field_service_title">Field Service Console</string>
-    <string name="date_label">Date: %1$s</string>
-    <string name="project_id_label">Project ID: %1$d</string>
-    <string name="no_work_reports_found">No work reports found.</string>
+    <!-- Content Descriptions (Accessibility) -->
+    <string name="cd_back">Back</string>
+    <string name="cd_save">Save</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_share">Share</string>
 
-    <!-- Mileage Screen -->
-    <string name="mileage_log_title">Mileage Log</string>
-    <string name="price_per_km">Price per Km (€)</string>
-    <string name="new_trip_calculator">New Trip Calculator</string>
-    <string name="origin_label">Origin</string>
-    <string name="destination_label">Destination</string>
-    <string name="start_odo_label">Start Odo</string>
-    <string name="end_odo_label">End Odo</string>
-    <string name="distance_km">Distance: %1$d km</string>
-    <string name="estimated_cost">Est. Cost: €%1$.2f</string>
-    <string name="log_trip">Log Trip</string>
-    <string name="recent_trips">Recent Trips</string>
-    <string name="export_annual_csv">Export Annual CSV</string>
+    <string name="auth_login_no_users_found">No users found</string>
+    <string name="cd_show_pin">Show PIN</string>
+    <string name="cd_hide_pin">Hide PIN</string>
+    <string name="language_code_es">ES</string>
+    <string name="language_code_en">EN</string>
 
-    <!-- Expenses Screen -->
-    <string name="expenses_title">Expenses &amp; Tickets</string>
-    <string name="export_quarter">Export This Quarter</string>
-    <string name="review_ticket">Review Ticket</string>
-    <string name="merchant_concept">Merchant / Concept</string>
-    <string name="amount_label">Amount</string>
-    <string name="save_button">Save</string>
-
-    <!-- Inventory Screen -->
-    <string name="inventory_title">Inventory Control</string>
-    <string name="stock_list">Stock List</string>
-    <string name="scan_label">Scan</string>
-    <string name="barcode_label">Barcode: %1$s</string>
-    <string name="forgot_pin_label">¿Olvidaste tu PIN?</string>
-    <string name="import_backup_label">Importar Backup</string>
-    
-    <!-- Settings - Company Details -->
-    <string name="backup_management_button">Gestionar Copias de Seguridad (Importar / Exportar)</string>
-    <string name="registered_users_title">Usuarios Registrados (Click para editar)</string>
-    <string name="role_admin_desc">Ambos Perfiles (Empresa + Trabajador)</string>
-    <string name="role_manager_title">Empresa / Autónomo</string>
-    <string name="role_worker_title">Particular / Trabajador</string>
-    <string name="role_manager_desc">Acceso total y gestión</string>
-    <string name="role_worker_desc">Acceso operativo limitado</string>
-    <string name="company_details_title">Datos de Empresa (para Informes PDF)</string>
-    <string name="company_name_label">Nombre Empresa / Titular</string>
-    <string name="company_dni_label">DNI / CIF</string>
-    <string name="company_address_label">Dirección</string>
-    <string name="company_postal_code_label">CP</string>
-    <string name="company_city_label">Ciudad</string>
-    <string name="company_province_label">Provincia</string>
-    <string name="save_company_data_button">Guardar Datos Empresa</string>
-    <string name="logo_title">Logotipo</string>
-    <string name="no_logo_label">Sin Logo</string>
-    <string name="select_logo_button">Seleccionar Logo</string>
-    <string name="delete_logo_button">Eliminar Logo</string>
-    
-    <!-- Settings - Messages -->
-    <string name="logo_deleted_success">Logo eliminado</string>
-    <string name="logo_updated_success">Logo actualizado correctamente</string>
-    <string name="saving_logo_message">Guardando logo...</string>
-    <string name="session_expired_message">Sesión expirada. Identifícate de nuevo.</string>
-    <string name="save_success">Datos guardados correctamente</string>
-    
-    <!-- Settings - General -->
-    <string name="language_section_label">Idioma / Language</string>
-    <string name="theme_section_label">Tema / Theme</string>
-    <string name="theme_system">Sistema</string>
-    <string name="theme_light">Claro</string>
-    <string name="theme_dark">Oscuro</string>
-    <string name="active_profiles_label">Perfiles Activos</string>
-    <string name="edit_role_title_prefix">Editar Rol: %1$s</string>
-    <string name="save_general">Guardar</string>
-    <string name="cancel_general">Cancelar</string>
-    
-    <!-- ViewModel Messages -->
-    <string name="language_changed_message">Idioma cambiado a %1$s</string>
-    <string name="theme_changed_message">Tema cambiado</string>
-    <string name="db_export_loading">Exportando Base de Datos...</string>
-    <string name="db_export_success">Base de Datos exportada correctamente</string>
-    <string name="db_export_error">Error al exportar: %1$s</string>
-    <string name="db_import_loading">Importando Base de Datos...</string>
-    <string name="db_import_success">Importación exitosa. Por favor, loguéate de nuevo.</string>
-    <string name="db_import_error">Error al importar: %1$s</string>
-    <string name="creating_user_loading">Creando Usuario...</string>
-    <string name="session_locked_error">Sesión bloqueada. No se puede crear usuario.</string>
-    <string name="user_created_success">Usuario creado correctamente</string>
-    <string name="user_create_failed">Fallo al crear usuario: %1$s</string>
-    <string name="role_updated_success">Rol actualizado correctamente</string>
-    <string name="role_update_error">Error al actualizar rol</string>
-    <string name="biometric_setup_loading">Iniciando configuración biométrica...</string>
-    <string name="biometric_enabled_success">Biometría activada correctamente</string>
-    <string name="biometric_enable_error">Error al activar biometría</string>
-    <string name="biometric_init_error">No se pudo inicializar biometría</string>
-    <string name="biometric_auth_failed">Autenticación biométrica fallida</string>
-    <string name="company_data_updated_success">Datos de empresa actualizados</string>
-    <string name="logo_save_error_prefix">Error al guardar el logo: %1$s</string>
-    <string name="share_backup_button">Subir a la Nube / Compartir</string>
-    <string name="share_backup_loading">Preparando archivo...</string>
-    <string name="share_backup_error">Error al generar archivo: %1$s</string>
-    <!-- Budget Editor & Financial -->
-    <string name="budget_editor_title">Budget Editor</string>
-    <string name="budget_title_label">Budget Title</string>
-    <string name="budget_desc_label">General Description</string>
-    <string name="budget_lines_title">Budget Lines</string>
-    <string name="line_description_label">Item</string>
-    <string name="quantity_label">Qty</string>
-    <string name="price_label">Price</string>
-    <string name="tax_label">VAT %</string>
-    <string name="add_line_button">Add Line</string>
-    <string name="add_line_fab">Add Line</string>
-    <string name="financial_summary_title">Financial Summary</string>
-    <string name="income_label">Income</string>
-    <string name="expenses_label">Expenses</string>
-    <string name="profit_label">Profit</string>
-    <string name="margin_label">Margin</string>
-    <string name="no_expenses">No expenses recorded.</string>
-    <string name="new_label">New</string>
-    <string name="view_label">View</string>
-    <string name="no_budgets">No budgets.</string>
-    <string name="budget_default_title">Budget for %1$s</string>
-    <string name="delete_content_desc">Delete</string>
-    <string name="add_line_dialog_title">Add Line</string>
-    
-    <string name="share_backup_chooser_title">Save backup to...</string>
-    <string name="share_pdf_title">Share PDF</string>
-    <string name="share_content_desc">Share</string>
-    <string name="distribute_button">Distribute (Proportional Split)</string>
-    <string name="distributed_label">Distributed</string>
-    
-    <!-- Archived Projects -->
-    <string name="archived_projects_title">Archived Projects</string>
-    <string name="no_archived_projects">No archived projects found.</string>
-    <string name="reactivate_button">Reactivate</string>
 </resources>

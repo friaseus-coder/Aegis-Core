@@ -72,7 +72,7 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
 
-    override fun getUserConfig(): kotlinx.coroutines.flow.Flow<com.antigravity.aegis.data.model.UserConfig?> {
+    override fun getUserConfig(): kotlinx.coroutines.flow.Flow<com.antigravity.aegis.data.local.entity.UserConfig?> {
         return database.userConfigDao().getUserConfig()
     }
 
@@ -87,7 +87,7 @@ class SettingsRepositoryImpl @Inject constructor(
         database.userConfigDao().updateThemeMode(mode)
     }
 
-    override suspend fun insertOrUpdateConfig(config: com.antigravity.aegis.data.model.UserConfig) {
+    override suspend fun insertOrUpdateConfig(config: com.antigravity.aegis.data.local.entity.UserConfig) {
         database.userConfigDao().insertOrUpdate(config)
     }
 
@@ -95,7 +95,7 @@ class SettingsRepositoryImpl @Inject constructor(
     private suspend fun ensureConfigExists() {
         val current = database.userConfigDao().getUserConfigOneShot()
         if (current == null) {
-            database.userConfigDao().insertUserConfig(com.antigravity.aegis.data.model.UserConfig())
+            database.userConfigDao().insertUserConfig(com.antigravity.aegis.data.local.entity.UserConfig())
         }
     }
 
@@ -179,7 +179,7 @@ class SettingsRepositoryImpl @Inject constructor(
     
     // I will skip implementing `performAutoBackup` fully here until I add BackupRepository to constructor.
     
-    override suspend fun performAutoBackup(userConfig: com.antigravity.aegis.data.model.UserConfig): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun performAutoBackup(userConfig: com.antigravity.aegis.data.local.entity.UserConfig): Result<String> = withContext(Dispatchers.IO) {
         try {
             val uriString = userConfig.backupLocationUri ?: return@withContext Result.failure(Exception("No backup location configured"))
             val treeUri = Uri.parse(uriString)

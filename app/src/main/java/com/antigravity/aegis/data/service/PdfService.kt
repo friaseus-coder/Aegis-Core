@@ -6,9 +6,9 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
-import com.antigravity.aegis.data.model.QuoteEntity
-import com.antigravity.aegis.data.model.BudgetLineEntity
-import com.antigravity.aegis.data.model.ExpenseEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
+import com.antigravity.aegis.data.local.entity.BudgetLineEntity
+import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

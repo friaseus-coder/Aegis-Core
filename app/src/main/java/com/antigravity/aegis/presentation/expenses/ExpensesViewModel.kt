@@ -4,7 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.antigravity.aegis.data.model.ExpenseEntity
+import com.antigravity.aegis.R
+import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.domain.expenses.ExportManager
 import com.antigravity.aegis.domain.expenses.OcrManager
 import com.antigravity.aegis.domain.repository.CrmRepository
@@ -66,9 +67,9 @@ class ExpensesViewModel @Inject constructor(
             _transferState.value = TransferState.Loading
             val result = transferManager.importData(DataTransferManager.EntityType.EXPENSES, uri, wipe)
             result.onSuccess {
-                 _transferState.value = TransferState.Success("Import Successful")
+                 _transferState.value = TransferState.Success(context.getString(R.string.data_import_success))
             }.onFailure {
-                 _transferState.value = TransferState.Error(it.message ?: "Import failed")
+                 _transferState.value = TransferState.Error(it.message ?: context.getString(R.string.data_import_db_error))
             }
         }
     }
@@ -87,7 +88,7 @@ class ExpensesViewModel @Inject constructor(
     }
 
     // Projects for Dropdown
-    val activeProjects: StateFlow<List<com.antigravity.aegis.data.model.ProjectEntity>> = projectRepository.getAllProjects()
+    val activeProjects: StateFlow<List<com.antigravity.aegis.data.local.entity.ProjectEntity>> = projectRepository.getAllProjects()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allExpenses: StateFlow<List<ExpenseEntity>> = repository.getAllExpenses()

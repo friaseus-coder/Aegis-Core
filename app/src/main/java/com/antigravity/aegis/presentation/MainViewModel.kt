@@ -4,9 +4,9 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.antigravity.aegis.data.model.ActiveRole
-import com.antigravity.aegis.data.model.EntityType
-import com.antigravity.aegis.data.model.UserConfig
+import com.antigravity.aegis.data.local.entity.ActiveRole
+import com.antigravity.aegis.data.local.entity.EntityType
+import com.antigravity.aegis.data.local.entity.UserConfig
 import com.antigravity.aegis.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

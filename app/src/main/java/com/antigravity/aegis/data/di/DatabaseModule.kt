@@ -48,7 +48,8 @@ object DatabaseModule {
             "aegis_core.db"
         )
             // .openHelperFactory(factory)
-            .fallbackToDestructiveMigration() // For development
+            .fallbackToDestructiveMigration() // Keep this if needed, but we adding migration now
+            .addMigrations(AegisDatabase.MIGRATION_18_19)
             .build()
     }
 

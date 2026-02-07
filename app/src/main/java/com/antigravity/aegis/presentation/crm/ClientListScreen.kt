@@ -66,15 +66,15 @@ fun ClientListScreen(
             viewModel.resetTransferState()
         }
         is CrmViewModel.TransferState.Error -> {
-            Toast.makeText(context, context.getString(R.string.import_error_prefix, state.message), Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.general_error_prefix, state.message), Toast.LENGTH_LONG).show()
              viewModel.resetTransferState()
         }
         is CrmViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text(stringResource(R.string.import_errors_title)) },
+                title = { Text(stringResource(R.string.data_import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.ok_button)) } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.general_ok)) } }
             )
         }
         is CrmViewModel.TransferState.ValidationSuccess -> {
@@ -94,17 +94,17 @@ fun ClientListScreen(
             AegisTopAppBar(
                 actions = {
                     IconButton(onClick = { viewModel.exportClients() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.export_csv))
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.data_export_csv))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.import_csv))
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.data_import_csv))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onNavigateToClientCreate() }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_client_fab))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.crm_clients_add_button))
             }
         }
     ) { padding ->
@@ -112,7 +112,7 @@ fun ClientListScreen(
             
             // Screen Title in Body
             Text(
-                text = stringResource(R.string.clients_title),
+                text = stringResource(R.string.crm_clients_title),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.primary
@@ -192,7 +192,7 @@ fun ClientListScreen(
                 if (clients.isEmpty()) {
                     item {
                         Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                            Text(if (searchQuery.length in 1..2) "Escribe al menos 3 letras para buscar" else stringResource(R.string.no_clients))
+                            Text(if (searchQuery.length in 1..2) "Escribe al menos 3 letras para buscar" else stringResource(R.string.crm_clients_empty))
                         }
                     }
                 }

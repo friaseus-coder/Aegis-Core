@@ -1,10 +1,10 @@
 package com.antigravity.aegis.presentation.crm
 
-import com.antigravity.aegis.data.model.ProjectEntity
-import com.antigravity.aegis.data.model.TaskEntity
-import com.antigravity.aegis.data.model.WorkReportEntity
-import com.antigravity.aegis.data.model.BudgetLineEntity
-import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.local.entity.ProjectEntity
+import com.antigravity.aegis.data.local.entity.TaskEntity
+import com.antigravity.aegis.data.local.entity.WorkReportEntity
+import com.antigravity.aegis.data.local.entity.BudgetLineEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.repository.ProjectRepository
@@ -14,7 +14,7 @@ import com.antigravity.aegis.domain.reports.PdfGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.antigravity.aegis.domain.transfer.DataTransferManager
 import com.antigravity.aegis.data.repository.AttachmentRepository
-import com.antigravity.aegis.data.model.DocumentEntity
+import com.antigravity.aegis.data.local.entity.DocumentEntity
 import android.provider.OpenableColumns
 import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -270,9 +270,9 @@ class CrmViewModel @Inject constructor(
     fun createProject(clientId: Int, name: String, status: String, startDate: Long, endDate: Long?) {
         viewModelScope.launch {
             val projectStatus = try {
-                com.antigravity.aegis.data.model.ProjectStatus.valueOf(status)
+                com.antigravity.aegis.data.local.entity.ProjectStatus.valueOf(status)
             } catch (e: Exception) {
-                com.antigravity.aegis.data.model.ProjectStatus.ACTIVE
+                com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE
             }
             val project = ProjectEntity(clientId = clientId, name = name, status = projectStatus, startDate = startDate, endDate = endDate)
             projectRepository.insertProject(project)
@@ -364,8 +364,8 @@ class CrmViewModel @Inject constructor(
     }
 
     // --- Derived State for Selected Project's Expenses ---
-    private val _projectExpenses = MutableStateFlow<List<com.antigravity.aegis.data.model.ExpenseEntity>>(emptyList())
-    val projectExpenses: StateFlow<List<com.antigravity.aegis.data.model.ExpenseEntity>> = _projectExpenses
+    private val _projectExpenses = MutableStateFlow<List<com.antigravity.aegis.data.local.entity.ExpenseEntity>>(emptyList())
+    val projectExpenses: StateFlow<List<com.antigravity.aegis.data.local.entity.ExpenseEntity>> = _projectExpenses
 
     data class FinancialSummary(
         val totalIncome: Double = 0.0,
@@ -410,12 +410,12 @@ class CrmViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), FinancialSummary())
     
     // Archived Projects
-    val archivedProjects: StateFlow<List<ProjectEntity>> = projectRepository.getProjectsByStatus(com.antigravity.aegis.data.model.ProjectStatus.ARCHIVED.name)
+    val archivedProjects: StateFlow<List<ProjectEntity>> = projectRepository.getProjectsByStatus(com.antigravity.aegis.data.local.entity.ProjectStatus.ARCHIVED.name)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun reactivateProject(projectId: Int) {
         viewModelScope.launch {
-            projectRepository.updateProjectStatus(projectId, com.antigravity.aegis.data.model.ProjectStatus.ACTIVE.name)
+            projectRepository.updateProjectStatus(projectId, com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE.name)
         }
     }
 

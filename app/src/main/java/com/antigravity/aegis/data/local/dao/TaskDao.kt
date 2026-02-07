@@ -1,7 +1,7 @@
 package com.antigravity.aegis.data.local.dao
 
 import androidx.room.*
-import com.antigravity.aegis.data.model.TaskEntity
+import com.antigravity.aegis.data.local.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 /**

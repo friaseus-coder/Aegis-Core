@@ -75,7 +75,7 @@ class DashboardViewModel @Inject constructor(
         // So user MUST choose.
     }
     
-    private suspend fun performBackup(userConfig: com.antigravity.aegis.data.model.UserConfig) {
+    private suspend fun performBackup(userConfig: com.antigravity.aegis.data.local.entity.UserConfig) {
         // Maybe check timestamp to not spam backup on every rotation/nav?
         // But ViewModel survives config changes.
         // Only on app restart.

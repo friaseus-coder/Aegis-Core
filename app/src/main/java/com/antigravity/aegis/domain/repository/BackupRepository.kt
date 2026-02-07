@@ -1,6 +1,6 @@
 package com.antigravity.aegis.domain.repository
 
-import com.antigravity.aegis.data.model.*
+import com.antigravity.aegis.data.local.entity.*
 import kotlinx.coroutines.flow.Flow
 
 interface BackupRepository {

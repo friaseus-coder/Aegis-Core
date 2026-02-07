@@ -1,6 +1,6 @@
 package com.antigravity.aegis.domain.repository
 
-import com.antigravity.aegis.data.model.ProjectEntity
+import com.antigravity.aegis.data.local.entity.ProjectEntity
 import kotlinx.coroutines.flow.Flow
 
 interface ProjectRepository {

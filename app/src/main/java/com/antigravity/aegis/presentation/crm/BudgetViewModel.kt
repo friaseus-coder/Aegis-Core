@@ -2,8 +2,8 @@ package com.antigravity.aegis.presentation.crm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.antigravity.aegis.data.model.BudgetLineEntity
-import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.local.entity.BudgetLineEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.domain.repository.BudgetRepository
 import com.antigravity.aegis.domain.repository.ProjectRepository
 import com.antigravity.aegis.domain.repository.CrmRepository
@@ -144,7 +144,7 @@ class BudgetViewModel @Inject constructor(
             
             // Log Event
             budgetRepository.insertBudgetLog(
-                com.antigravity.aegis.data.model.BudgetLogEntity(
+                com.antigravity.aegis.data.local.entity.BudgetLogEntity(
                     quoteId = quote.id,
                     timestamp = System.currentTimeMillis(),
                     action = "PDF Generated",

@@ -29,7 +29,7 @@ import androidx.compose.material3.FilterChip
 @Composable
 fun SetupScreen(
     state: SetupUiState,
-    onConfirm: (String, String, String, com.antigravity.aegis.data.model.UserRole, String, String) -> Unit
+    onConfirm: (String, String, String, com.antigravity.aegis.data.local.entity.UserRole, String, String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var pin by remember { mutableStateOf("") }
@@ -50,7 +50,7 @@ fun SetupScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.welcome_title),
+            text = stringResource(R.string.auth_setup_welcome_title),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -58,11 +58,11 @@ fun SetupScreen(
         Spacer(modifier = Modifier.height(24.dp))
         
         Text(
-            text = stringResource(R.string.recovery_kit_title),
+            text = stringResource(R.string.auth_setup_recovery_kit_title),
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = stringResource(R.string.recovery_kit_desc),
+            text = stringResource(R.string.auth_setup_recovery_kit_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center
@@ -223,16 +223,16 @@ fun SetupScreen(
         Button(
             onClick = { 
                  val role = when {
-                    isEmpresa && isParticular -> com.antigravity.aegis.data.model.UserRole.ADMIN
-                    isEmpresa -> com.antigravity.aegis.data.model.UserRole.MANAGER
-                    else -> com.antigravity.aegis.data.model.UserRole.USER
+                    isEmpresa && isParticular -> com.antigravity.aegis.data.local.entity.UserRole.ADMIN
+                    isEmpresa -> com.antigravity.aegis.data.local.entity.UserRole.MANAGER
+                    else -> com.antigravity.aegis.data.local.entity.UserRole.USER
                 }
                 onConfirm(name, language, pin, role, email, phone) 
             },
             enabled = isValid,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(R.string.init_vault_button))
+            Text(stringResource(R.string.auth_setup_init_vault_button))
         }
     }
 }

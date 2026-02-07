@@ -1,4 +1,4 @@
-package com.antigravity.aegis.data.model
+package com.antigravity.aegis.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "budget_lines",
+    tableName = "budget_logs",
     foreignKeys = [
         ForeignKey(
             entity = QuoteEntity::class,
@@ -17,11 +17,11 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("quoteId")]
 )
-data class BudgetLineEntity(
+data class BudgetLogEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val quoteId: Int,
-    val description: String,
-    val quantity: Double,
-    val unitPrice: Double,
-    val taxRate: Double // e.g., 0.21 for 21%
+    val timestamp: Long,
+    val action: String, // "SENT", "VIEWED", "ACCEPTED"
+    val messageTemplateUsed: String?, // Name of the template used if any
+    val channelType: String = "UNKNOWN" // "EMAIL", "WHATSAPP", etc.
 )

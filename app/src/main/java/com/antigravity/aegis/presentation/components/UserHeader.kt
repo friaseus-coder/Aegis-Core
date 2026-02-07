@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.antigravity.aegis.data.model.ActiveRole
-import com.antigravity.aegis.data.model.EntityType
-import com.antigravity.aegis.data.model.UserConfig
+import com.antigravity.aegis.data.local.entity.ActiveRole
+import com.antigravity.aegis.data.local.entity.EntityType
+import com.antigravity.aegis.data.local.entity.UserConfig
 import java.io.File
 
 @Composable

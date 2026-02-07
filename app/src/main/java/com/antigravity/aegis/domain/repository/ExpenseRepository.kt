@@ -1,6 +1,6 @@
 package com.antigravity.aegis.domain.repository
 
-import com.antigravity.aegis.data.model.ExpenseEntity
+import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import kotlinx.coroutines.flow.Flow
 
 interface ExpenseRepository {

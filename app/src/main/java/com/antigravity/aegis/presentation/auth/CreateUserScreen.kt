@@ -28,7 +28,7 @@ fun CreateUserScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.create_new_user_title),
+            text = stringResource(R.string.auth_create_user_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary
         )
@@ -38,14 +38,14 @@ fun CreateUserScreen(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text(stringResource(R.string.name_label)) },
+            label = { Text(stringResource(R.string.general_name)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
         
-        Text(stringResource(R.string.language_label), style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.general_language), style = MaterialTheme.typography.labelMedium)
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -66,7 +66,7 @@ fun CreateUserScreen(
         OutlinedTextField(
             value = pin,
             onValueChange = { if (it.length <= 6) pin = it },
-            label = { Text(stringResource(R.string.enter_pin_label)) },
+            label = { Text(stringResource(R.string.auth_login_pin_label)) },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
              modifier = Modifier.fillMaxWidth()
@@ -79,7 +79,7 @@ fun CreateUserScreen(
             enabled = name.isNotBlank() && pin.length >= 4,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(R.string.create_and_enter))
+            Text(stringResource(R.string.auth_create_user_button))
         }
     }
 }

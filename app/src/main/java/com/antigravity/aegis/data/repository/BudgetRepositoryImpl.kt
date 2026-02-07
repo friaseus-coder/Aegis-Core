@@ -1,9 +1,9 @@
 package com.antigravity.aegis.data.repository
 
 import com.antigravity.aegis.data.local.dao.BudgetDao
-import com.antigravity.aegis.data.model.BudgetLineEntity
-import com.antigravity.aegis.data.model.BudgetLogEntity
-import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.local.entity.BudgetLineEntity
+import com.antigravity.aegis.data.local.entity.BudgetLogEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.domain.repository.BudgetRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

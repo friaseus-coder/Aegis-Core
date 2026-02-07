@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.antigravity.aegis.R
 import com.antigravity.aegis.data.local.entity.ClientEntity
-import com.antigravity.aegis.data.model.ProjectEntity
-import com.antigravity.aegis.data.model.DocumentEntity
+import com.antigravity.aegis.data.local.entity.ProjectEntity
+import com.antigravity.aegis.data.local.entity.DocumentEntity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
@@ -88,7 +88,7 @@ fun ClientDashboardScreen(
             // 2. Metrics (Placeholders)
             item {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricCard("Proyectos Activos", "${projects.filter { it.status == com.antigravity.aegis.data.model.ProjectStatus.ACTIVE }.size}")
+                    MetricCard("Proyectos Activos", "${projects.filter { it.status == com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE }.size}")
                     MetricCard("Presupuestos", "€ 0.00") // Placeholder
                     MetricCard("Horas Mes", "0h") // Placeholder
                 }

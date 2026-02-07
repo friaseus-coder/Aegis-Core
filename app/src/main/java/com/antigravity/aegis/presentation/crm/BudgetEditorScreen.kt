@@ -39,7 +39,7 @@ fun BudgetEditorScreen(
     
     var showAddLineDialog by remember { mutableStateOf(false) }
 
-    val shareTitle = stringResource(R.string.share_pdf_title)
+    val shareTitle = stringResource(R.string.settings_share_pdf_title)
 
     LaunchedEffect(projectId, quoteId) {
         if (quoteId != null && quoteId != 0) {
@@ -71,17 +71,17 @@ fun BudgetEditorScreen(
             AegisTopAppBar(
                 actions = {
                     IconButton(onClick = { viewModel.generatePdf() }) {
-                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_content_desc))
+                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.cd_share))
                     }
                     IconButton(onClick = { viewModel.saveBudget() }) {
-                        Icon(Icons.Default.Save, contentDescription = stringResource(R.string.save_content_desc))
+                        Icon(Icons.Default.Save, contentDescription = stringResource(R.string.cd_save))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddLineDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_line_fab))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.general_add))
             }
         }
     ) { padding ->
@@ -94,19 +94,19 @@ fun BudgetEditorScreen(
                 OutlinedTextField(
                     value = quote!!.title,
                     onValueChange = { viewModel.updateQuoteDetails(it, quote!!.description) },
-                    label = { Text(stringResource(R.string.budget_title_label)) },
+                    label = { Text(stringResource(R.string.quotes_budget_editor_title)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = quote!!.description,
                     onValueChange = { viewModel.updateQuoteDetails(quote!!.title, it) },
-                    label = { Text(stringResource(R.string.budget_desc_label)) },
+                    label = { Text(stringResource(R.string.quotes_item_desc_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(stringResource(R.string.budget_lines_title), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.quotes_budget_lines_title), style = MaterialTheme.typography.titleMedium)
                 
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(lines) { line ->
@@ -121,7 +121,7 @@ fun BudgetEditorScreen(
                             }
                             Text("€${(line.quantity * line.unitPrice) * (1 + line.taxRate)}", style = MaterialTheme.typography.bodyLarge)
                             IconButton(onClick = { viewModel.removeLine(line) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_content_desc))
+                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.cd_delete))
                             }
                         }
                         Divider()
@@ -130,7 +130,7 @@ fun BudgetEditorScreen(
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(R.string.total_amount_label) + ": €${quote!!.totalAmount}", 
+                    text = stringResource(R.string.quotes_total_amount_label) + ": €${quote!!.totalAmount}", 
                     style = MaterialTheme.typography.headlineSmall, 
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.align(Alignment.End)
@@ -161,15 +161,15 @@ fun AddLineDialog(onDismiss: () -> Unit, onConfirm: (String, Double, Double, Dou
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_line_dialog_title)) },
+        title = { Text(stringResource(R.string.quotes_add_line_button)) },
         text = {
             Column {
-                OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text(stringResource(R.string.line_description_label)) })
+                OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text(stringResource(R.string.quotes_item_desc_label)) })
                 Row {
                     OutlinedTextField(
                         value = quantity, 
                         onValueChange = { quantity = it }, 
-                        label = { Text(stringResource(R.string.quantity_label)) },
+                        label = { Text(stringResource(R.string.quotes_item_qty_label)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
@@ -177,7 +177,7 @@ fun AddLineDialog(onDismiss: () -> Unit, onConfirm: (String, Double, Double, Dou
                     OutlinedTextField(
                         value = price, 
                         onValueChange = { price = it }, 
-                        label = { Text(stringResource(R.string.price_label)) },
+                        label = { Text(stringResource(R.string.quotes_item_price_label)) },
                          modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
@@ -186,7 +186,7 @@ fun AddLineDialog(onDismiss: () -> Unit, onConfirm: (String, Double, Double, Dou
                  OutlinedTextField(
                     value = tax, 
                     onValueChange = { tax = it }, 
-                    label = { Text(stringResource(R.string.tax_label)) },
+                    label = { Text(stringResource(R.string.quotes_item_tax_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
@@ -198,9 +198,9 @@ fun AddLineDialog(onDismiss: () -> Unit, onConfirm: (String, Double, Double, Dou
                 val t = (tax.toDoubleOrNull() ?: 0.0) / 100.0
                 if (description.isNotBlank()) onConfirm(description, q, p, t)
             }) {
-                Text(stringResource(R.string.add_button))
+                Text(stringResource(R.string.general_save))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) } }
     )
 }

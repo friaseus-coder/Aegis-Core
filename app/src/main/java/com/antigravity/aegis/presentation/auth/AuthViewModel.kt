@@ -13,15 +13,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-import com.antigravity.aegis.data.model.UserEntity
+import com.antigravity.aegis.data.local.entity.UserEntity
 
-import com.antigravity.aegis.data.model.UserRole
+import com.antigravity.aegis.data.local.entity.UserRole
 
 import com.antigravity.aegis.domain.usecase.EnableBiometricsUseCase
 import com.antigravity.aegis.domain.usecase.LoginWithBiometricsUseCase
 import com.antigravity.aegis.data.security.BiometricPromptManager
 import com.antigravity.aegis.data.security.BiometricResult
 import com.antigravity.aegis.data.security.EncryptionKeyManager
+import com.antigravity.aegis.presentation.util.UiText
 import com.antigravity.aegis.R
 
 @HiltViewModel
@@ -60,7 +61,7 @@ class AuthViewModel @Inject constructor(
     val biometricPromptState = _biometricPromptState.asStateFlow()
     
     // Login error state - contains error message or null if no error
-    private val _loginError = MutableStateFlow<String?>(null)
+    private val _loginError = MutableStateFlow<UiText?>(null)
     val loginError = _loginError.asStateFlow()
 
     init {
@@ -110,7 +111,7 @@ class AuthViewModel @Inject constructor(
                 val config = settingsRepository.getUserConfig().first()
                 if (config == null) {
                     // Create default if missing
-                     settingsRepository.insertOrUpdateConfig(com.antigravity.aegis.data.model.UserConfig(language = lang))
+                     settingsRepository.insertOrUpdateConfig(com.antigravity.aegis.data.local.entity.UserConfig(language = lang))
                 } else {
                     settingsRepository.updateLanguage(lang)
                 }
@@ -159,7 +160,7 @@ class AuthViewModel @Inject constructor(
                 encryptionKeyManager.setMasterKey(mk)
                 _authState.value = AuthState.RecoverySuccess
             } else {
-                _loginError.value = "Palabras incorrectas"
+                _loginError.value = UiText.StringResource(R.string.auth_error_invalid_seed)
             }
         }
     }
@@ -173,7 +174,7 @@ class AuthViewModel @Inject constructor(
                  encryptionKeyManager.setMasterKey(mk)
                  _authState.value = AuthState.RecoverySuccess
              } else {
-                 _loginError.value = "Datos incorrectos"
+                 _loginError.value = UiText.StringResource(R.string.auth_error_invalid_credentials)
              }
         }
     }
@@ -193,7 +194,7 @@ class AuthViewModel @Inject constructor(
                      _authState.value = AuthState.Authenticated
                  }
             } else {
-                _loginError.value = "PIN incorrecto"
+                _loginError.value = UiText.StringResource(R.string.auth_error_pin_incorrect)
             }
         }
     }
@@ -228,7 +229,7 @@ class AuthViewModel @Inject constructor(
                     name = name, 
                     language = language, 
                     pin = pin, 
-                    role = com.antigravity.aegis.data.model.UserRole.ADMIN,
+                    role = com.antigravity.aegis.data.local.entity.UserRole.ADMIN,
                     email = email,
                     phone = phone,
                     seedPhrase = currentSetup.seedPhrase, 
@@ -267,13 +268,13 @@ class AuthViewModel @Inject constructor(
                     }
                 }
                 _biometricPromptState.value = BiometricPromptConfig(
-                    titleResId = R.string.biometric_login_title,
-                    descriptionResId = R.string.biometric_login_desc,
+                    titleResId = R.string.auth_login_biometric_prompt_title,
+                    descriptionResId = R.string.auth_login_biometric_prompt_desc,
                     cryptoObject = androidx.biometric.BiometricPrompt.CryptoObject(cipher)
                 )
             } else {
                 // Biometrics not set up for this user
-                _loginError.value = "Biometría no disponible para este usuario"
+                _loginError.value = UiText.StringResource(R.string.auth_error_biometric_unavailable)
             }
         }
     }
@@ -295,8 +296,8 @@ class AuthViewModel @Inject constructor(
                     }
                 }
                 _biometricPromptState.value = BiometricPromptConfig(
-                    titleResId = R.string.biometric_enable_title,
-                    descriptionResId = R.string.biometric_enable_desc,
+                    titleResId = R.string.auth_login_biometric_enable_title,
+                    descriptionResId = R.string.auth_login_biometric_enable_desc,
                     cryptoObject = androidx.biometric.BiometricPrompt.CryptoObject(cipher)
                 )
             }
@@ -319,7 +320,7 @@ class AuthViewModel @Inject constructor(
                 }
             }
             is BiometricResult.AuthenticationError -> {
-                _loginError.value = "Error biométrico: ${result.error}"
+                _loginError.value = UiText.StringResource(R.string.auth_error_biometric_generic, result.error)
                 pendingBiometricAction = null
             }
             else -> Unit

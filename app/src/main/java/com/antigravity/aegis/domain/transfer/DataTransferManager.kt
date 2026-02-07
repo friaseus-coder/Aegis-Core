@@ -3,7 +3,7 @@ package com.antigravity.aegis.domain.transfer
 import android.net.Uri
 import android.content.Context
 import com.antigravity.aegis.data.local.dao.CrmDao
-import com.antigravity.aegis.data.model.*
+import com.antigravity.aegis.data.local.entity.*
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.domain.repository.BackupRepository
 import dagger.hilt.android.qualifiers.ApplicationContext

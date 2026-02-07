@@ -1,4 +1,4 @@
-package com.antigravity.aegis.data.model
+package com.antigravity.aegis.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.Index

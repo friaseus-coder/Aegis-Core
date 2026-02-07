@@ -29,7 +29,7 @@ fun CreateQuoteScreen(
     var description by remember { mutableStateOf("") }
     
     // Line Items State
-    val budgetLines = remember { mutableStateListOf<com.antigravity.aegis.data.model.BudgetLineEntity>() }
+    val budgetLines = remember { mutableStateListOf<com.antigravity.aegis.data.local.entity.BudgetLineEntity>() }
     
     // New Item Inputs
     var newItemDesc by remember { mutableStateOf("") }
@@ -46,10 +46,10 @@ fun CreateQuoteScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.new_quote_title)) },
+                title = { Text(stringResource(R.string.quotes_title_new)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back_content_desc))
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
@@ -67,7 +67,7 @@ fun CreateQuoteScreen(
                         },
                         enabled = selectedClient != null && title.isNotBlank() && budgetLines.isNotEmpty()
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.save_content_desc))
+                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.general_create))
                     }
                 }
             )
@@ -86,10 +86,10 @@ fun CreateQuoteScreen(
                 onExpandedChange = { expandedClientDropdown = !expandedClientDropdown }
             ) {
                 OutlinedTextField(
-                    value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.select_client_placeholder),
+                    value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.quotes_select_client_placeholder),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text(stringResource(R.string.client_label)) },
+                    label = { Text(stringResource(R.string.quotes_no_clients_found)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedClientDropdown) },
                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                     modifier = Modifier.menuAnchor().fillMaxWidth()
@@ -120,14 +120,14 @@ fun CreateQuoteScreen(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text(stringResource(R.string.quote_title_label)) },
+                label = { Text(stringResource(R.string.quotes_title_label)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text(stringResource(R.string.quote_description_label)) },
+                label = { Text(stringResource(R.string.quotes_description_label)) },
                 modifier = Modifier.fillMaxWidth().height(100.dp),
                 maxLines = 3
             )
@@ -164,7 +164,7 @@ fun CreateQuoteScreen(
                     val price = newItemPrice.toDoubleOrNull()
                     if (newItemDesc.isNotBlank() && qty != null && price != null) {
                         budgetLines.add(
-                            com.antigravity.aegis.data.model.BudgetLineEntity(
+                            com.antigravity.aegis.data.local.entity.BudgetLineEntity(
                                 quoteId = 0, // Temp
                                 description = newItemDesc,
                                 quantity = qty,

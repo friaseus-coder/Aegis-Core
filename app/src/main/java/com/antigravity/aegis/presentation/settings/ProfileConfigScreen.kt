@@ -27,8 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.antigravity.aegis.data.model.ActiveRole
-import com.antigravity.aegis.data.model.EntityType
+import com.antigravity.aegis.data.local.entity.ActiveRole
+import com.antigravity.aegis.data.local.entity.EntityType
 import com.antigravity.aegis.presentation.MainViewModel
 import java.io.File
 

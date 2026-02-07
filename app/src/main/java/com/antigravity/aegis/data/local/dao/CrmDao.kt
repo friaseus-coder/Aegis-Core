@@ -6,13 +6,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.antigravity.aegis.data.local.entity.ClientEntity
-import com.antigravity.aegis.data.model.ProjectEntity
-import com.antigravity.aegis.data.model.TaskEntity
-import com.antigravity.aegis.data.model.WorkReportEntity
-import com.antigravity.aegis.data.model.QuoteEntity
-import com.antigravity.aegis.data.model.ExpenseEntity
-import com.antigravity.aegis.data.model.ProductEntity
-import com.antigravity.aegis.data.model.MileageLogEntity
+import com.antigravity.aegis.data.local.entity.ProjectEntity
+import com.antigravity.aegis.data.local.entity.TaskEntity
+import com.antigravity.aegis.data.local.entity.WorkReportEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
+import com.antigravity.aegis.data.local.entity.ExpenseEntity
+import com.antigravity.aegis.data.local.entity.ProductEntity
+import com.antigravity.aegis.data.local.entity.MileageLogEntity
 import kotlinx.coroutines.flow.Flow
 
 /**

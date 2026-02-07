@@ -1,7 +1,7 @@
 package com.antigravity.aegis.data.repository
 
 import com.antigravity.aegis.data.local.dao.TaskDao
-import com.antigravity.aegis.data.model.TaskEntity
+import com.antigravity.aegis.data.local.entity.TaskEntity
 import com.antigravity.aegis.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

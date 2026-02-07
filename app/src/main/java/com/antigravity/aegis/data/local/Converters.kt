@@ -1,8 +1,8 @@
 package com.antigravity.aegis.data.local
 
 import androidx.room.TypeConverter
-import com.antigravity.aegis.data.model.ActiveRole
-import com.antigravity.aegis.data.model.EntityType
+import com.antigravity.aegis.data.local.entity.ActiveRole
+import com.antigravity.aegis.data.local.entity.EntityType
 
 class Converters {
     @TypeConverter
@@ -34,16 +34,16 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromProjectStatus(value: com.antigravity.aegis.data.model.ProjectStatus): String {
+    fun fromProjectStatus(value: com.antigravity.aegis.data.local.entity.ProjectStatus): String {
         return value.name
     }
 
     @TypeConverter
-    fun toProjectStatus(value: String): com.antigravity.aegis.data.model.ProjectStatus {
+    fun toProjectStatus(value: String): com.antigravity.aegis.data.local.entity.ProjectStatus {
         return try {
-            com.antigravity.aegis.data.model.ProjectStatus.valueOf(value)
+            com.antigravity.aegis.data.local.entity.ProjectStatus.valueOf(value)
         } catch (e: IllegalArgumentException) {
-            com.antigravity.aegis.data.model.ProjectStatus.ACTIVE // Fallback
+            com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE // Fallback
         }
     }
 }

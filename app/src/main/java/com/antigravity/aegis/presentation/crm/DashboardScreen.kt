@@ -49,13 +49,13 @@ fun DashboardScreen(
                 onClick = onNavigateToClients,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.manage_clients))
+                Text(stringResource(R.string.dashboard_manage_clients))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                stringResource(R.string.active_projects),
+                stringResource(R.string.dashboard_active_projects),
                 style = MaterialTheme.typography.titleLarge
             )
             
@@ -73,9 +73,9 @@ fun DashboardScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(project.name, style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.status_label, project.status), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.dashboard_status_label, project.status), style = MaterialTheme.typography.bodyMedium)
                             project.endDate?.let {
-                                Text(stringResource(R.string.deadline_label, it), style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.dashboard_deadline_label, it), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
@@ -83,7 +83,7 @@ fun DashboardScreen(
                 
                 if (activeProjects.isEmpty()) {
                     item {
-                        Text(stringResource(R.string.no_active_projects), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.dashboard_no_projects), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }

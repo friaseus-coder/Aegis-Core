@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.antigravity.aegis.data.model.DocumentEntity
+import com.antigravity.aegis.data.local.entity.DocumentEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

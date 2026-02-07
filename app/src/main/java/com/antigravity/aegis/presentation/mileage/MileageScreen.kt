@@ -66,9 +66,9 @@ fun MileageScreen(
         is MileageViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text(stringResource(R.string.import_errors_title)) },
+                title = { Text(stringResource(R.string.data_import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.ok_button)) } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.general_ok)) } }
             )
         }
         is MileageViewModel.TransferState.ValidationSuccess -> {
@@ -100,7 +100,7 @@ fun MileageScreen(
                 OutlinedTextField(
                     value = tempPrice,
                     onValueChange = { tempPrice = it },
-                    label = { Text(stringResource(R.string.price_per_km)) },
+                    label = { Text(stringResource(R.string.mileage_price_per_km)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
             },
@@ -108,10 +108,10 @@ fun MileageScreen(
                 TextButton(onClick = {
                     viewModel.updatePricePerKm(tempPrice.toDoubleOrNull() ?: 0.0)
                     showSettings = false
-                }) { Text(stringResource(R.string.save_button)) }
+                }) { Text(stringResource(R.string.general_save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showSettings = false }) { Text(stringResource(R.string.cancel_button)) }
+                TextButton(onClick = { showSettings = false }) { Text(stringResource(R.string.general_cancel)) }
             }
         )
     }
@@ -148,7 +148,7 @@ fun MileageScreen(
         ) {
             // Screen Title
             Text(
-                text = stringResource(R.string.mileage_log_title),
+                text = stringResource(R.string.mileage_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -160,18 +160,18 @@ fun MileageScreen(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.new_trip_calculator), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.mileage_calculator_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = origin, onValueChange = { origin = it },
-                            label = { Text(stringResource(R.string.origin_label)) },
+                            label = { Text(stringResource(R.string.mileage_origin_label)) },
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = destination, onValueChange = { destination = it },
-                            label = { Text(stringResource(R.string.destination_label)) },
+                            label = { Text(stringResource(R.string.mileage_destination_label)) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -179,13 +179,13 @@ fun MileageScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = startOdo, onValueChange = { startOdo = it },
-                            label = { Text(stringResource(R.string.start_odo_label)) },
+                            label = { Text(stringResource(R.string.mileage_start_odo_label)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = endOdo, onValueChange = { endOdo = it },
-                            label = { Text(stringResource(R.string.end_odo_label)) },
+                            label = { Text(stringResource(R.string.mileage_end_odo_label)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
@@ -227,7 +227,7 @@ fun MileageScreen(
                             },
                             enabled = dist > 0
                         ) {
-                            Text(stringResource(R.string.log_trip))
+                            Text(stringResource(R.string.mileage_log_trip_button))
                         }
                     }
                 }
@@ -238,9 +238,9 @@ fun MileageScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.recent_trips), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.mileage_recent_trips_title), style = MaterialTheme.typography.titleMedium)
                 TextButton(onClick = { viewModel.exportAnnualReport() }) {
-                    Text(stringResource(R.string.export_annual_csv))
+                    Text(stringResource(R.string.mileage_export_annual_button))
                 }
             }
             
@@ -257,7 +257,7 @@ fun MileageScreen(
 }
 
 @Composable
-fun MileageItem(log: com.antigravity.aegis.data.model.MileageLogEntity) {
+fun MileageItem(log: com.antigravity.aegis.data.local.entity.MileageLogEntity) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Row(
             modifier = Modifier.padding(12.dp).fillMaxWidth(),

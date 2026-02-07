@@ -75,7 +75,7 @@ fun MainMenuScreen(
             )
 
             Text(
-                stringResource(R.string.select_module),
+                stringResource(R.string.main_menu_select_module),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -92,38 +92,38 @@ fun MainMenuScreen(
                 for (module in enabledModules) {
                     when (module) {
                         AppModule.CRM -> ModuleCard(
-                            title = stringResource(R.string.module_crm_title),
-                            subtitle = stringResource(R.string.module_crm_subtitle),
+                            title = stringResource(R.string.home_module_crm_title),
+                            subtitle = stringResource(R.string.home_module_crm_subtitle),
                             icon = Icons.Default.Home,
                             onClick = onNavigateToCrm
                         )
                         AppModule.FIELD_SERVICE -> ModuleCard(
-                            title = stringResource(R.string.module_field_title),
-                            subtitle = stringResource(R.string.module_field_subtitle),
+                            title = stringResource(R.string.home_module_field_title),
+                            subtitle = stringResource(R.string.home_module_field_subtitle),
                             icon = Icons.Default.Build,
                             onClick = onNavigateToFieldService
                         )
                         AppModule.BUDGETS -> ModuleCard(
-                            title = stringResource(R.string.module_budgets_title),
-                            subtitle = stringResource(R.string.module_budgets_subtitle),
+                            title = stringResource(R.string.home_module_budgets_title),
+                            subtitle = stringResource(R.string.home_module_budgets_subtitle),
                             icon = Icons.Default.DateRange,
                             onClick = onNavigateToBudgets
                         )
                         AppModule.EXPENSES -> ModuleCard(
-                            title = stringResource(R.string.module_expenses_title),
-                            subtitle = stringResource(R.string.module_expenses_subtitle),
+                            title = stringResource(R.string.home_module_expenses_title),
+                            subtitle = stringResource(R.string.home_module_expenses_subtitle),
                             icon = Icons.Default.Receipt,
                             onClick = onNavigateToExpenses
                         )
                         AppModule.INVENTORY -> ModuleCard(
-                            title = stringResource(R.string.module_inventory_title),
-                            subtitle = stringResource(R.string.module_inventory_subtitle),
+                            title = stringResource(R.string.home_module_inventory_title),
+                            subtitle = stringResource(R.string.home_module_inventory_subtitle),
                             icon = Icons.Default.ShoppingBag,
                             onClick = onNavigateToInventory
                         )
                         AppModule.MILEAGE -> ModuleCard(
-                            title = stringResource(R.string.module_mileage_title),
-                            subtitle = stringResource(R.string.module_mileage_subtitle),
+                            title = stringResource(R.string.home_module_mileage_title),
+                            subtitle = stringResource(R.string.home_module_mileage_subtitle),
                             icon = Icons.Default.DirectionsCar,
                             onClick = onNavigateToMileage
                         )

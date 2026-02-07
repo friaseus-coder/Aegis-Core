@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.data.local.dao.CrmDao
 import com.antigravity.aegis.data.local.dao.UserConfigDao
-import com.antigravity.aegis.data.model.MileageLogEntity
+import com.antigravity.aegis.data.local.entity.MileageLogEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow

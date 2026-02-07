@@ -2,7 +2,7 @@ package com.antigravity.aegis.presentation.inventory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.antigravity.aegis.data.model.ProductEntity
+import com.antigravity.aegis.data.local.entity.ProductEntity
 import com.antigravity.aegis.domain.repository.CrmRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

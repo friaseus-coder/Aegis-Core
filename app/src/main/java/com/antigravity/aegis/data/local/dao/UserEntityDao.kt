@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.antigravity.aegis.data.model.UserEntity
+import com.antigravity.aegis.data.local.entity.UserEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -25,7 +25,7 @@ interface UserEntityDao {
     suspend fun deleteUser(userId: Int)
 
     @Query("UPDATE users SET role = :role WHERE id = :userId")
-    suspend fun updateUserRole(userId: Int, role: com.antigravity.aegis.data.model.UserRole)
+    suspend fun updateUserRole(userId: Int, role: com.antigravity.aegis.data.local.entity.UserRole)
     @Query("SELECT * FROM users")
     suspend fun getAllUsersList(): List<UserEntity>
 

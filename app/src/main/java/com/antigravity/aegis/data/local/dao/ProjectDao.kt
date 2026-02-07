@@ -1,11 +1,17 @@
 package com.antigravity.aegis.data.local.dao
 
 import androidx.room.*
-import com.antigravity.aegis.data.model.ProjectEntity
+import com.antigravity.aegis.data.local.entity.ProjectEntity
 import kotlinx.coroutines.flow.Flow
+
+import com.antigravity.aegis.data.local.relation.ProjectWithTasks
 
 @Dao
 interface ProjectDao {
+    @Transaction
+    @Query("SELECT * FROM projects WHERE id = :projectId")
+    fun getProjectWithTasks(projectId: Int): Flow<ProjectWithTasks>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: ProjectEntity): Long
 

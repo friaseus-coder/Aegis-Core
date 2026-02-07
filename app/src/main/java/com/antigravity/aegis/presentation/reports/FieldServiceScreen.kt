@@ -50,7 +50,7 @@ fun FieldServiceScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                stringResource(R.string.work_reports_section_title), 
+                stringResource(R.string.crm_reports_section_title), 
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -61,18 +61,17 @@ fun FieldServiceScreen(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(stringResource(R.string.report_item_title, report.id), style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.date_label, java.util.Date(report.date).toString()))
-                            Text(stringResource(R.string.project_id_label, report.projectId))
+                            Text(stringResource(R.string.crm_report_item_title, report.id), style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.dashboard_deadline_label, java.util.Date(report.date).toString())) // Reusing deadline label for date format temporarily or adding general_date
+                            Text(stringResource(R.string.crm_project_id_label, report.projectId))
                             Text(report.description, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
                     }
                 }
                 if (allReports.isEmpty()) {
-                    item { Text(stringResource(R.string.no_work_reports_found)) }
+                    item { Text(stringResource(R.string.field_reports_not_found)) }
                 }
             }
         }
     }
 }
-

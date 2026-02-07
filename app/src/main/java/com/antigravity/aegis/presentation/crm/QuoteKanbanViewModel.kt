@@ -6,7 +6,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.data.local.entity.ClientEntity
-import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.reports.PdfGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -121,7 +121,7 @@ class QuoteKanbanViewModel @Inject constructor(
     fun createQuote(
         title: String,
         clientId: Int,
-        lines: List<com.antigravity.aegis.data.model.BudgetLineEntity>,
+        lines: List<com.antigravity.aegis.data.local.entity.BudgetLineEntity>,
         description: String
     ) {
         viewModelScope.launch {

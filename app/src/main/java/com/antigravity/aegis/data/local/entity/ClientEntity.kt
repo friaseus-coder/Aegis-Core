@@ -22,6 +22,7 @@ data class ClientEntity(
     val codigoPostal: String? = null,
     // Categoría auto-calculada (Activo si tiene proyectos/presupuestos, Potencial si no)
     val categoria: String = "Potencial",
-    val notas: String? = null
+    val notas: String? = null,
+    val isSynced: Boolean = false
 )
 

@@ -1,7 +1,7 @@
 package com.antigravity.aegis.domain.repository
 
-import com.antigravity.aegis.data.model.UserEntity
-import com.antigravity.aegis.data.model.UserRole
+import com.antigravity.aegis.data.local.entity.UserEntity
+import com.antigravity.aegis.data.local.entity.UserRole
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {

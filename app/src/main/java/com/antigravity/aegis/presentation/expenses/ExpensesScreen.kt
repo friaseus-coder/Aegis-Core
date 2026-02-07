@@ -75,9 +75,9 @@ fun ExpensesScreen(
         is ExpensesViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text(stringResource(R.string.import_errors_title)) },
+                title = { Text(stringResource(R.string.data_import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.ok_button)) } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.general_ok)) } }
             )
         }
         is ExpensesViewModel.TransferState.ValidationSuccess -> {
@@ -128,10 +128,10 @@ fun ExpensesScreen(
             AegisTopAppBar(
                 actions = {
                     IconButton(onClick = { viewModel.exportExpenses() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.export_csv))
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.data_export_csv))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.import_csv))
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.data_import_csv))
                     }
                 }
             )
@@ -164,7 +164,7 @@ fun ExpensesScreen(
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.export_quarter))
+                    Text(stringResource(R.string.expenses_export_quarter_button))
                 }
                 
                 Button(
@@ -180,7 +180,7 @@ fun ExpensesScreen(
                 ) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.scan_label))
+                    Text(stringResource(R.string.expenses_merchant_label))
                 }
             }
             
@@ -204,7 +204,7 @@ fun ExpensesScreen(
 
 @Composable
 fun AddExpenseDialog(
-    projects: List<com.antigravity.aegis.data.model.ProjectEntity>,
+    projects: List<com.antigravity.aegis.data.local.entity.ProjectEntity>,
     scannedData: com.antigravity.aegis.domain.expenses.OcrManager.ExtractedData?,
     imageUri: Uri?,
     onSave: (Long, Double, String, String, Int?) -> Unit,
@@ -213,7 +213,7 @@ fun AddExpenseDialog(
     var merchant by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf(scannedData?.totalAmount?.toString() ?: "") }
     var category by remember { mutableStateOf("Material") }
-    var selectedProject by remember { mutableStateOf<com.antigravity.aegis.data.model.ProjectEntity?>(null) }
+    var selectedProject by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
     var date by remember { mutableStateOf(scannedData?.date ?: System.currentTimeMillis()) }
     
     // Simple Category Dropdown logic (could be improved)
@@ -223,7 +223,7 @@ fun AddExpenseDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (scannedData != null) stringResource(R.string.review_ticket) else "Nueva Entrada") },
+        title = { Text(if (scannedData != null) stringResource(R.string.expenses_review_ticket_title) else "Nueva Entrada") },
         text = {
             Column {
                 if (imageUri != null) {
@@ -242,14 +242,14 @@ fun AddExpenseDialog(
                 OutlinedTextField(
                     value = merchant,
                     onValueChange = { merchant = it },
-                    label = { Text(stringResource(R.string.merchant_concept)) },
+                    label = { Text(stringResource(R.string.expenses_merchant_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text(stringResource(R.string.amount_label)) },
+                    label = { Text(stringResource(R.string.expenses_amount_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -287,17 +287,17 @@ fun AddExpenseDialog(
                  onClick = {
                      onSave(date, amount.toDoubleOrNull() ?: 0.0, merchant, category, selectedProject?.id)
                  }
-            ) { Text(stringResource(R.string.save_button)) }
+            ) { Text(stringResource(R.string.general_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
         }
     )
 }
 
 @Composable
 fun ExpenseCard(
-    expense: com.antigravity.aegis.data.model.ExpenseEntity, 
+    expense: com.antigravity.aegis.data.local.entity.ExpenseEntity, 
     onDistribute: () -> Unit = {}
 ) {
     Card(
@@ -336,10 +336,10 @@ fun ExpenseCard(
                     onClick = onDistribute,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text(stringResource(R.string.distribute_button))
+                    Text(stringResource(R.string.settings_distribute_button))
                 }
             } else if (expense.status == "Distributed") {
-                 Text(stringResource(R.string.distributed_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.align(Alignment.End))
+                 Text(stringResource(R.string.settings_distributed_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.align(Alignment.End))
             }
         }
     }

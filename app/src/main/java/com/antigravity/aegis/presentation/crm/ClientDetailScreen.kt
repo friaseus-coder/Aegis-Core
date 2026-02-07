@@ -50,7 +50,7 @@ fun ClientDetailScreen(
 
     if (client == null) {
         // Fallback or Loading
-        Text(stringResource(R.string.client_not_found))
+        Text(stringResource(R.string.crm_client_not_found))
         return
     }
 
@@ -65,7 +65,7 @@ fun ClientDetailScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddProjectDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_project_fab))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.crm_project_add_button))
             }
         }
     ) { padding ->
@@ -82,14 +82,14 @@ fun ClientDetailScreen(
                     if (address.isNotBlank()) {
                          Text("Dirección: $address")
                     }
-                    Text(stringResource(R.string.client_email_label, client!!.email ?: stringResource(R.string.not_available_short)))
-                    Text(stringResource(R.string.client_phone_label, client!!.phone ?: stringResource(R.string.not_available_short)))
-                    Text("Notas: ${client!!.notas ?: stringResource(R.string.not_available_short)}")
+                    Text(stringResource(R.string.crm_client_detail_email, client!!.email ?: stringResource(R.string.general_na)))
+                    Text(stringResource(R.string.crm_client_detail_phone, client!!.phone ?: stringResource(R.string.general_na)))
+                    Text("Notas: ${client!!.notas ?: stringResource(R.string.general_na)}")
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Text(stringResource(R.string.projects_section_title), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.crm_projects_section_title), style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn {
@@ -124,21 +124,21 @@ fun AddProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String, Long?) -
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_project_dialog_title)) },
+        title = { Text(stringResource(R.string.crm_project_new_dialog_title)) },
         text = {
             Column {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.project_name_label)) })
+                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.crm_project_name_label)) })
             }
         },
         confirmButton = {
             Button(onClick = { 
                 if (name.isNotBlank()) onConfirm(name, status, null) 
             }) {
-                Text(stringResource(R.string.create_button))
+                Text(stringResource(R.string.general_create))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
         }
     )
 }

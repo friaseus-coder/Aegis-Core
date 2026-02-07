@@ -25,12 +25,12 @@ fun ArchivedProjectsScreen(
 
     Scaffold(
         topBar = {
-            AegisTopAppBar(title = stringResource(R.string.archived_projects_title))
+            AegisTopAppBar(title = stringResource(R.string.crm_archived_projects_title))
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
             if (archivedProjects.isEmpty()) {
-                Text(stringResource(R.string.no_archived_projects))
+                Text(stringResource(R.string.crm_archived_projects_empty))
             } else {
                 LazyColumn {
                     items(archivedProjects) { project ->
@@ -50,7 +50,7 @@ fun ArchivedProjectsScreen(
                                     Text("Archived on: ${java.util.Date(project.endDate ?: 0).toString()}", style = MaterialTheme.typography.bodySmall)
                                 }
                                 Button(onClick = { viewModel.reactivateProject(project.id) }) {
-                                    Text(stringResource(R.string.reactivate_button))
+                                    Text(stringResource(R.string.crm_project_reactivate_button))
                                 }
                             }
                         }

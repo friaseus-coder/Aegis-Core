@@ -1,7 +1,6 @@
 package com.antigravity.aegis.data.model
 
-import com.antigravity.aegis.data.model.*
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.data.local.entity.*
 
 data class BackupData(
     val version: Int = 1,

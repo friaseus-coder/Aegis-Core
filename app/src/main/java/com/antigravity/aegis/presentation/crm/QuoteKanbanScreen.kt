@@ -36,7 +36,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.antigravity.aegis.data.local.entity.ClientEntity
-import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.domain.reports.PdfGenerator
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt

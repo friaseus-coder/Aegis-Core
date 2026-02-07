@@ -1,9 +1,9 @@
 package com.antigravity.aegis.data.local.dao
 
 import androidx.room.*
-import com.antigravity.aegis.data.model.BudgetLineEntity
-import com.antigravity.aegis.data.model.BudgetLogEntity
-import com.antigravity.aegis.data.model.QuoteEntity
+import com.antigravity.aegis.data.local.entity.BudgetLineEntity
+import com.antigravity.aegis.data.local.entity.BudgetLogEntity
+import com.antigravity.aegis.data.local.entity.QuoteEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

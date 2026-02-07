@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
-import com.antigravity.aegis.data.model.UserEntity
+import com.antigravity.aegis.data.local.entity.UserEntity
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
@@ -95,7 +95,7 @@ fun LoginScreen(
                          Column(horizontalAlignment = Alignment.CenterHorizontally) {
                              CircularProgressIndicator()
                              Spacer(modifier = Modifier.height(16.dp))
-                             Text(stringResource(R.string.loading_label))
+                             Text(stringResource(R.string.general_loading))
                          }
                      }
                 }
@@ -108,7 +108,8 @@ fun LoginScreen(
                      }
                 }
                 AuthState.Locked, AuthState.Authenticated -> {
-                    val loginError by viewModel.loginError.collectAsState()
+                    val loginErrorUi by viewModel.loginError.collectAsState()
+                    val loginError = loginErrorUi?.asString()
                     
                     // Clear PIN when there's an error
                     LaunchedEffect(loginError) {
@@ -182,15 +183,15 @@ private fun LoginContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = onNavigateToCreateUser) {
-                Text(stringResource(R.string.create_user_label), fontSize = 12.sp)
+                Text(stringResource(R.string.auth_login_create_user_button), fontSize = 12.sp)
             }
             
             Row {
                 TextButton(onClick = { onLanguageChange("es") }) {
-                    Text("ES", fontWeight = if (language == "es") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
+                    Text(stringResource(R.string.language_code_es), fontWeight = if (language == "es") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
                 }
                 TextButton(onClick = { onLanguageChange("en") }) {
-                    Text("EN", fontWeight = if (language == "en") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
+                    Text(stringResource(R.string.language_code_en), fontWeight = if (language == "en") androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
                 }
             }
         }
@@ -207,7 +208,7 @@ private fun LoginContent(
         Spacer(modifier = Modifier.height(32.dp))
         
         // User Selector
-        Text(stringResource(R.string.select_user_label), style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.auth_login_select_user_title), style = MaterialTheme.typography.labelMedium)
         
         if (users.isNotEmpty()) {
             androidx.compose.foundation.lazy.LazyRow(
@@ -224,7 +225,7 @@ private fun LoginContent(
             }
         } else {
             Spacer(modifier = Modifier.height(16.dp))
-            Text("No users found", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.auth_login_no_users_found), style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(16.dp))
         }
         
@@ -235,7 +236,7 @@ private fun LoginContent(
         OutlinedTextField(
             value = pin,
             onValueChange = onPinChange,
-            label = { Text(stringResource(R.string.enter_pin_label)) },
+            label = { Text(stringResource(R.string.auth_login_pin_label)) },
             visualTransformation = if (showPin) VisualTransformation.None else PasswordVisualTransformation(),
             singleLine = true,
             isError = loginError != null,
@@ -248,7 +249,7 @@ private fun LoginContent(
                 IconButton(onClick = { showPin = !showPin }) {
                     Icon(
                         imageVector = Icons.Default.Lock,
-                        contentDescription = if (showPin) "Ocultar PIN" else "Mostrar PIN"
+                        contentDescription = if (showPin) stringResource(R.string.cd_hide_pin) else stringResource(R.string.cd_show_pin)
                     )
                 }
             }
@@ -261,7 +262,7 @@ private fun LoginContent(
             enabled = pin.length >= 4 && selectedUser != null,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(R.string.unlock_button))
+            Text(stringResource(R.string.auth_login_unlock_button))
         }
 
         if (isBiometricAvailable) {
@@ -272,7 +273,7 @@ private fun LoginContent(
             ) {
                 Icon(Icons.Default.Person, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.biometric_login_button))
+                Text(stringResource(R.string.auth_login_biometric_button))
             }
         }
         
@@ -284,10 +285,10 @@ private fun LoginContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             TextButton(onClick = onNavigateToRecovery) {
-                Text(stringResource(R.string.forgot_pin_label))
+                Text(stringResource(R.string.auth_login_forgot_pin_button))
             }
             TextButton(onClick = onNavigateToImport) {
-                Text(stringResource(R.string.import_backup_label))
+                Text(stringResource(R.string.auth_login_import_backup_button))
             }
         }
         
@@ -295,7 +296,7 @@ private fun LoginContent(
         if (isAuthenticated && !isBiometricAvailable && selectedUser != null) {
              Spacer(modifier = Modifier.height(8.dp))
              TextButton(onClick = onEnableBiometric) {
-                 Text(stringResource(R.string.enable_biometrics_button), fontSize = 12.sp)
+                 Text(stringResource(R.string.auth_login_enable_biometrics_button), fontSize = 12.sp)
              }
         }
     }
