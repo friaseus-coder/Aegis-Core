@@ -49,7 +49,10 @@ object DatabaseModule {
         )
             // .openHelperFactory(factory)
             .fallbackToDestructiveMigration() // Keep this if needed, but we adding migration now
-            .addMigrations(AegisDatabase.MIGRATION_18_19)
+            .addMigrations(
+                AegisDatabase.MIGRATION_18_19,
+                AegisDatabase.MIGRATION_19_20
+            )
             .build()
     }
 

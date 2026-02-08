@@ -40,7 +40,7 @@ import com.antigravity.aegis.data.local.entity.UserConfig
         BudgetLineEntity::class,
         BudgetLogEntity::class
     ],
-    version = 19,
+    version = 20,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -61,6 +61,14 @@ abstract class AegisDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE projects ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE tasks ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE expenses ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+        
+        val MIGRATION_19_20 = object : androidx.room.migration.Migration(19, 20) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                // Agregar campos para personalización de módulos en UserConfig
+                database.execSQL("ALTER TABLE user_config ADD COLUMN moduleOrder TEXT NOT NULL DEFAULT ''")
+                database.execSQL("ALTER TABLE user_config ADD COLUMN hiddenModules TEXT NOT NULL DEFAULT ''")
             }
         }
     }
