@@ -238,12 +238,19 @@ fun NavigationGraph(
             com.antigravity.aegis.presentation.settings.SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToBackup = { navController.navigate(Screen.ImportBackup.route) },
+                onNavigateToModuleCustomization = { navController.navigate(Screen.ModuleCustomization.route) },
                 onLogout = {
                     // Navigate back to Login and clear backstack
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+        
+        composable(Screen.ModuleCustomization.route) {
+            com.antigravity.aegis.presentation.settings.ModuleCustomizationScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         

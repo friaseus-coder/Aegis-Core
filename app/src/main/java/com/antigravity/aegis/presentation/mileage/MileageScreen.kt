@@ -123,18 +123,18 @@ fun MileageScreen(
             AegisTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.ui_back))
                     }
                 },
                 actions = {
                      IconButton(onClick = { viewModel.exportMileage() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = "Export CSV")
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.ui_export_csv))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = "Import CSV")
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.ui_import_csv))
                     }
                     IconButton(onClick = { showSettings = true }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings_title))
                     }
                 }
             )
@@ -205,8 +205,8 @@ fun MileageScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text("Distance: $dist km")
-                            Text("Est. Cost: ${String.format("€%.2f", cost)}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.ui_distance, dist))
+                            Text(stringResource(R.string.ui_est_cost, cost), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         }
                         Button(
                             onClick = {

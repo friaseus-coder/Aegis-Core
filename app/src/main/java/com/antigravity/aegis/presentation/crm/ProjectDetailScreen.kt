@@ -85,11 +85,11 @@ fun ProjectDetailScreen(
                     // Row 2: Breakdown
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
-                            Text("Gastos Directos", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.financial_direct_expenses), style = MaterialTheme.typography.bodySmall)
                             Text("€${"%.2f".format(financialSummary.directExpenses)}", style = MaterialTheme.typography.bodyMedium)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("Gastos Generales (Imputados)", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.financial_allocated_general), style = MaterialTheme.typography.bodySmall)
                             Text("€${"%.2f".format(financialSummary.allocatedGeneralExpenses)}", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
@@ -107,7 +107,7 @@ fun ProjectDetailScreen(
                             )
                         }
                          Column(horizontalAlignment = Alignment.End) {
-                            Text("Beneficio/Hora", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.financial_profit_per_hour), style = MaterialTheme.typography.bodySmall)
                             Text("€${"%.2f".format(financialSummary.profitPerHour)}", style = MaterialTheme.typography.titleMedium)
                         }
                     }
@@ -142,7 +142,7 @@ fun ProjectDetailScreen(
                  items(budgets) { budget ->
                      ListItem(
                          headlineContent = { Text(budget.title) },
-                         supportingContent = { Text("Total: €${budget.totalAmount} - ${budget.status}") },
+                         supportingContent = { Text(stringResource(R.string.financial_total, budget.totalAmount, budget.status)) },
                          trailingContent = {
                              TextButton(onClick = { onNavigateToEditBudget(0, budget.id) }) { Text(stringResource(R.string.quotes_list_view_tab)) }
                          }

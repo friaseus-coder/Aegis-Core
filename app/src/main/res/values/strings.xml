@@ -242,6 +242,21 @@
     <string name="settings_role_edit_prefix">Edit Role: %1$s</string>
     <string name="settings_role_update_success">Role updated successfully</string>
     <string name="settings_role_update_error">Error updating role</string>
+    
+    <!-- Feature: Module Customization -->
+    <string name="settings_customize_modules_button">Customize Modules</string>
+    <string name="module_customization_title">Customize Modules</string>
+    <string name="module_customization_desc">Drag to reorder, toggle to show/hide modules</string>
+    <string name="module_customization_restore_button">Restore Defaults</string>
+    <string name="module_customization_restored">Modules restored to default</string>
+    <string name="module_id_projects">Projects</string>
+    <string name="module_id_work_reports">Work Reports</string>
+    <string name="module_id_budgets">Budgets</string>
+    <string name="module_id_expenses">Expenses</string>
+    <string name="module_id_inventory">Inventory</string>
+    <string name="module_id_time_control">Time Control</string>
+    <string name="module_id_clients">Clients</string>
+    <string name="module_id_mileage">Mileage</string>
 
     <!-- Language Definitions -->
     <string name="language_spanish">Español</string>
@@ -263,5 +278,58 @@
     <string name="cd_hide_pin">Hide PIN</string>
     <string name="language_code_es">ES</string>
     <string name="language_code_en">EN</string>
+
+    <!-- Additional UI Strings -->
+    <string name="ui_search_label">Search (min 3 letters)</string>
+    <string name="ui_clear_label">Clear</string>
+    <string name="ui_search_hint">Search</string>
+    <string name="ui_filter_all">All</string>
+    <string name="ui_filter_individuals">Individuals</string>
+    <string name="ui_filter_companies">Companies</string>
+    <string name="ui_search_min_chars">Type at least 3 letters to search</string>
+    <string name="ui_back">Back</string>
+    <string name="ui_export_csv">Export CSV</string>
+    <string name="ui_import_csv">Import CSV</string>
+    <string name="ui_new_quote">New Quote</string>
+    <string name="ui_share_quote">Share Quote</string>
+    <string name="ui_share_pdf">Share PDF</string>
+    <string name="ui_move_to">Move to:</string>
+    <string name="ui_options">Options</string>
+    <string name="ui_new_entry">New Entry</string>
+    <string name="ui_add_report">Add Report</string>
+    <string name="ui_scan_next">Scan Next</string>
+    <string name="ui_product_found">Product Found!</string>
+    <string name="ui_product_not_found">Product Not Found</string>
+    <string name="ui_create_product">Create Product</string>
+    <string name="ui_product_name">Product Name</string>
+    <string name="ui_price">Price</string>
+    <string name="ui_barcode_label">Barcode: %1$s</string>
+    <string name="ui_units">%1$d units</string>
+    <string name="ui_low_stock">LOW STOCK</string>
+    <string name="ui_camera_permission_required">Camera permission required</string>
+    <string name="ui_distance">Distance: %1$.0f km</string>
+    <string name="ui_est_cost">Est. Cost: €%1$.2f</string>
+    <string name="ui_unknown">Unknown</string>
+    <string name="ui_date_label">Date: %1$s</string>
+
+    <!-- Quote Kanban Statuses -->
+    <string name="quote_status_draft">Draft</string>
+    <string name="quote_status_sent">Sent</string>
+    <string name="quote_status_won">Won</string>
+    <string name="quote_status_lost">Lost</string>
+
+    <!-- Expense Categories -->
+    <string name="expense_category_material">Material</string>
+    <string name="expense_category_transport">Transport</string>
+    <string name="expense_category_office">Office</string>
+    <string name="expense_category_food">Food</string>
+    <string name="expense_category_other">Other</string>
+    <string name="expense_general_no_project">General (No Project)</string>
+
+    <!-- Project Financial Labels -->
+    <string name="financial_direct_expenses">Direct Expenses</string>
+    <string name="financial_allocated_general">Allocated General Expenses</string>
+    <string name="financial_profit_per_hour">Profit/Hour</string>
+    <string name="financial_total">Total: €%1$.2f - %2$s</string>
 
 </resources>

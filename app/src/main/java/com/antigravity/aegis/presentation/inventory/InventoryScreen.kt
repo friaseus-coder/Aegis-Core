@@ -101,15 +101,15 @@ fun InventoryScreen(
             AegisTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.ui_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.exportProducts() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = "Export CSV")
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.ui_export_csv))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = "Import CSV")
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.ui_import_csv))
                     }
                 }
             )
@@ -125,7 +125,7 @@ fun InventoryScreen(
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    label = { Text(stringResource(R.string.inventory_barcode_label)) },
+                    label = { Text(stringResource(R.string.inventory_scan_label)) },
                     icon = { Text("📷") } // Placeholder icon
                 )
             }
@@ -184,18 +184,18 @@ fun InventoryList(products: List<ProductEntity>) {
                 ) {
                     Column {
                         Text(product.name, fontWeight = FontWeight.Bold)
-                        Text("Barcode: ${product.barcode}", style = MaterialTheme.typography.bodySmall)
-                        Text("Price: $${product.price}", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.ui_barcode_label, product.barcode), style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.ui_price) + ": $${product.price}", style = MaterialTheme.typography.bodySmall)
                     }
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "${product.quantity} units",
+                            text = stringResource(R.string.ui_units, product.quantity),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         if (product.quantity < product.minQuantity) {
                             Text(
-                                "LOW STOCK",
+                                stringResource(R.string.ui_low_stock),
                                 color = MaterialTheme.colorScheme.error,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelSmall
@@ -293,7 +293,7 @@ fun ScannerView(
                             when (scanState) {
                                 is InventoryViewModel.ScanResult.Found -> {
                                     val product = scanState.product
-                                    Text("Product Found!", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                                    Text(stringResource(R.string.ui_product_found), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(product.name, style = MaterialTheme.typography.headlineSmall)
                                     Text("$${product.price} - Stock: ${product.quantity}")
@@ -307,11 +307,11 @@ fun ScannerView(
                                         Button(onClick = { onUpdateQuantity(product, 1) }) { Text("+1") }
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    TextButton(onClick = onResetScan, modifier = Modifier.fillMaxWidth()) { Text("Scan Next") }
+                                    TextButton(onClick = onResetScan, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.ui_scan_next)) }
                                 }
                                 is InventoryViewModel.ScanResult.NotFound -> {
-                                    Text("Product Not Found", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                                    Text("Barcode: ${scanState.barcode}")
+                                    Text(stringResource(R.string.ui_product_not_found), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                                    Text(stringResource(R.string.ui_barcode_label, scanState.barcode))
                                     Spacer(modifier = Modifier.height(16.dp))
                                     
                                     var name by remember { mutableStateOf("") }
@@ -320,12 +320,12 @@ fun ScannerView(
                                     
                                     OutlinedTextField(
                                         value = name, onValueChange = { name = it },
-                                        label = { Text("Product Name") },
+                                        label = { Text(stringResource(R.string.ui_product_name)) },
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                     OutlinedTextField(
                                         value = price, onValueChange = { price = it },
-                                        label = { Text("Price") },
+                                        label = { Text(stringResource(R.string.ui_price)) },
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                     Button(
@@ -334,9 +334,9 @@ fun ScannerView(
                                         },
                                         modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
                                     ) {
-                                        Text("Create Product")
+                                        Text(stringResource(R.string.ui_create_product))
                                     }
-                                    TextButton(onClick = onResetScan, modifier = Modifier.fillMaxWidth()) { Text("Cancel") }
+                                    TextButton(onClick = onResetScan, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.general_cancel)) }
                                 }
                                 else -> {}
                             }
@@ -346,7 +346,7 @@ fun ScannerView(
             }
         } else {
              Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                 Text("Camera permission required")
+                 Text(stringResource(R.string.ui_camera_permission_required))
              }
         }
     }

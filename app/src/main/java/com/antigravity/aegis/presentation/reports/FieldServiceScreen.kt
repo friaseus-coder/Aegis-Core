@@ -36,7 +36,7 @@ fun FieldServiceScreen(
                     onNavigateToCreateReport(1)
                 }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir Parte")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.ui_add_report))
             }
         }
     ) { padding ->

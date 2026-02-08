@@ -30,7 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onLogout: () -> Unit,
-    onNavigateToBackup: () -> Unit
+    onNavigateToBackup: () -> Unit,
+    onNavigateToModuleCustomization: () -> Unit
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -180,6 +181,16 @@ fun SettingsScreen(
                         onClick = { viewModel.updateThemeMode("dark") },
                         label = { Text(stringResource(R.string.theme_dark)) }
                     )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Module Customization Button
+                Button(
+                    onClick = onNavigateToModuleCustomization,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.settings_customize_modules_button))
                 }
             }
 

@@ -180,7 +180,7 @@ fun ExpensesScreen(
                 ) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.expenses_merchant_label))
+                    Text(stringResource(R.string.inventory_scan_label))
                 }
             }
             
@@ -223,7 +223,7 @@ fun AddExpenseDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (scannedData != null) stringResource(R.string.expenses_review_ticket_title) else "Nueva Entrada") },
+        title = { Text(if (scannedData != null) stringResource(R.string.expenses_review_ticket_title) else stringResource(R.string.ui_new_entry)) },
         text = {
             Column {
                 if (imageUri != null) {
@@ -271,10 +271,10 @@ fun AddExpenseDialog(
                 // Project Dropdown
                 Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(onClick = { expandedProj = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text(selectedProject?.name ?: "General (Sin Proyecto)")
+                        Text(selectedProject?.name ?: stringResource(R.string.expense_general_no_project))
                     }
                     DropdownMenu(expanded = expandedProj, onDismissRequest = { expandedProj = false }) {
-                        DropdownMenuItem(text = { Text("General (Sin Proyecto)") }, onClick = { selectedProject = null; expandedProj = false })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.expense_general_no_project)) }, onClick = { selectedProject = null; expandedProj = false })
                         projects.forEach { proj ->
                             DropdownMenuItem(text = { Text(proj.name) }, onClick = { selectedProject = proj; expandedProj = false })
                         }
@@ -312,7 +312,7 @@ fun ExpenseCard(
             ) {
                 Column {
                     Text(
-                        text = expense.merchantName ?: "Unknown",
+                        text = expense.merchantName ?: stringResource(R.string.ui_unknown),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

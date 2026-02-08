@@ -50,6 +50,8 @@ import android.widget.Toast
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.ui.res.stringResource
+import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,9 +89,9 @@ fun QuoteKanbanScreen(
         is QuoteKanbanViewModel.TransferState.ValidationError -> {
              AlertDialog(
                 onDismissRequest = { viewModel.resetTransferState() },
-                title = { Text("Import Errors") },
+                title = { Text(stringResource(R.string.data_import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text("OK") } }
+                confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.general_ok)) } }
             )
         }
         is QuoteKanbanViewModel.TransferState.ValidationSuccess -> {
@@ -109,22 +111,22 @@ fun QuoteKanbanScreen(
             AegisTopAppBar(
                 navigationIcon = {
                      IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.ui_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.exportQuotes() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = "Export CSV")
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.ui_export_csv))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = "Import CSV")
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.ui_import_csv))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToCreateQuote) {
-                Icon(Icons.Default.Add, contentDescription = "New Quote")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.ui_new_quote))
             }
         }
     ) { padding ->
@@ -151,7 +153,8 @@ fun QuoteKanbanScreen(
                     },
                     onShareQuote = { quote, client ->
                         // Generate and Share
-                        val pdfGenerator = PdfGenerator() 
+                        val pdfGenerator = PdfGenerator()
+                        val shareTitle = context.getString(R.string.ui_share_quote)
                         scope.launch {
                              val pdfFile = pdfGenerator.generateQuotePdf(context, quote, client, userConfig)
                              val uri = FileProvider.getUriForFile(
@@ -164,7 +167,7 @@ fun QuoteKanbanScreen(
                                 putExtra(Intent.EXTRA_STREAM, uri)
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
-                            context.startActivity(Intent.createChooser(intent, "Share Quote"))
+                            context.startActivity(Intent.createChooser(intent, shareTitle))
                         }
                     }
                 )
@@ -271,14 +274,14 @@ fun QuoteCard(
                 }
                 Box {
                     IconButton(onClick = { showMenu = true }, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Options")
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.ui_options))
                     }
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Share PDF") },
+                            text = { Text(stringResource(R.string.ui_share_pdf)) },
                             onClick = {
                                 showMenu = false
                                 onShare()
@@ -286,7 +289,7 @@ fun QuoteCard(
                             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) }
                         )
                         HorizontalDivider()
-                        Text("Move to:", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.labelSmall)
+                        Text(stringResource(R.string.ui_move_to), modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.labelSmall)
                         listOf("Draft", "Sent", "Won", "Lost").filter { it != currentStatus }.forEach { targetStatus ->
                             DropdownMenuItem(
                                 text = { Text(targetStatus) },

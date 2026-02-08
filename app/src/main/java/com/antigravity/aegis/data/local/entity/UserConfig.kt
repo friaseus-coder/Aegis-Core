@@ -29,7 +29,11 @@ data class UserConfig(
     
     // Backup Configuration
     val backupLocationUri: String? = null,
-    val lastBackupTimestamp: Long = 0
+    val lastBackupTimestamp: Long = 0,
+    
+    // Module Customization
+    val moduleOrder: String = "", // JSON array de IDs de módulos en orden personalizado
+    val hiddenModules: String = "" // JSON array de IDs de módulos ocultos
 )
 
 enum class EntityType {

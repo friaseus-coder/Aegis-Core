@@ -13,6 +13,7 @@ import com.antigravity.aegis.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -264,8 +265,10 @@ class SettingsViewModel @Inject constructor(
         dniCif: String
     ) {
         viewModelScope.launch {
-            val currentConfig = userConfig.value ?: return@launch
-            val newConfig = currentConfig.copy(
+            val currentConfig = userConfig.value
+            // CRÍTICO: Asegurar que siempre usamos id = 1 para que Room pueda actualizar correctamente
+            val newConfig = (currentConfig ?: com.antigravity.aegis.data.local.entity.UserConfig()).copy(
+                id = 1, // Forzar id = 1 siempre
                 companyName = name,
                 companyAddress = address,
                 companyPostalCode = postalCode,
@@ -304,6 +307,130 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.insertOrUpdateConfig(newConfig)
             _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.settings_logo_deleted))
         }
+    }
+    
+    // ========== Module Customization ==========
+    
+    /**
+     * Obtiene la lista de módulos con su configuración actual (visibilidad y orden)
+     */
+    fun getModuleConfigurations(): kotlinx.coroutines.flow.Flow<List<com.antigravity.aegis.domain.model.ModuleConfig>> {
+        return userConfig.map { config ->
+            val defaultModules = getDefaultModules()
+            
+            if (config == null || config.moduleOrder.isEmpty()) {
+                // Sin configuración, devolver módulos por defecto
+                defaultModules
+            } else {
+                // Parsear configuración guardada
+                val orderList = try {
+                    org.json.JSONArray(config.moduleOrder).let { arr ->
+                        (0 until arr.length()).map { arr.getString(it) }
+                    }
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                
+                val hiddenList = try {
+                    org.json.JSONArray(config.hiddenModules).let { arr ->
+                        (0 until arr.length()).map { arr.getString(it) }
+                    }
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                
+                // Aplicar configuración
+                val moduleMap = defaultModules.associateBy { it.id }
+                orderList.mapIndexedNotNull { index, id ->
+                    moduleMap[id]?.copy(
+                        isVisible = id !in hiddenList,
+                        order = index
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Actualiza la visibilidad de un módulo
+     */
+    fun updateModuleVisibility(moduleId: String, isVisible: Boolean) {
+        viewModelScope.launch {
+            val currentConfig = userConfig.value ?: com.antigravity.aegis.data.local.entity.UserConfig()
+            
+            val hiddenList = try {
+                org.json.JSONArray(currentConfig.hiddenModules).let { arr ->
+                    (0 until arr.length()).map { arr.getString(it) }.toMutableList()
+                }
+            } catch (e: Exception) {
+                mutableListOf()
+            }
+            
+            if (isVisible) {
+                hiddenList.remove(moduleId)
+            } else {
+                if (moduleId !in hiddenList) hiddenList.add(moduleId)
+            }
+            
+            val newHiddenJson = org.json.JSONArray(hiddenList).toString()
+            val newConfig = currentConfig.copy(
+                id = 1,
+                hiddenModules = newHiddenJson
+            )
+            
+            settingsRepository.insertOrUpdateConfig(newConfig)
+        }
+    }
+    
+    /**
+     * Actualiza el orden de los módulos
+     */
+    fun updateModuleOrder(newOrder: List<String>) {
+        viewModelScope.launch {
+            val currentConfig = userConfig.value ?: com.antigravity.aegis.data.local.entity.UserConfig()
+            
+            val orderJson = org.json.JSONArray(newOrder).toString()
+            val newConfig = currentConfig.copy(
+                id = 1,
+                moduleOrder = orderJson
+            )
+            
+            settingsRepository.insertOrUpdateConfig(newConfig)
+        }
+    }
+    
+    /**
+     * Restaura la configuración de módulos a valores predeterminados
+     */
+    fun restoreDefaultModules() {
+        viewModelScope.launch {
+            val currentConfig = userConfig.value ?: com.antigravity.aegis.data.local.entity.UserConfig()
+            
+            val newConfig = currentConfig.copy(
+                id = 1,
+                moduleOrder = "",
+                hiddenModules = ""
+            )
+            
+            settingsRepository.insertOrUpdateConfig(newConfig)
+            _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.module_customization_restored))
+        }
+    }
+    
+    /**
+     * Devuelve la lista de módulos por defecto
+     */
+    private fun getDefaultModules(): List<com.antigravity.aegis.domain.model.ModuleConfig> {
+        return listOf(
+            com.antigravity.aegis.domain.model.ModuleConfig("projects", R.string.module_id_projects, true, 0),
+            com.antigravity.aegis.domain.model.ModuleConfig("work_reports", R.string.module_id_work_reports, true, 1),
+            com.antigravity.aegis.domain.model.ModuleConfig("budgets", R.string.module_id_budgets, true, 2),
+            com.antigravity.aegis.domain.model.ModuleConfig("expenses", R.string.module_id_expenses, true, 3),
+            com.antigravity.aegis.domain.model.ModuleConfig("inventory", R.string.module_id_inventory, true, 4),
+            com.antigravity.aegis.domain.model.ModuleConfig("time_control", R.string.module_id_time_control, true, 5),
+            com.antigravity.aegis.domain.model.ModuleConfig("clients", R.string.module_id_clients, true, 6),
+            com.antigravity.aegis.domain.model.ModuleConfig("mileage", R.string.module_id_mileage, true, 7)
+        )
     }
 }
 

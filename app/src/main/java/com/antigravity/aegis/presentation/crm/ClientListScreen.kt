@@ -122,7 +122,7 @@ fun ClientListScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Buscar (min 3 letras)") },
+                label = { Text(stringResource(R.string.ui_search_label)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
@@ -130,10 +130,10 @@ fun ClientListScreen(
                 trailingIcon = {
                      if (searchQuery.isNotEmpty()) {
                          IconButton(onClick = { searchQuery = "" }) {
-                             Icon(Icons.Default.Clear, "Limpiar")
+                             Icon(Icons.Default.Clear, stringResource(R.string.ui_clear_label))
                          }
                      } else {
-                         Icon(Icons.Default.Search, "Buscar")
+                         Icon(Icons.Default.Search, stringResource(R.string.ui_search_hint))
                      }
                 }
             )
@@ -148,12 +148,12 @@ fun ClientListScreen(
                  FilterChip(
                      selected = filterType == null,
                      onClick = { filterType = null },
-                     label = { Text("Todos") }
+                     label = { Text(stringResource(R.string.ui_filter_all)) }
                  )
                  Spacer(modifier = Modifier.width(8.dp))
-                 FilterChip(selected = filterType == "Particular", onClick = { filterType = "Particular" }, label = { Text("Particulares") })
+                 FilterChip(selected = filterType == "Particular", onClick = { filterType = "Particular" }, label = { Text(stringResource(R.string.ui_filter_individuals)) })
                  Spacer(modifier = Modifier.width(8.dp))
-                 FilterChip(selected = filterType == "Empresa", onClick = { filterType = "Empresa" }, label = { Text("Empresas") })
+                 FilterChip(selected = filterType == "Empresa", onClick = { filterType = "Empresa" }, label = { Text(stringResource(R.string.ui_filter_companies)) })
             }
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -192,7 +192,7 @@ fun ClientListScreen(
                 if (clients.isEmpty()) {
                     item {
                         Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                            Text(if (searchQuery.length in 1..2) "Escribe al menos 3 letras para buscar" else stringResource(R.string.crm_clients_empty))
+                            Text(if (searchQuery.length in 1..2) stringResource(R.string.ui_search_min_chars) else stringResource(R.string.crm_clients_empty))
                         }
                     }
                 }

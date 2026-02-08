@@ -104,15 +104,40 @@ class SettingsRepositoryImpl @Inject constructor(
             val inputStream = context.contentResolver.openInputStream(uri)
                 ?: return@withContext Result.failure(Exception("Cannot open input stream"))
 
+            // Decodificar imagen a Bitmap
+            val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                ?: return@withContext Result.failure(Exception("Cannot decode image"))
+            inputStream.close()
+
+            // Redimensionar si es necesario (máximo 1024x1024 manteniendo aspect ratio)
+            val maxDimension = 1024
+            val scaledBitmap = if (originalBitmap.width > maxDimension || originalBitmap.height > maxDimension) {
+                val scale = minOf(
+                    maxDimension.toFloat() / originalBitmap.width,
+                    maxDimension.toFloat() / originalBitmap.height
+                )
+                val newWidth = (originalBitmap.width * scale).toInt()
+                val newHeight = (originalBitmap.height * scale).toInt()
+                android.graphics.Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true).also {
+                    if (it != originalBitmap) originalBitmap.recycle()
+                }
+            } else {
+                originalBitmap
+            }
+
             val directory = File(context.filesDir, "company_assets")
             if (!directory.exists()) directory.mkdirs()
 
             val fileName = "company_logo_${System.currentTimeMillis()}.jpg" 
             val file = File(directory, fileName)
             
+            // Comprimir y guardar con calidad 80%
             FileOutputStream(file).use { output ->
-                inputStream.copyTo(output)
+                scaledBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, output)
             }
+            
+            // Liberar memoria
+            scaledBitmap.recycle()
             
             Result.success(file.absolutePath)
         } catch (e: Exception) {
