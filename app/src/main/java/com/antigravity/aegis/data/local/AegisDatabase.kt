@@ -40,7 +40,7 @@ import com.antigravity.aegis.data.local.entity.UserConfig
         BudgetLineEntity::class,
         BudgetLogEntity::class
     ],
-    version = 23,
+    version = 24,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -88,6 +88,40 @@ abstract class AegisDatabase : RoomDatabase() {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE projects ADD COLUMN category TEXT DEFAULT NULL")
                 database.execSQL("ALTER TABLE tasks ADD COLUMN estimatedDuration INTEGER DEFAULT NULL")
+            }
+        }
+
+        val MIGRATION_23_24 = object : androidx.room.migration.Migration(23, 24) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                // Add description column
+                database.execSQL("ALTER TABLE projects ADD COLUMN description TEXT DEFAULT NULL")
+                // Add missing index for parentProjectId
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_parentProjectId ON projects(parentProjectId)")
+                // Recreate projects table with proper foreign keys (self-referencing FK for parentProjectId)
+                // SQLite doesn't support ADD FOREIGN KEY, so we recreate the table
+                database.execSQL("""
+                    CREATE TABLE projects_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        clientId INTEGER NOT NULL,
+                        parentProjectId INTEGER DEFAULT NULL,
+                        name TEXT NOT NULL,
+                        status TEXT NOT NULL,
+                        startDate INTEGER NOT NULL,
+                        endDate INTEGER DEFAULT NULL,
+                        isArchived INTEGER NOT NULL DEFAULT 0,
+                        isSynced INTEGER NOT NULL DEFAULT 0,
+                        isTemplate INTEGER NOT NULL DEFAULT 0,
+                        category TEXT DEFAULT NULL,
+                        description TEXT DEFAULT NULL,
+                        FOREIGN KEY (clientId) REFERENCES clients(id) ON DELETE CASCADE,
+                        FOREIGN KEY (parentProjectId) REFERENCES projects_new(id) ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                database.execSQL("INSERT INTO projects_new SELECT id, clientId, parentProjectId, name, status, startDate, endDate, isArchived, isSynced, isTemplate, category, description FROM projects")
+                database.execSQL("DROP TABLE projects")
+                database.execSQL("ALTER TABLE projects_new RENAME TO projects")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_clientId ON projects(clientId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_parentProjectId ON projects(parentProjectId)")
             }
         }
     }
