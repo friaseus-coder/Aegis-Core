@@ -239,6 +239,7 @@ fun NavigationGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToBackup = { navController.navigate(Screen.ImportBackup.route) },
                 onNavigateToModuleCustomization = { navController.navigate(Screen.ModuleCustomization.route) },
+                onNavigateToTemplates = { navController.navigate(Screen.Templates.route) },
                 onLogout = {
                     // Navigate back to Login and clear backstack
                     navController.navigate(Screen.Login.route) {
@@ -254,8 +255,21 @@ fun NavigationGraph(
             )
         }
         
+        // --- TEMPLATES ---
+        composable(Screen.Templates.route) {
+             com.antigravity.aegis.presentation.crm.TemplateListScreen(
+                 viewModel = crmViewModel,
+                 onNavigateToDetail = { templateId ->
+                     crmViewModel.selectProject(templateId)
+                     navController.navigate(Screen.ProjectDetail.route)
+                 }
+             )
+        }
+        
         // --- PLACEHOLDERS ---
-        composable(Screen.TimeControl.route) { TimeControlScreen() }
+        composable(Screen.TimeControl.route) { 
+            com.antigravity.aegis.presentation.timecontrol.TimeControlScreen() 
+        }
         composable(Screen.PasswordVault.route) { PasswordVaultScreen() }
         
         // --- AUTH & UTILITIES ---

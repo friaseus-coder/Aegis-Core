@@ -38,8 +38,7 @@ fun ExpensesScreen() = PlaceholderScreen("Gastos")
 @Composable
 fun InventoryScreen() = PlaceholderScreen("Inventario")
 
-@Composable
-fun TimeControlScreen() = PlaceholderScreen("Control Horario")
+
 
 @Composable
 fun PasswordVaultScreen() = PlaceholderScreen("Password Vault")

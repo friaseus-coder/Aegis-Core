@@ -47,7 +47,7 @@ class ClientListViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ClientListUiState(isLoading = true)
+        initialValue = ClientListUiState(isLoading = false)
     )
 
     fun onSearchQueryChanged(query: String) {

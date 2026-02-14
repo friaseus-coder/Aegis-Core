@@ -5,7 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,7 +16,10 @@ import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.components.BovedaLogo
 import com.antigravity.aegis.ui.theme.LocalCompanyLogoUri
+import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.ArrowBack
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +31,11 @@ fun ProjectDetailScreen(
     val project by viewModel.selectedProject.collectAsState()
     val tasks by viewModel.projectTasks.collectAsState()
     val reports by viewModel.projectReports.collectAsState()
+    val subProjects by viewModel.subProjects.collectAsState()
     var showAddTaskDialog by remember { mutableStateOf(false) }
+
+    var showAddSubProjectDialog by remember { mutableStateOf(false) }
+    var showSaveTemplateDialog by remember { mutableStateOf(false) }
 
     if (project == null) {
         Text(stringResource(R.string.crm_project_not_found))
@@ -35,7 +44,26 @@ fun ProjectDetailScreen(
 
     Scaffold(
         topBar = {
-            AegisTopAppBar()
+            AegisTopAppBar(
+                 actions = {
+                    var expanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Opciones")
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Guardar como Plantilla") },
+                            onClick = { 
+                                expanded = false
+                                showSaveTemplateDialog = true
+                            }
+                        )
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddTaskDialog = true }) {
@@ -45,18 +73,69 @@ fun ProjectDetailScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize().padding(16.dp)) {
             // Project Name as Header
-            Text(
-                text = project!!.name,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(stringResource(R.string.dashboard_status_label, project!!.status), style = MaterialTheme.typography.titleMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                 Column {
+                    Text(
+                        text = project!!.name,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.dashboard_status_label, project!!.status), style = MaterialTheme.typography.titleMedium)
+                 }
+                 
+                 // Generate Quote Button (Only for Root Projects ideally, but logic handles it)
+                 if (project!!.parentProjectId == null) {
+                     FilledTonalButton(onClick = { 
+                         viewModel.createQuoteFromProject(project!!.id) { quoteId ->
+                             onNavigateToEditBudget(project!!.id, quoteId.toInt())
+                         }
+                     }) {
+                         Text("Generar Presupuesto")
+                     }
+                 }
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
 
+
+            // -- SUBPROJECTS SECTION --
+            if (project!!.parentProjectId == null) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("Subproyectos", style = MaterialTheme.typography.titleLarge)
+                    TextButton(onClick = { showAddSubProjectDialog = true }) {
+                        Text(stringResource(R.string.general_add))
+                    }
+                }
+                
+                LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
+                    items(subProjects) { sub ->
+                        ListItem(
+                            headlineContent = { Text(sub.name) },
+                            supportingContent = { Text(sub.status.name) },
+                            trailingContent = {
+                                Button(onClick = {
+                                    viewModel.createWorkOrderFromProject(sub.id) { reportId ->
+                                        onNavigateToCreateReport(project!!.id) 
+                                    }
+                                }) {
+                                    Text("Generar Parte")
+                                }
+                            }
+                        )
+                        HorizontalDivider()
+                    }
+                     if (subProjects.isEmpty()) {
+                         item { Text("No hay subproyectos", style = MaterialTheme.typography.bodyMedium) }
+                     }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // -- FINANCIAL SUMMARY --
             val financialSummary by viewModel.financialSummary.collectAsState()
@@ -190,8 +269,26 @@ fun ProjectDetailScreen(
                         )
                         Text(
                             text = task.description,
-                            modifier = Modifier.padding(start = 8.dp)
+                            modifier = Modifier.padding(start = 8.dp).weight(1f)
                         )
+                        if (task.estimatedDuration != null) {
+                             // Convert ms to hours (roughly) or days
+                             // Assumption: stored as ms. 
+                             // If < 1 day (8h), show hours. If >= 1 day, show days.
+                             // 1h = 3600000ms
+                             val hours = task.estimatedDuration / 3600000
+                             val durationText = if (hours >= 8) {
+                                 "${hours / 8}d"
+                             } else {
+                                 "${hours}h"
+                             }
+                             
+                             SuggestionChip(
+                                 onClick = {},
+                                 label = { Text(durationText) },
+                                 modifier = Modifier.padding(start = 8.dp)
+                             )
+                        }
                     }
                     Divider()
                 }
@@ -201,34 +298,134 @@ fun ProjectDetailScreen(
         if (showAddTaskDialog) {
             AddTaskDialog(
                 onDismiss = { showAddTaskDialog = false },
-                onConfirm = { desc ->
-                    viewModel.createTask(project!!.id, desc)
+                onConfirm = { desc, duration ->
+                    viewModel.createTask(project!!.id, desc, duration)
                     showAddTaskDialog = false
                 }
             )
         }
+        
+        if (showAddSubProjectDialog) {
+             AddSubProjectDialog(
+                onDismiss = { showAddSubProjectDialog = false },
+                onConfirm = { name ->
+                    viewModel.createSubProject(project!!.id, name, System.currentTimeMillis())
+                    showAddSubProjectDialog = false
+                }
+             )
+        }
+
+
+        if (showSaveTemplateDialog) {
+             SaveTemplateDialog(
+                currentName = project!!.name,
+                onDismiss = { showSaveTemplateDialog = false },
+                onConfirm = { templateName, category ->
+                    viewModel.saveAsTemplate(project!!.id, templateName, category)
+                    showSaveTemplateDialog = false
+                }
+             )
+        }
     }
+}
+ 
+@Composable
+fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var name by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Nuevo Subproyecto") },
+        text = {
+            OutlinedTextField(
+                value = name, 
+                onValueChange = { name = it }, 
+                label = { Text("Nombre del Subproyecto") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = { 
+                if (name.isNotBlank()) onConfirm(name) 
+            }) {
+                Text(stringResource(R.string.general_add))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
+        }
+    )
 }
 
 @Composable
-fun AddTaskDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun AddTaskDialog(onDismiss: () -> Unit, onConfirm: (String, Long?) -> Unit) {
     var description by remember { mutableStateOf("") }
+    var durationHours by remember { mutableStateOf("") }
     
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.crm_task_new_dialog_title)) },
         text = {
-            OutlinedTextField(
-                value = description, 
-                onValueChange = { description = it }, 
-                label = { Text(stringResource(R.string.crm_task_description_label)) }
-            )
+            Column {
+                OutlinedTextField(
+                    value = description, 
+                    onValueChange = { description = it }, 
+                    label = { Text(stringResource(R.string.crm_task_description_label)) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = durationHours, 
+                    onValueChange = { durationHours = it.filter { c -> c.isDigit() } }, 
+                    label = { Text("Duración Estimada (Horas)") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                )
+            }
         },
         confirmButton = {
             Button(onClick = { 
-                if (description.isNotBlank()) onConfirm(description) 
+                if (description.isNotBlank()) {
+                    val duration = durationHours.toLongOrNull()?.let { it * 3600000 } // Hours to Ms
+                    onConfirm(description, duration)
+                }
             }) {
                 Text(stringResource(R.string.general_add))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
+        }
+    )
+}
+@Composable
+fun SaveTemplateDialog(currentName: String, onDismiss: () -> Unit, onConfirm: (String, String?) -> Unit) {
+    var name by remember { mutableStateOf(currentName + " (Plantilla)") }
+    var category by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Guardar como Plantilla") },
+        text = {
+            Column {
+                Text("Se creará una copia de este proyecto y sus subproyectos como una plantilla reutilizable.")
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = name, 
+                    onValueChange = { name = it }, 
+                    label = { Text("Nombre de la Plantilla") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                // Simple text field for category for now, or dropdown if we have list
+                OutlinedTextField(
+                    value = category, 
+                    onValueChange = { category = it }, 
+                    label = { Text("Categoría (Opcional)") }
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { 
+                if (name.isNotBlank()) onConfirm(name, category.takeIf { it.isNotBlank() }) 
+            }) {
+                Text(stringResource(R.string.general_save))
             }
         },
         dismissButton = {

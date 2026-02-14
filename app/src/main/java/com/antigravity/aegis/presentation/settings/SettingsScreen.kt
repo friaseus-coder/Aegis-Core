@@ -31,7 +31,8 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToBackup: () -> Unit,
-    onNavigateToModuleCustomization: () -> Unit
+    onNavigateToModuleCustomization: () -> Unit,
+    onNavigateToTemplates: () -> Unit
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -391,6 +392,24 @@ fun SettingsScreen(
                             Text(stringResource(R.string.settings_logo_delete_button))
                         }
                     }
+                }
+            }
+
+            // Templates Section
+            SettingsSection(title = "Gestión de Plantillas") {
+                Button(
+                    onClick = onNavigateToTemplates,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Gestionar Plantillas de Proyecto")
+                }
+                
+                Button(
+                    onClick = { viewModel.loadDefaultTemplates() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text("Cargar Plantillas Predeterminadas")
                 }
             }
 

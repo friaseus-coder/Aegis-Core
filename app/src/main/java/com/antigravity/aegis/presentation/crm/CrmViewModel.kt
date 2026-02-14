@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.lifecycle.ViewModel
@@ -42,7 +42,13 @@ class CrmViewModel @Inject constructor(
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val transferManager: DataTransferManager,
     private val attachmentRepository: AttachmentRepository,
-    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
+    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository,
+    private val createQuoteFromProjectUseCase: com.antigravity.aegis.domain.usecase.project.CreateQuoteFromProjectUseCase,
+    private val createWorkOrderFromProjectUseCase: com.antigravity.aegis.domain.usecase.project.CreateWorkOrderFromProjectUseCase,
+    private val saveProjectAsTemplateUseCase: com.antigravity.aegis.domain.usecase.project.SaveProjectAsTemplateUseCase,
+    private val createProjectFromTemplateUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectFromTemplateUseCase,
+    private val exportTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ExportTemplateUseCase,
+    private val importTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ImportTemplateUseCase
 ) : ViewModel() {
 
 
@@ -78,7 +84,12 @@ class CrmViewModel @Inject constructor(
     fun setFilterType(type: String?) { _filterType.value = type }
 
     // --- Projects ---
+    // --- Projects ---
     val activeProjects: StateFlow<List<ProjectEntity>> = projectRepository.getActiveProjects()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val activeRootProjects: StateFlow<List<ProjectEntity>> = activeProjects
+        .map { projects -> projects.filter { it.parentProjectId == null } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // --- Selection State ---
@@ -279,7 +290,7 @@ class CrmViewModel @Inject constructor(
         }
     }
 
-    fun createTask(projectId: Int, description: String) {
+    fun createTask(projectId: Int, description: String, estimatedDuration: Long? = null) {
         viewModelScope.launch {
             // TaskEntity uses 'description' as primary content? Or 'title'? 
             // In TaskEntity: val description: String
@@ -291,7 +302,12 @@ class CrmViewModel @Inject constructor(
             // Better: use named arguments to be safe or check entity. 
             // Error: No value passed for parameter 'title'.
             // So TaskEntity has (..., title, description, ...).
-            val task = TaskEntity(projectId = projectId, title = description, description = "") 
+            val task = TaskEntity(
+                projectId = projectId, 
+                title = description, 
+                description = "",
+                estimatedDuration = estimatedDuration
+            ) 
             repository.createTask(task)
         }
     }
@@ -446,11 +462,93 @@ class CrmViewModel @Inject constructor(
                     _projectReports.value = reports
                 }
             }
+            // Fetch subprojects
+            launch {
+                projectRepository.getSubProjects(projectId).collect { subs ->
+                    _subProjects.value = subs
+                }
+            }
         }
     }
     
     fun clearSelection() {
         _selectedClient.value = null
         _selectedProject.value = null
+        _subProjects.value = emptyList()
+    }
+
+    // --- SubProjects & Conversions ---
+    private val _subProjects = MutableStateFlow<List<ProjectEntity>>(emptyList())
+    val subProjects: StateFlow<List<ProjectEntity>> = _subProjects
+
+    fun createSubProject(parentProjectId: Int, name: String, startDate: Long) {
+        viewModelScope.launch {
+            val parent = projectRepository.getProjectById(parentProjectId) ?: return@launch
+            val subProject = ProjectEntity(
+                clientId = parent.clientId,
+                parentProjectId = parentProjectId,
+                name = name,
+                status = com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE,
+                startDate = startDate
+            )
+            projectRepository.insertProject(subProject)
+        }
+    }
+
+    fun createQuoteFromProject(projectId: Int, onResult: (Long) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val quoteId = createQuoteFromProjectUseCase(projectId)
+                onResult(quoteId)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
+    fun createWorkOrderFromProject(subProjectId: Int, onResult: (Long) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val workOrderId = createWorkOrderFromProjectUseCase(subProjectId)
+                onResult(workOrderId)
+            } catch (e: Exception) {
+                // Handle error
+            }
+                // Handle error
+            }
+    }
+
+    // --- Template Management ---
+    val templates: StateFlow<List<ProjectEntity>> = projectRepository.getTemplates()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun saveAsTemplate(projectId: Int, templateName: String, category: String? = null) {
+        viewModelScope.launch {
+            saveProjectAsTemplateUseCase(projectId, templateName, category)
+        }
+    }
+
+    fun createProjectFromTemplate(templateId: Int, clientId: Int, name: String, startDate: Long, endDate: Long?) {
+        viewModelScope.launch {
+            createProjectFromTemplateUseCase(templateId, clientId, name, startDate, endDate)
+        }
+    }
+
+    fun exportTemplate(templateId: Int, uri: Uri) {
+        viewModelScope.launch {
+            _transferState.value = TransferState.Loading
+            exportTemplateUseCase(templateId, uri)
+                .onSuccess { _transferState.value = TransferState.Success("Template Exported") }
+                .onFailure { _transferState.value = TransferState.Error(it.message ?: "Export Failed") }
+        }
+    }
+
+    fun importTemplate(uri: Uri) {
+        viewModelScope.launch {
+             _transferState.value = TransferState.Loading
+            importTemplateUseCase(uri)
+                .onSuccess { _transferState.value = TransferState.Success("Template Imported") }
+                .onFailure { _transferState.value = TransferState.Error(it.message ?: "Import Failed") }
+        }
     }
 }

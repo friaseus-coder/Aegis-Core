@@ -1,6 +1,7 @@
 package com.antigravity.aegis.domain.repository
 
 import com.antigravity.aegis.data.local.entity.ProjectEntity
+import com.antigravity.aegis.data.local.relation.ProjectWithSubProjects
 import kotlinx.coroutines.flow.Flow
 
 interface ProjectRepository {
@@ -14,4 +15,7 @@ interface ProjectRepository {
     suspend fun updateProjectStatus(projectId: Int, status: String)
     suspend fun getProjectsActiveInPeriod(periodStart: Long, periodEnd: Long): List<ProjectEntity>
     suspend fun deleteProject(project: ProjectEntity)
+    fun getSubProjects(parentId: Int): Flow<List<ProjectEntity>>
+    fun getProjectWithSubProjects(id: Int): Flow<ProjectWithSubProjects>
+    fun getTemplates(): Flow<List<ProjectEntity>>
 }

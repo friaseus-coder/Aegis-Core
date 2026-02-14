@@ -20,7 +20,7 @@ fun DashboardScreen(
     onNavigateToClients: () -> Unit,
     onNavigateToProject: (Int) -> Unit
 ) {
-    val activeProjects by viewModel.activeProjects.collectAsState()
+    val activeProjects by viewModel.activeRootProjects.collectAsState()
 
     Scaffold(
         topBar = {

@@ -11,7 +11,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,10 +30,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,6 +45,7 @@ fun ClientDetailScreen(
 ) {
     val client by viewModel.selectedClient.collectAsState()
     val projects by viewModel.clientProjects.collectAsState()
+    val templates by viewModel.templates.collectAsState()
     var showAddProjectDialog by remember { mutableStateOf(false) }
 
     if (client == null) {
@@ -106,9 +106,14 @@ fun ClientDetailScreen(
 
         if (showAddProjectDialog) {
             AddProjectDialog(
+                templates = templates,
                 onDismiss = { showAddProjectDialog = false },
-                onConfirm = { name, status, deadline ->
-                    viewModel.createProject(client!!.id, name, status, System.currentTimeMillis(), deadline)
+                onConfirm = { name, status, deadline, templateId ->
+                    if (templateId != null) {
+                        viewModel.createProjectFromTemplate(templateId, client!!.id, name, System.currentTimeMillis(), deadline)
+                    } else {
+                        viewModel.createProject(client!!.id, name, status, System.currentTimeMillis(), deadline)
+                    }
                     showAddProjectDialog = false
                 }
             )
@@ -116,23 +121,73 @@ fun ClientDetailScreen(
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String, Long?) -> Unit) {
+fun AddProjectDialog(
+    templates: List<com.antigravity.aegis.data.local.entity.ProjectEntity>,
+    onDismiss: () -> Unit, 
+    onConfirm: (String, String, Long?, Int?) -> Unit
+) {
     var name by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Active") }
-    // Simplified deadline input for now
-    
+    var selectedTemplate by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.crm_project_new_dialog_title)) },
         text = {
-            Column {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.crm_project_name_label)) })
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Template Selector
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedTemplate?.name ?: "Sin Plantilla (Proyecto en Blanco)",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Plantilla") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Sin Plantilla (Proyecto en Blanco)") },
+                            onClick = { 
+                                selectedTemplate = null
+                                expanded = false
+                            }
+                        )
+                        templates.forEach { template ->
+                            DropdownMenuItem(
+                                text = { Text(template.name) },
+                                onClick = { 
+                                    selectedTemplate = template
+                                    if (name.isBlank()) name = template.name // Auto-fill name
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = name, 
+                    onValueChange = { name = it }, 
+                    label = { Text(stringResource(R.string.crm_project_name_label)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         },
         confirmButton = {
             Button(onClick = { 
-                if (name.isNotBlank()) onConfirm(name, status, null) 
+                if (name.isNotBlank()) onConfirm(name, status, null, selectedTemplate?.id) 
             }) {
                 Text(stringResource(R.string.general_create))
             }

@@ -2,6 +2,7 @@ package com.antigravity.aegis.data.repository
 
 import com.antigravity.aegis.data.local.dao.ProjectDao
 import com.antigravity.aegis.data.local.entity.ProjectEntity
+import com.antigravity.aegis.data.local.relation.ProjectWithSubProjects
 import com.antigravity.aegis.domain.repository.ProjectRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -19,4 +20,7 @@ class ProjectRepositoryImpl @Inject constructor(
     override suspend fun updateProjectStatus(projectId: Int, status: String) = dao.updateProjectStatus(projectId, status)
     override suspend fun getProjectsActiveInPeriod(periodStart: Long, periodEnd: Long): List<ProjectEntity> = dao.getProjectsActiveInPeriod(periodStart, periodEnd)
     override suspend fun deleteProject(project: ProjectEntity) = dao.deleteProject(project)
+    override fun getSubProjects(parentId: Int): Flow<List<ProjectEntity>> = dao.getSubProjects(parentId)
+    override fun getProjectWithSubProjects(id: Int): Flow<ProjectWithSubProjects> = dao.getProjectWithSubProjects(id)
+    override fun getTemplates(): Flow<List<ProjectEntity>> = dao.getTemplates()
 }

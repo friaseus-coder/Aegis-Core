@@ -20,17 +20,30 @@ enum class ProjectStatus {
             parentColumns = ["id"],
             childColumns = ["clientId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = ProjectEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["parentProjectId"],
+            onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("clientId")]
+    indices = [
+        Index("clientId"),
+        Index("parentProjectId")
+    ]
 )
 data class ProjectEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val clientId: Int,
+    val parentProjectId: Int? = null, // Para subproyectos
     val name: String,
     val status: ProjectStatus, // "Active", "Closed", "Archived"
     val startDate: Long,
     val endDate: Long? = null,
     val isArchived: Boolean = false,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    val isTemplate: Boolean = false,
+    val category: String? = null,
+    val description: String? = null
 )

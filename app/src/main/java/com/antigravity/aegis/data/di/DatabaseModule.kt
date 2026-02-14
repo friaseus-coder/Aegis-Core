@@ -51,7 +51,10 @@ object DatabaseModule {
             .fallbackToDestructiveMigration() // Keep this if needed, but we adding migration now
             .addMigrations(
                 AegisDatabase.MIGRATION_18_19,
-                AegisDatabase.MIGRATION_19_20
+                AegisDatabase.MIGRATION_19_20,
+                AegisDatabase.MIGRATION_20_21,
+                AegisDatabase.MIGRATION_21_22,
+                AegisDatabase.MIGRATION_22_23
             )
             .build()
     }

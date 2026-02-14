@@ -25,5 +25,6 @@ data class TaskEntity(
     val isCompleted: Boolean = false,
     val isSynced: Boolean = false,
     val isActive: Boolean = true,
-    val status: String = "Pending" // "Pending", "InProgress", "Completed", "Cancelled"
+    val status: String = "Pending", // "Pending", "InProgress", "Completed", "Cancelled"
+    val estimatedDuration: Long? = null
 )
