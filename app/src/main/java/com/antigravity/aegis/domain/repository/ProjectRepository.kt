@@ -18,4 +18,5 @@ interface ProjectRepository {
     fun getSubProjects(parentId: Int): Flow<List<ProjectEntity>>
     fun getProjectWithSubProjects(id: Int): Flow<ProjectWithSubProjects>
     fun getTemplates(): Flow<List<ProjectEntity>>
+    fun getTemplateCategories(): Flow<List<String>>
 }

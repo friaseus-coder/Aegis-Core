@@ -522,6 +522,9 @@ class CrmViewModel @Inject constructor(
     val templates: StateFlow<List<ProjectEntity>> = projectRepository.getTemplates()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val templateCategories: StateFlow<List<String>> = projectRepository.getTemplateCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     fun saveAsTemplate(projectId: Int, templateName: String, category: String? = null) {
         viewModelScope.launch {
             saveProjectAsTemplateUseCase(projectId, templateName, category)

@@ -197,6 +197,20 @@ class TemplateSeeder @Inject constructor(
         durationDays: Int,
         materials: List<String>
     ) {
+        // Check if template exists
+        val existingTemplate = projectDao.getTemplateByName(name)
+        
+        if (existingTemplate != null) {
+            // Update category if null or different? 
+            // Mainly if null or if we want to enforce the category from seeder.
+            if (existingTemplate.category != category) {
+                 val updatedTemplate = existingTemplate.copy(category = category)
+                 projectDao.updateProject(updatedTemplate)
+            }
+            // We could also update description etc, but let's stick to category for now to be safe against user edits.
+            return
+        }
+
         // Create Project Template
         // Duration in db is milliseconds ideally, but Task uses Long. Let's assume day = 8h work?
         // Or specific duration per task. For simplicity, we distribute evenly or just set total.
@@ -215,7 +229,7 @@ class TemplateSeeder @Inject constructor(
         val projectId = projectDao.insertProject(template)
         
         // Create Tasks
-        val durationPerTask = (durationDays * 8 * 3600 * 1000L) / tasks.size // distribute days into tasks
+        val durationPerTask = if (tasks.isNotEmpty()) (durationDays * 8 * 3600 * 1000L) / tasks.size else 0L
         
         tasks.forEach { taskDesc ->
             val task = TaskEntity(

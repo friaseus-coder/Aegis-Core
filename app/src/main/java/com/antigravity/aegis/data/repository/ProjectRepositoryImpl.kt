@@ -23,4 +23,5 @@ class ProjectRepositoryImpl @Inject constructor(
     override fun getSubProjects(parentId: Int): Flow<List<ProjectEntity>> = dao.getSubProjects(parentId)
     override fun getProjectWithSubProjects(id: Int): Flow<ProjectWithSubProjects> = dao.getProjectWithSubProjects(id)
     override fun getTemplates(): Flow<List<ProjectEntity>> = dao.getTemplates()
+    override fun getTemplateCategories(): Flow<List<String>> = dao.getTemplateCategories()
 }
