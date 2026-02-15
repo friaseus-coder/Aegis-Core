@@ -219,7 +219,7 @@ class TemplateSeeder @Inject constructor(
         val template = ProjectEntity(
             name = name,
             description = description,
-            clientId = 0, // No client for template
+            clientId = null, // No client for template
             startDate = System.currentTimeMillis(),
             status = ProjectStatus.ACTIVE,
             isTemplate = true,

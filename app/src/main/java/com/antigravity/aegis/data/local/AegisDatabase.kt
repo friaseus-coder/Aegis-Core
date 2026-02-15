@@ -40,7 +40,7 @@ import com.antigravity.aegis.data.local.entity.UserConfig
         BudgetLineEntity::class,
         BudgetLogEntity::class
     ],
-    version = 25,
+    version = 26,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -120,6 +120,21 @@ abstract class AegisDatabase : RoomDatabase() {
                 database.execSQL("DROP INDEX IF EXISTS index_projects_clientId")
                 database.execSQL("DROP INDEX IF EXISTS index_projects_parentProjectId")
                 database.execSQL("CREATE TABLE projects (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, clientId INTEGER NOT NULL, parentProjectId INTEGER DEFAULT NULL, name TEXT NOT NULL, status TEXT NOT NULL, startDate INTEGER NOT NULL, endDate INTEGER DEFAULT NULL, isArchived INTEGER NOT NULL DEFAULT 0, isSynced INTEGER NOT NULL DEFAULT 0, isTemplate INTEGER NOT NULL DEFAULT 0, category TEXT DEFAULT NULL, description TEXT DEFAULT NULL, FOREIGN KEY (clientId) REFERENCES clients(id) ON DELETE CASCADE, FOREIGN KEY (parentProjectId) REFERENCES projects(id) ON DELETE CASCADE)")
+                database.execSQL("INSERT INTO projects (id, clientId, parentProjectId, name, status, startDate, endDate, isArchived, isSynced, isTemplate, category, description) SELECT id, clientId, parentProjectId, name, status, startDate, endDate, isArchived, isSynced, isTemplate, category, description FROM projects_old")
+                database.execSQL("DROP TABLE projects_old")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_clientId ON projects(clientId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_parentProjectId ON projects(parentProjectId)")
+            }
+        }
+
+        val MIGRATION_25_26 = object : androidx.room.migration.Migration(25, 26) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                // Make clientId Nullable
+                database.execSQL("ALTER TABLE projects RENAME TO projects_old")
+                database.execSQL("DROP INDEX IF EXISTS index_projects_clientId")
+                database.execSQL("DROP INDEX IF EXISTS index_projects_parentProjectId")
+                // Note: clientId is now INTEGER (nullable) instead of INTEGER NOT NULL
+                database.execSQL("CREATE TABLE projects (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, clientId INTEGER, parentProjectId INTEGER DEFAULT NULL, name TEXT NOT NULL, status TEXT NOT NULL, startDate INTEGER NOT NULL, endDate INTEGER DEFAULT NULL, isArchived INTEGER NOT NULL DEFAULT 0, isSynced INTEGER NOT NULL DEFAULT 0, isTemplate INTEGER NOT NULL DEFAULT 0, category TEXT DEFAULT NULL, description TEXT DEFAULT NULL, FOREIGN KEY (clientId) REFERENCES clients(id) ON DELETE CASCADE, FOREIGN KEY (parentProjectId) REFERENCES projects(id) ON DELETE CASCADE)")
                 database.execSQL("INSERT INTO projects (id, clientId, parentProjectId, name, status, startDate, endDate, isArchived, isSynced, isTemplate, category, description) SELECT id, clientId, parentProjectId, name, status, startDate, endDate, isArchived, isSynced, isTemplate, category, description FROM projects_old")
                 database.execSQL("DROP TABLE projects_old")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_clientId ON projects(clientId)")

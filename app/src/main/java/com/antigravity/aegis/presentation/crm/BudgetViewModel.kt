@@ -42,7 +42,7 @@ class BudgetViewModel @Inject constructor(
             val project = projectRepository.getProjectById(projectId)
             if (project != null) {
                 _currentQuote.value = QuoteEntity(
-                    clientId = project.clientId,
+                    clientId = project.clientId ?: 0,
                     projectId = project.id,
                     date = System.currentTimeMillis(),
                     totalAmount = 0.0,

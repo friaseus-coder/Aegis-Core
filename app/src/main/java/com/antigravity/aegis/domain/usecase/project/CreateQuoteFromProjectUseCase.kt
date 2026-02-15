@@ -12,12 +12,13 @@ class CreateQuoteFromProjectUseCase @Inject constructor(
     private val budgetRepository: BudgetRepository
 ) {
     suspend operator fun invoke(projectId: Int): Long {
-        val projectWithSubProjectsWrapper = projectRepository.getProjectWithSubProjects(projectId).first()
+        val projectWithSubProjectsWrapper = projectRepository.getProjectWithSubProjectsSync(projectId)
+            ?: throw IllegalStateException("Project not found")
         val project = projectWithSubProjectsWrapper.project
         val subProjects = projectWithSubProjectsWrapper.subProjects
 
         val quote = QuoteEntity(
-            clientId = project.clientId,
+            clientId = project.clientId ?: 0,
             projectId = project.id,
             date = System.currentTimeMillis(),
             totalAmount = 0.0,

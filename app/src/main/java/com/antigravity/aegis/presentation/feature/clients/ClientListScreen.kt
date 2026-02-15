@@ -20,20 +20,78 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.antigravity.aegis.R
 import com.antigravity.aegis.domain.model.ClientType
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
+import com.antigravity.aegis.presentation.crm.CrmViewModel
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientListScreen(
     viewModel: ClientListViewModel = hiltViewModel(),
+    crmViewModel: CrmViewModel,
     onNavigateToClientDetail: (Int) -> Unit,
     onNavigateToClientCreate: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val transferState by crmViewModel.transferState.collectAsState()
+    val context = LocalContext.current
+
+    // Import Picker
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            crmViewModel.validateImport(uri)
+        }
+    }
+
+    // Handling States
+    when (val state = transferState) {
+        is CrmViewModel.TransferState.Success -> {
+            Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            crmViewModel.resetTransferState()
+        }
+        is CrmViewModel.TransferState.Error -> {
+            Toast.makeText(context, "Error: ${state.message}", Toast.LENGTH_LONG).show()
+             crmViewModel.resetTransferState()
+        }
+        is CrmViewModel.TransferState.ValidationError -> {
+             AlertDialog(
+                onDismissRequest = { crmViewModel.resetTransferState() },
+                title = { Text(stringResource(R.string.data_import_errors_title)) },
+                text = { Text(state.errors.joinToString("\n")) },
+                confirmButton = { TextButton(onClick = { crmViewModel.resetTransferState() }) { Text("OK") } }
+            )
+        }
+        is CrmViewModel.TransferState.ValidationSuccess -> {
+            ImportConfirmationDialog(
+                onConfirm = { wipe -> crmViewModel.confirmImport(state.uri, wipe) },
+                onCancel = { crmViewModel.resetTransferState() }
+            )
+        }
+        is CrmViewModel.TransferState.Loading -> {
+             // Show simple loading if needed, or rely on toast
+        }
+        else -> {}
+    }
 
     Scaffold(
         topBar = {
             AegisTopAppBar(
-                title = stringResource(R.string.data_import_errors_title)
+                title = stringResource(R.string.crm_clients_title), // Changed title to be correct
+                actions = {
+                    IconButton(onClick = { crmViewModel.exportClients() }) {
+                        Icon(Icons.Default.ArrowDownward, contentDescription = "Exportar CSV")
+                    }
+                    IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
+                        Icon(Icons.Default.ArrowUpward, contentDescription = "Importar CSV")
+                    }
+                }
             )
         },
         floatingActionButton = {

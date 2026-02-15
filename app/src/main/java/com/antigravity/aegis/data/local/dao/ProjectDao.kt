@@ -13,9 +13,14 @@ interface ProjectDao {
     @Query("SELECT * FROM projects WHERE id = :projectId")
     fun getProjectWithTasks(projectId: Int): Flow<ProjectWithTasks>
 
+
     @Transaction
     @Query("SELECT * FROM projects WHERE id = :projectId")
     fun getProjectWithSubProjects(projectId: Int): Flow<ProjectWithSubProjects>
+
+    @Transaction
+    @Query("SELECT * FROM projects WHERE id = :projectId")
+    suspend fun getProjectWithSubProjectsSync(projectId: Int): ProjectWithSubProjects?
 
     @Transaction
     @Query("SELECT * FROM projects WHERE parentProjectId = :parentId")

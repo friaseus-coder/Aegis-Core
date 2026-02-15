@@ -348,14 +348,21 @@ class CrmViewModel @Inject constructor(
             val client = _selectedClient.value // Might be null if we navigated directly... assume flow is robust
             
             if (project != null && project.id == projectId) {
-                // We need client...
-                 val currentClient = repository.getClientById(project.clientId)
+                viewModelScope.launch {
+                 val clientId = project.clientId ?: 0
+                 val currentClient = if (clientId != 0) repository.getClientById(clientId) else null
+                 _selectedClient.value = currentClient
+                 
+                 // Also load project tasks/details
+                 // _uiState.value = CrmUiState.ProjectDetail(project) // This line was commented out in the original context, keeping it that way.
+                 
                  val config = settingsRepository.getUserConfig().firstOrNull() // Get current config
                  
                  if (currentClient != null) {
                       val pdfFile = pdfGenerator.generateReportPdf(context, report.copy(id = reportId.toInt()), project, currentClient, signatureBitmap, config)
                       // Notify user or share intent?
                  }
+                }
             }
         }
     }
@@ -514,8 +521,7 @@ class CrmViewModel @Inject constructor(
             } catch (e: Exception) {
                 // Handle error
             }
-                // Handle error
-            }
+        }
     }
 
     // --- Template Management ---

@@ -22,6 +22,7 @@ class ProjectRepositoryImpl @Inject constructor(
     override suspend fun deleteProject(project: ProjectEntity) = dao.deleteProject(project)
     override fun getSubProjects(parentId: Int): Flow<List<ProjectEntity>> = dao.getSubProjects(parentId)
     override fun getProjectWithSubProjects(id: Int): Flow<ProjectWithSubProjects> = dao.getProjectWithSubProjects(id)
+    override suspend fun getProjectWithSubProjectsSync(id: Int): ProjectWithSubProjects? = dao.getProjectWithSubProjectsSync(id)
     override fun getTemplates(): Flow<List<ProjectEntity>> = dao.getTemplates()
     override fun getTemplateCategories(): Flow<List<String>> = dao.getTemplateCategories()
 }

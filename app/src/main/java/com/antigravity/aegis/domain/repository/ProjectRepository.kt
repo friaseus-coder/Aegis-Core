@@ -17,6 +17,7 @@ interface ProjectRepository {
     suspend fun deleteProject(project: ProjectEntity)
     fun getSubProjects(parentId: Int): Flow<List<ProjectEntity>>
     fun getProjectWithSubProjects(id: Int): Flow<ProjectWithSubProjects>
+    suspend fun getProjectWithSubProjectsSync(id: Int): ProjectWithSubProjects?
     fun getTemplates(): Flow<List<ProjectEntity>>
     fun getTemplateCategories(): Flow<List<String>>
 }

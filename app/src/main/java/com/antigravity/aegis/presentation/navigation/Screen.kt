@@ -35,4 +35,5 @@ sealed class Screen(val route: String) {
     data object ImportBackup : Screen("import_backup")
     data object ModuleCustomization : Screen("module_customization")
     data object Templates : Screen("templates")
+    data object ArchivedProjects : Screen("archived_projects")
 }

@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.antigravity.aegis.presentation.dashboard.DashboardScreen
-import com.antigravity.aegis.presentation.screens.*
+import com.antigravity.aegis.presentation.screens.PasswordVaultScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.antigravity.aegis.presentation.auth.AuthState
@@ -121,6 +121,7 @@ fun NavigationGraph(
 
         composable(Screen.Clients.route) {
             com.antigravity.aegis.presentation.feature.clients.ClientListScreen(
+                crmViewModel = crmViewModel,
                 onNavigateToClientDetail = { clientId ->
                     crmViewModel.selectClient(clientId)
                     navController.navigate(Screen.ClientDetail.route)
@@ -271,6 +272,14 @@ fun NavigationGraph(
             com.antigravity.aegis.presentation.timecontrol.TimeControlScreen() 
         }
         composable(Screen.PasswordVault.route) { PasswordVaultScreen() }
+        
+        // --- ARCHIVADOS ---
+        composable(Screen.ArchivedProjects.route) {
+            com.antigravity.aegis.presentation.crm.ArchivedProjectsScreen(
+                viewModel = crmViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
         
         // --- AUTH & UTILITIES ---
         composable(Screen.Recovery.route) {

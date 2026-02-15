@@ -35,7 +35,7 @@ enum class ProjectStatus {
 )
 data class ProjectEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val clientId: Int,
+    val clientId: Int? = null,
     val parentProjectId: Int? = null, // Para subproyectos
     val name: String,
     val status: ProjectStatus, // "Active", "Closed", "Archived"
