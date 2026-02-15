@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class BudgetViewModel @Inject constructor(
@@ -101,31 +103,29 @@ class BudgetViewModel @Inject constructor(
         _currentQuote.value = _currentQuote.value?.copy(totalAmount = total)
     }
 
+
     fun saveBudget() {
         viewModelScope.launch {
             val quote = _currentQuote.value ?: return@launch
             
-            // 1. Insert/Update Quote
-            val quoteId = if (quote.id == 0) {
-                budgetRepository.insertQuote(quote)
-            } else {
-                budgetRepository.updateQuote(quote)
-                quote.id.toLong()
-            }
+            _budgetState.value = BudgetState.Loading
             
-            // 2. Insert Lines
-            if (quote.id != 0) {
-                 budgetRepository.deleteBudgetLines(quote.id)
-            }
-            
-            val linesToSave = _lines.value.map { it.copy(quoteId = quoteId.toInt()) }
-            budgetRepository.insertBudgetLines(linesToSave)
-            
-            _budgetState.value = BudgetState.Saved
-            
-            // Update current quote with ID if needed
-            if (quote.id == 0) {
-                 _currentQuote.value = quote.copy(id = quoteId.toInt())
+            try {
+                // Perform database operations on IO thread
+                val quoteId = withContext(Dispatchers.IO) {
+                    budgetRepository.saveQuoteWithLines(quote, _lines.value)
+                }
+                
+                // Update State on Main Thread
+                _budgetState.value = BudgetState.Saved
+                
+                // Update current quote with ID if needed
+                if (quote.id == 0) {
+                     _currentQuote.value = quote.copy(id = quoteId.toInt())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _budgetState.value = BudgetState.Error("Error saving budget: ${e.message}")
             }
         }
     }

@@ -20,4 +20,5 @@ interface ProjectRepository {
     suspend fun getProjectWithSubProjectsSync(id: Int): ProjectWithSubProjects?
     fun getTemplates(): Flow<List<ProjectEntity>>
     fun getTemplateCategories(): Flow<List<String>>
+    fun getAllCategories(): Flow<List<String>>
 }

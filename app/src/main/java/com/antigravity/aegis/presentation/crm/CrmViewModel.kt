@@ -528,8 +528,20 @@ class CrmViewModel @Inject constructor(
     val templates: StateFlow<List<ProjectEntity>> = projectRepository.getTemplates()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val templateCategories: StateFlow<List<String>> = projectRepository.getTemplateCategories()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    private val defaultCategories = listOf(
+        "Reformas", 
+        "Marketing Digital", 
+        "Sistemas", 
+        "Ventas", 
+        "Administración", 
+        "Otros"
+    )
+
+    val templateCategories: StateFlow<List<String>> = projectRepository.getAllCategories()
+        .map { dbCategories -> 
+            (dbCategories + defaultCategories).distinct().sorted()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), defaultCategories.sorted())
 
     fun saveAsTemplate(projectId: Int, templateName: String, category: String? = null) {
         viewModelScope.launch {

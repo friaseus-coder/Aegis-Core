@@ -24,4 +24,6 @@ interface BudgetRepository {
     // Logs
     suspend fun insertBudgetLog(log: BudgetLogEntity): Long
     fun getBudgetLogs(quoteId: Int): Flow<List<BudgetLogEntity>>
+    
+    suspend fun saveQuoteWithLines(quote: QuoteEntity, lines: List<BudgetLineEntity>): Long
 }

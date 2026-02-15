@@ -25,4 +25,5 @@ class ProjectRepositoryImpl @Inject constructor(
     override suspend fun getProjectWithSubProjectsSync(id: Int): ProjectWithSubProjects? = dao.getProjectWithSubProjectsSync(id)
     override fun getTemplates(): Flow<List<ProjectEntity>> = dao.getTemplates()
     override fun getTemplateCategories(): Flow<List<String>> = dao.getTemplateCategories()
+    override fun getAllCategories(): Flow<List<String>> = dao.getAllCategories()
 }

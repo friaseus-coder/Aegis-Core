@@ -49,4 +49,26 @@ interface BudgetDao {
 
     @Query("SELECT * FROM budget_logs WHERE quoteId = :quoteId ORDER BY timestamp DESC")
     fun getBudgetLogs(quoteId: Int): Flow<List<BudgetLogEntity>>
+
+    @Transaction
+    suspend fun saveBudgetTransaction(quote: QuoteEntity, lines: List<BudgetLineEntity>): Long {
+        // 1. Insert or Update Quote
+        val quoteId = if (quote.id == 0) {
+            insertQuote(quote)
+        } else {
+            updateQuote(quote)
+            quote.id.toLong()
+        }
+
+        // 2. Clear old lines if updating
+        if (quote.id != 0) {
+            deleteBudgetLines(quote.id)
+        }
+
+        // 3. Insert new lines
+        val linesWithId = lines.map { it.copy(quoteId = quoteId.toInt()) }
+        insertBudgetLines(linesWithId)
+
+        return quoteId
+    }
 }

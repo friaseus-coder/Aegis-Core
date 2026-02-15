@@ -44,6 +44,9 @@ interface ProjectDao {
     @Query("SELECT DISTINCT category FROM projects WHERE isTemplate = 1 AND category IS NOT NULL ORDER BY category ASC")
     fun getTemplateCategories(): Flow<List<String>>
 
+    @Query("SELECT DISTINCT category FROM projects WHERE category IS NOT NULL AND category != '' ORDER BY category ASC")
+    fun getAllCategories(): Flow<List<String>>
+
     @Query("SELECT * FROM projects WHERE isTemplate = 1 AND name = :name LIMIT 1")
     suspend fun getTemplateByName(name: String): ProjectEntity?
 

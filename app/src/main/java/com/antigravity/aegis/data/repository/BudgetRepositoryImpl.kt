@@ -26,4 +26,7 @@ class BudgetRepositoryImpl @Inject constructor(
     
     override suspend fun insertBudgetLog(log: BudgetLogEntity): Long = dao.insertBudgetLog(log)
     override fun getBudgetLogs(quoteId: Int): Flow<List<BudgetLogEntity>> = dao.getBudgetLogs(quoteId)
+    
+    override suspend fun saveQuoteWithLines(quote: QuoteEntity, lines: List<BudgetLineEntity>): Long = 
+        dao.saveBudgetTransaction(quote, lines)
 }
