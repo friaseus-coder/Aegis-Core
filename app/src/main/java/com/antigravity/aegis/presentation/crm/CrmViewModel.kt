@@ -2,7 +2,6 @@ package com.antigravity.aegis.presentation.crm
 
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
-import com.antigravity.aegis.data.local.entity.WorkReportEntity
 import com.antigravity.aegis.data.local.entity.BudgetLineEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.ClientEntity
@@ -44,7 +43,6 @@ class CrmViewModel @Inject constructor(
     private val attachmentRepository: AttachmentRepository,
     private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository,
     private val createQuoteFromProjectUseCase: com.antigravity.aegis.domain.usecase.project.CreateQuoteFromProjectUseCase,
-    private val createWorkOrderFromProjectUseCase: com.antigravity.aegis.domain.usecase.project.CreateWorkOrderFromProjectUseCase,
     private val saveProjectAsTemplateUseCase: com.antigravity.aegis.domain.usecase.project.SaveProjectAsTemplateUseCase,
     private val createProjectFromTemplateUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectFromTemplateUseCase,
     private val exportTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ExportTemplateUseCase,
@@ -84,12 +82,10 @@ class CrmViewModel @Inject constructor(
     fun setFilterType(type: String?) { _filterType.value = type }
 
     // --- Projects ---
-    // --- Projects ---
     val activeProjects: StateFlow<List<ProjectEntity>> = projectRepository.getActiveProjects()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val activeRootProjects: StateFlow<List<ProjectEntity>> = activeProjects
-        .map { projects -> projects.filter { it.parentProjectId == null } }
+    val activeRootProjects: StateFlow<List<ProjectEntity>> = projectRepository.getActiveRootProjects()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // --- Selection State ---
@@ -111,17 +107,10 @@ class CrmViewModel @Inject constructor(
     private val _projectTasks = MutableStateFlow<List<TaskEntity>>(emptyList())
     val projectTasks: StateFlow<List<TaskEntity>> = _projectTasks
 
-    // --- Work Reports ---
-    private val _projectReports = MutableStateFlow<List<WorkReportEntity>>(emptyList())
-    val projectReports: StateFlow<List<WorkReportEntity>> = _projectReports
-
     // --- Budgets ---
     private val _projectBudgets = MutableStateFlow<List<QuoteEntity>>(emptyList())
     val projectBudgets: StateFlow<List<QuoteEntity>> = _projectBudgets
 
-    val allWorkReports: StateFlow<List<WorkReportEntity>> = repository.getAllWorkReports()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-    
     // Transfer Logic
     private val _transferState = MutableStateFlow<TransferState>(TransferState.Idle)
     val transferState = _transferState.asStateFlow()
@@ -278,14 +267,14 @@ class CrmViewModel @Inject constructor(
         }
     }
 
-    fun createProject(clientId: Int, name: String, status: String, startDate: Long, endDate: Long?) {
+    fun createProject(clientId: Int, name: String, status: String, startDate: Long, endDate: Long?, category: String? = null) {
         viewModelScope.launch {
             val projectStatus = try {
-                com.antigravity.aegis.data.local.entity.ProjectStatus.valueOf(status)
+                com.antigravity.aegis.data.local.entity.ProjectStatus.valueOf(status.uppercase())
             } catch (e: Exception) {
                 com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE
             }
-            val project = ProjectEntity(clientId = clientId, name = name, status = projectStatus, startDate = startDate, endDate = endDate)
+            val project = ProjectEntity(clientId = clientId, name = name, status = projectStatus, startDate = startDate, endDate = endDate, category = category)
             projectRepository.insertProject(project)
         }
     }
@@ -317,56 +306,6 @@ class CrmViewModel @Inject constructor(
             repository.updateTaskStatus(task.id, isCompleted)
         }
     }
-    
-    fun createWorkReport(projectId: Int, description: String, signatureBitmap: android.graphics.Bitmap?) {
-        viewModelScope.launch {
-            // Save signature bitmap to internal storage
-            var signaturePath: String? = null
-            if (signatureBitmap != null) {
-                val filename = "signature_${System.currentTimeMillis()}.png"
-                val file = java.io.File(context.filesDir, filename)
-                try {
-                    java.io.FileOutputStream(file).use { out ->
-                        signatureBitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
-                    }
-                    signaturePath = file.absolutePath
-                } catch (e: Exception) {
-                    android.util.Log.e("CrmViewModel", "Error saving signature", e)
-                }
-            }
-            
-            val report = WorkReportEntity(
-                projectId = projectId,
-                date = System.currentTimeMillis(),
-                description = description,
-                signaturePath = signaturePath
-            )
-            val reportId = repository.createWorkReport(report)
-            
-            // Generate PDF
-            val project = _selectedProject.value
-            val client = _selectedClient.value // Might be null if we navigated directly... assume flow is robust
-            
-            if (project != null && project.id == projectId) {
-                viewModelScope.launch {
-                 val clientId = project.clientId ?: 0
-                 val currentClient = if (clientId != 0) repository.getClientById(clientId) else null
-                 _selectedClient.value = currentClient
-                 
-                 // Also load project tasks/details
-                 // _uiState.value = CrmUiState.ProjectDetail(project) // This line was commented out in the original context, keeping it that way.
-                 
-                 val config = settingsRepository.getUserConfig().firstOrNull() // Get current config
-                 
-                 if (currentClient != null) {
-                      val pdfFile = pdfGenerator.generateReportPdf(context, report.copy(id = reportId.toInt()), project, currentClient, signatureBitmap, config)
-                      // Notify user or share intent?
-                 }
-                }
-            }
-        }
-    }
-
     // Navigation and Selection
     fun selectClient(clientId: Int) {
         viewModelScope.launch {
@@ -396,8 +335,7 @@ class CrmViewModel @Inject constructor(
         val allocatedGeneralExpenses: Double = 0.0,
         val totalExpenses: Double = 0.0,
         val netProfit: Double = 0.0,
-        val margin: Double = 0.0,
-        val profitPerHour: Double = 0.0
+        val margin: Double = 0.0
     )
     
     // Switch map on selectedProject to fetch profit
@@ -420,8 +358,7 @@ class CrmViewModel @Inject constructor(
                        allocatedGeneralExpenses = profitability?.allocatedGeneralExpenses ?: 0.0,
                        totalExpenses = profitability?.totalExpenses ?: 0.0,
                        netProfit = profitability?.netProfit ?: 0.0,
-                       margin = profitability?.profitMargin ?: 0.0,
-                       profitPerHour = profitability?.profitPerHour ?: 0.0
+                       margin = profitability?.profitMargin ?: 0.0
                    )
                 } catch (e: Exception) {
                     FinancialSummary()
@@ -463,12 +400,6 @@ class CrmViewModel @Inject constructor(
                     _projectExpenses.value = expenses
                 }
             }
-            // Fetch reports
-            launch {
-                repository.getWorkReportsForProject(projectId).collect { reports ->
-                    _projectReports.value = reports
-                }
-            }
             // Fetch subprojects
             launch {
                 projectRepository.getSubProjects(projectId).collect { subs ->
@@ -488,7 +419,15 @@ class CrmViewModel @Inject constructor(
     private val _subProjects = MutableStateFlow<List<ProjectEntity>>(emptyList())
     val subProjects: StateFlow<List<ProjectEntity>> = _subProjects
 
-    fun createSubProject(parentProjectId: Int, name: String, startDate: Long) {
+    fun createSubProject(
+        parentProjectId: Int, 
+        name: String, 
+        startDate: Long,
+        materials: String? = null,
+        price: Double? = null,
+        estimatedTime: Double? = null,
+        estimatedTimeUnit: String? = null
+    ) {
         viewModelScope.launch {
             val parent = projectRepository.getProjectById(parentProjectId) ?: return@launch
             val subProject = ProjectEntity(
@@ -496,30 +435,24 @@ class CrmViewModel @Inject constructor(
                 parentProjectId = parentProjectId,
                 name = name,
                 status = com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE,
-                startDate = startDate
+                startDate = startDate,
+                materials = materials,
+                price = price,
+                estimatedTime = estimatedTime,
+                estimatedTimeUnit = estimatedTimeUnit
             )
             projectRepository.insertProject(subProject)
         }
     }
 
-    fun createQuoteFromProject(projectId: Int, onResult: (Long) -> Unit) {
+    fun createQuoteFromProject(projectId: Int, onResult: (Long) -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
                 val quoteId = createQuoteFromProjectUseCase(projectId)
                 onResult(quoteId)
             } catch (e: Exception) {
-                // Handle error
-            }
-        }
-    }
-
-    fun createWorkOrderFromProject(subProjectId: Int, onResult: (Long) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val workOrderId = createWorkOrderFromProjectUseCase(subProjectId)
-                onResult(workOrderId)
-            } catch (e: Exception) {
-                // Handle error
+                android.util.Log.e("CrmViewModel", "Error creating quote from project", e)
+                onError(e.message ?: "Error desconocido")
             }
         }
     }

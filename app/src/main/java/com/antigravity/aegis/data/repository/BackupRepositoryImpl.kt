@@ -18,7 +18,6 @@ data class BackupData(
     val clients: List<ClientEntity> = emptyList(),
     val projects: List<ProjectEntity> = emptyList(),
     val tasks: List<TaskEntity> = emptyList(),
-    val workReports: List<WorkReportEntity> = emptyList(),
     val quotes: List<QuoteEntity> = emptyList(),
     val expenses: List<ExpenseEntity> = emptyList(),
     val products: List<ProductEntity> = emptyList(),
@@ -38,7 +37,6 @@ class BackupRepositoryImpl @Inject constructor(
             val clients = database.crmDao().getAllClientsSync()
             val projects = database.crmDao().getAllProjectsSync()
             val tasks = database.crmDao().getAllTasksSync()
-            val reports = database.crmDao().getAllWorkReportsSync() 
             val quotes = database.crmDao().getAllQuotesSync()
             val expenses = database.crmDao().getAllExpensesSync()
             val products = database.crmDao().getAllProductsSync()
@@ -51,7 +49,6 @@ class BackupRepositoryImpl @Inject constructor(
                 clients = clients,
                 projects = projects,
                 tasks = tasks,
-                workReports = reports,
                 quotes = quotes,
                 expenses = expenses,
                 products = products,
@@ -74,7 +71,6 @@ class BackupRepositoryImpl @Inject constructor(
             // androidx.room.withTransaction(database) {
             // Note: withTransaction was failing with suspend errors, running sequentially in IO context for now.
                 // Clear
-                database.crmDao().deleteAllWorkReports()
                 database.crmDao().deleteAllTasks()
                 database.crmDao().deleteAllProjects()
                 database.crmDao().deleteAllQuotes()
@@ -91,7 +87,6 @@ class BackupRepositoryImpl @Inject constructor(
                 if (backupData.clients.isNotEmpty()) database.crmDao().insertClients(backupData.clients)
                 if (backupData.projects.isNotEmpty()) database.crmDao().insertProjects(backupData.projects)
                 if (backupData.tasks.isNotEmpty()) database.crmDao().insertTasks(backupData.tasks)
-                if (backupData.workReports.isNotEmpty()) database.crmDao().insertWorkReports(backupData.workReports)
                 if (backupData.quotes.isNotEmpty()) database.crmDao().insertQuotes(backupData.quotes)
                 if (backupData.expenses.isNotEmpty()) database.crmDao().insertExpenses(backupData.expenses)
                 if (backupData.products.isNotEmpty()) database.crmDao().insertProducts(backupData.products)

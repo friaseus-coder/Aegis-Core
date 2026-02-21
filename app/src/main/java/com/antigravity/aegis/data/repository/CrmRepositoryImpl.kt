@@ -6,7 +6,6 @@ import com.antigravity.aegis.data.local.dao.DocumentDao
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
-import com.antigravity.aegis.data.local.entity.WorkReportEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.data.local.entity.ProductEntity
@@ -85,18 +84,6 @@ class CrmRepositoryImpl @Inject constructor(
 
     override suspend fun updateTaskStatus(taskId: Int, isCompleted: Boolean) {
         dao.updateTaskStatus(taskId, isCompleted)
-    }
-
-    override suspend fun createWorkReport(report: WorkReportEntity): Long {
-        return dao.insertWorkReport(report)
-    }
-
-    override fun getWorkReportsForProject(projectId: Int): Flow<List<WorkReportEntity>> {
-        return dao.getWorkReportsForProject(projectId)
-    }
-
-    override fun getAllWorkReports(): Flow<List<WorkReportEntity>> {
-        return dao.getAllWorkReports()
     }
 
     override suspend fun createQuote(quote: QuoteEntity): Long {

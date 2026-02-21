@@ -28,6 +28,7 @@ import android.net.Uri
 class QuoteKanbanViewModel @Inject constructor(
     private val repository: CrmRepository,
     private val budgetRepository: com.antigravity.aegis.domain.repository.BudgetRepository,
+    private val projectRepository: com.antigravity.aegis.domain.repository.ProjectRepository,
     private val pdfGenerator: PdfGenerator,
     @ApplicationContext private val context: Context,
     private val transferManager: DataTransferManager,
@@ -117,6 +118,19 @@ class QuoteKanbanViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     val allClients: StateFlow<List<ClientEntity>> = _clients.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun createProjectForQuote(clientId: Int, name: String, onProjectCreated: (Int) -> Unit) {
+        viewModelScope.launch {
+            val project = com.antigravity.aegis.data.local.entity.ProjectEntity(
+                clientId = clientId,
+                name = name,
+                status = com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE,
+                startDate = System.currentTimeMillis()
+            )
+            val projectId = projectRepository.insertProject(project)
+            onProjectCreated(projectId.toInt())
+        }
+    }
 
     fun createQuote(
         title: String,

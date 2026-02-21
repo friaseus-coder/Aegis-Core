@@ -160,25 +160,9 @@ fun NavigationGraph(
         composable(Screen.ProjectDetail.route) {
             com.antigravity.aegis.presentation.crm.ProjectDetailScreen(
                 viewModel = crmViewModel,
-                onNavigateToCreateReport = { projectId ->
-                    // crmViewModel.selectProject(projectId) // Already selected
-                    navController.navigate(Screen.CreateReport.createRoute(projectId))
-                },
                 onNavigateToEditBudget = { projectId, quoteId ->
                     navController.navigate(Screen.EditBudget.createRoute(projectId, quoteId))
                 }
-            )
-        }
-
-        composable(Screen.CreateReport.route) { backStackEntry ->
-            val projectId = backStackEntry.arguments?.getString("projectId")?.toIntOrNull() ?: 0
-            com.antigravity.aegis.presentation.reports.CreateReportScreen(
-                projectId = projectId,
-                onSaveReport = { desc, sig ->
-                     crmViewModel.createWorkReport(projectId, desc, sig)
-                     navController.popBackStack()
-                },
-                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -200,19 +184,10 @@ fun NavigationGraph(
 
         // --- OTHER MODULES ---
 
-        composable(Screen.WorkReports.route) {
-            com.antigravity.aegis.presentation.reports.FieldServiceScreen(
-                viewModel = crmViewModel,
-                onNavigateToCreateReport = { projectId ->
-                    navController.navigate(Screen.CreateReport.createRoute(projectId))
-                }
-            )
-        }
-
         composable(Screen.Budgets.route) {
              com.antigravity.aegis.presentation.crm.QuoteKanbanScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToCreateQuote = { navController.navigate(Screen.EditBudget.createRoute(0, 0)) }
+                onNavigateToCreateQuote = { projectId -> navController.navigate(Screen.EditBudget.createRoute(projectId, 0)) }
             )
         }
 

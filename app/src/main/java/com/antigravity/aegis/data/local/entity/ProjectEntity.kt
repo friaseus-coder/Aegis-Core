@@ -45,5 +45,9 @@ data class ProjectEntity(
     val isSynced: Boolean = false,
     val isTemplate: Boolean = false,
     val category: String? = null,
-    val description: String? = null
+    val description: String? = null,
+    val materials: String? = null,
+    val price: Double? = null,
+    val estimatedTime: Double? = null,
+    val estimatedTimeUnit: String? = null
 )

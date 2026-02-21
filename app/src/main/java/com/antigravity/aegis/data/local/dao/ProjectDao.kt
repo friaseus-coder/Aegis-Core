@@ -26,6 +26,9 @@ interface ProjectDao {
     @Query("SELECT * FROM projects WHERE parentProjectId = :parentId")
     fun getSubProjects(parentId: Int): Flow<List<ProjectEntity>>
 
+    @Query("SELECT * FROM projects WHERE parentProjectId = :parentId")
+    suspend fun getSubProjectsSync(parentId: Int): List<ProjectEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: ProjectEntity): Long
 
@@ -52,6 +55,9 @@ interface ProjectDao {
 
     @Query("SELECT * FROM projects WHERE status = 'ACTIVE' AND isTemplate = 0 ORDER BY startDate DESC")
     fun getActiveProjects(): Flow<List<ProjectEntity>>
+
+    @Query("SELECT * FROM projects WHERE status = 'ACTIVE' AND isTemplate = 0 AND parentProjectId IS NULL ORDER BY startDate DESC")
+    fun getActiveRootProjects(): Flow<List<ProjectEntity>>
 
     @Query("SELECT * FROM projects WHERE clientId = :clientId AND isTemplate = 0 ORDER BY startDate DESC")
     fun getProjectsByClient(clientId: Int): Flow<List<ProjectEntity>>

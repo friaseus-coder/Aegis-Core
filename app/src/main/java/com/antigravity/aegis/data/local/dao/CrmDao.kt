@@ -8,7 +8,6 @@ import androidx.room.Transaction
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
-import com.antigravity.aegis.data.local.entity.WorkReportEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.data.local.entity.ProductEntity
@@ -82,16 +81,6 @@ interface CrmDao {
     
     @Query("UPDATE tasks SET isCompleted = :isCompleted WHERE id = :taskId")
     suspend fun updateTaskStatus(taskId: Int, isCompleted: Boolean)
-
-    // Work Reports
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWorkReport(report: WorkReportEntity): Long
-
-    @Query("SELECT * FROM work_reports WHERE projectId = :projectId ORDER BY date DESC")
-    fun getWorkReportsForProject(projectId: Int): Flow<List<WorkReportEntity>>
-
-    @Query("SELECT * FROM work_reports ORDER BY date DESC")
-    fun getAllWorkReports(): Flow<List<WorkReportEntity>>
 
     // Quotes
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -176,12 +165,6 @@ interface CrmDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTasks(tasks: List<TaskEntity>)
     
-    @Query("SELECT * FROM work_reports")
-    suspend fun getAllWorkReportsSync(): List<WorkReportEntity>
-    
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWorkReports(reports: List<WorkReportEntity>)
-    
     @Query("SELECT * FROM quotes")
     suspend fun getAllQuotesSync(): List<QuoteEntity>
     
@@ -211,6 +194,4 @@ interface CrmDao {
     suspend fun deleteAllProjects()
     @Query("DELETE FROM tasks")
     suspend fun deleteAllTasks()
-    @Query("DELETE FROM work_reports")
-    suspend fun deleteAllWorkReports()
 }

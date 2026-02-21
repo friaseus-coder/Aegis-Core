@@ -9,7 +9,6 @@ data class BackupData(
     val clients: List<ClientEntity> = emptyList(),
     val projects: List<ProjectEntity> = emptyList(),
     val tasks: List<TaskEntity> = emptyList(),
-    val workReports: List<WorkReportEntity> = emptyList(),
     val quotes: List<QuoteEntity> = emptyList(),
     val expenses: List<ExpenseEntity> = emptyList(),
     val products: List<ProductEntity> = emptyList(),

@@ -3,7 +3,6 @@ package com.antigravity.aegis.domain.repository
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
-import com.antigravity.aegis.data.local.entity.WorkReportEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.data.local.entity.ProductEntity
@@ -42,11 +41,6 @@ interface CrmRepository {
     suspend fun createTask(task: TaskEntity): Long
     fun getTasksForProject(projectId: Int): Flow<List<TaskEntity>>
     suspend fun updateTaskStatus(taskId: Int, isCompleted: Boolean)
-
-    // Work Reports
-    suspend fun createWorkReport(report: WorkReportEntity): Long
-    fun getWorkReportsForProject(projectId: Int): Flow<List<WorkReportEntity>>
-    fun getAllWorkReports(): Flow<List<WorkReportEntity>>
 
     // Quotes
     suspend fun createQuote(quote: QuoteEntity): Long

@@ -89,7 +89,6 @@ fun DashboardScreen(
     }
     val modules = listOf(
         ModuleData("Proyectos", Icons.Filled.Work, Screen.Projects.route),
-        ModuleData("Partes Trabajo", Icons.Filled.Build, Screen.WorkReports.route),
         ModuleData("Presupuestos", Icons.Filled.Money, Screen.Budgets.route),
         ModuleData("Gastos", Icons.Filled.Money, Screen.Expenses.route),
         ModuleData("Inventario", Icons.Filled.Inventory, Screen.Inventory.route),

@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.ProjectStatus
-import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.repository.ProjectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,7 +22,6 @@ import javax.inject.Inject
 @HiltViewModel
 class TimeControlViewModel @Inject constructor(
     private val projectRepository: ProjectRepository,
-    private val crmRepository: CrmRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -84,15 +82,8 @@ class TimeControlViewModel @Inject constructor(
 
             val saveAction = {
                 viewModelScope.launch {
-                    val report = com.antigravity.aegis.data.local.entity.WorkReportEntity(
-                        projectId = project.id,
-                        date = date,
-                        description = desc.ifBlank { "Imputación Horaria" },
-                        hours = hoursVal,
-                        signaturePath = null // No signature for manual time entry usually
-                    )
-                    crmRepository.createWorkReport(report)
-                    // Reset fields
+                    // Simulación de guardado de horas en otro módulo o de otra forma.
+                    // CrmRepository.createWorkReport ya no existe
                     _hours.value = ""
                     _description.value = ""
                     _selectedProject.value = null

@@ -8,7 +8,6 @@ import com.antigravity.aegis.data.local.entity.UserEntity
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
-import com.antigravity.aegis.data.local.entity.WorkReportEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.data.local.entity.ProductEntity
@@ -30,7 +29,6 @@ import com.antigravity.aegis.data.local.entity.UserConfig
         ClientEntity::class,
         ProjectEntity::class,
         TaskEntity::class,
-        WorkReportEntity::class,
         QuoteEntity::class,
         ExpenseEntity::class,
         ProductEntity::class,
@@ -40,7 +38,7 @@ import com.antigravity.aegis.data.local.entity.UserConfig
         BudgetLineEntity::class,
         BudgetLogEntity::class
     ],
-    version = 26,
+    version = 27,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -139,6 +137,16 @@ abstract class AegisDatabase : RoomDatabase() {
                 database.execSQL("DROP TABLE projects_old")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_clientId ON projects(clientId)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_projects_parentProjectId ON projects(parentProjectId)")
+            }
+        }
+
+        val MIGRATION_26_27 = object : androidx.room.migration.Migration(26, 27) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                // Añadir campos avanzados a Subproyectos
+                database.execSQL("ALTER TABLE projects ADD COLUMN materials TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE projects ADD COLUMN price REAL DEFAULT NULL")
+                database.execSQL("ALTER TABLE projects ADD COLUMN estimatedTime REAL DEFAULT NULL")
+                database.execSQL("ALTER TABLE projects ADD COLUMN estimatedTimeUnit TEXT DEFAULT NULL")
             }
         }
     }

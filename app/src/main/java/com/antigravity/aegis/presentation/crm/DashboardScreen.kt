@@ -109,11 +109,11 @@ fun DashboardScreen(
                 categories = categories,
                 templates = templates,
                 onDismiss = { showCreateDialog = false },
-                onConfirm = { clientId, name, startDate, endDate, templateId ->
+                onConfirm = { clientId, name, startDate, endDate, templateId, category ->
                     if (templateId != null) {
                          viewModel.createProjectFromTemplate(templateId, clientId, name, startDate, endDate)
                     } else {
-                         viewModel.createProject(clientId, name, "ACTIVE", startDate, endDate)
+                         viewModel.createProject(clientId, name, "ACTIVE", startDate, endDate, category)
                     }
                     showCreateDialog = false
                 },
@@ -129,7 +129,7 @@ fun CreateProjectWizard(
     categories: List<String>,
     templates: List<com.antigravity.aegis.data.local.entity.ProjectEntity>,
     onDismiss: () -> Unit,
-    onConfirm: (Int, String, Long, Long?, Int?) -> Unit,
+    onConfirm: (Int, String, Long, Long?, Int?, String?) -> Unit,
     onCreateClient: () -> Unit
 ) {
     var step by remember { mutableStateOf(1) }
@@ -258,7 +258,7 @@ fun CreateProjectWizard(
                             Button(
                                 onClick = { 
                                     if (projectName.isNotBlank() && selectedClient != null) {
-                                        onConfirm(selectedClient!!.id, projectName, startDate, endDate, selectedTemplate?.id)
+                                        onConfirm(selectedClient!!.id, projectName, startDate, endDate, selectedTemplate?.id, selectedCategory)
                                     }
                                 },
                                 enabled = projectName.isNotBlank()

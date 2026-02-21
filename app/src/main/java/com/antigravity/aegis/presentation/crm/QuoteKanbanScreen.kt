@@ -59,10 +59,12 @@ import com.antigravity.aegis.presentation.components.AegisTopAppBar
 fun QuoteKanbanScreen(
     viewModel: QuoteKanbanViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    onNavigateToCreateQuote: () -> Unit
+    onNavigateToCreateQuote: (Int) -> Unit
 ) {
     val kanbanState by viewModel.kanbanState.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
+    val allClients by viewModel.allClients.collectAsState()
+    var showCreateDialog by remember { mutableStateOf(false) }
     val userConfig by viewModel.userConfig.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -125,7 +127,7 @@ fun QuoteKanbanScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToCreateQuote) {
+            FloatingActionButton(onClick = { showCreateDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.ui_new_quote))
             }
         }
@@ -174,6 +176,74 @@ fun QuoteKanbanScreen(
             }
         }
     } // Column
+        
+        if (showCreateDialog) {
+            var projectName by remember { mutableStateOf("") }
+            var expandedClient by remember { mutableStateOf(false) }
+            var selectedClient by remember { mutableStateOf<ClientEntity?>(null) }
+            
+            AlertDialog(
+                onDismissRequest = { showCreateDialog = false },
+                title = { Text(stringResource(R.string.ui_new_quote)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Se creará automáticamente un Proyecto Activo asociado a este presupuesto.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        
+                        ExposedDropdownMenuBox(
+                            expanded = expandedClient,
+                            onExpandedChange = { expandedClient = !expandedClient }
+                        ) {
+                            OutlinedTextField(
+                                value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: "Seleccionar Cliente",
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedClient) },
+                                modifier = Modifier.menuAnchor().fillMaxWidth()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expandedClient,
+                                onDismissRequest = { expandedClient = false }
+                            ) {
+                                allClients.forEach { client ->
+                                    DropdownMenuItem(
+                                        text = { Text(if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName) },
+                                        onClick = {
+                                            selectedClient = client
+                                            expandedClient = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        
+                        OutlinedTextField(
+                            value = projectName,
+                            onValueChange = { projectName = it },
+                            label = { Text("Nombre del Proyecto/Presupuesto") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (selectedClient != null && projectName.isNotBlank()) {
+                                viewModel.createProjectForQuote(selectedClient!!.id, projectName) { projectId ->
+                                    onNavigateToCreateQuote(projectId)
+                                }
+                                showCreateDialog = false
+                            }
+                        },
+                        enabled = selectedClient != null && projectName.isNotBlank()
+                    ) {
+                        Text(stringResource(R.string.general_create))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCreateDialog = false }) { Text(stringResource(R.string.general_cancel)) }
+                }
+            )
+        }
     } // Scaffold
 } // Function
 

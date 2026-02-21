@@ -14,9 +14,7 @@ data class ProjectProfitability(
     val allocatedGeneralExpenses: Double,
     val totalExpenses: Double,
     val netProfit: Double,
-    val profitMargin: Double,
-    val totalHours: Double,
-    val profitPerHour: Double
+    val profitMargin: Double
 )
 
 class GetProjectRealProfitUseCase @Inject constructor(
@@ -94,10 +92,6 @@ class GetProjectRealProfitUseCase @Inject constructor(
             iteratorCal.add(Calendar.MONTH, 1)
         }
         
-        // 3. Hourly Profit
-        val workReports = crmRepository.getWorkReportsForProject(projectId).first()
-        val totalHours = workReports.sumOf { it.hours }
-
         // Direct Expenses
         // Use flow first
         val directExpensesList = crmRepository.getExpensesForProject(projectId).first() 
@@ -105,11 +99,11 @@ class GetProjectRealProfitUseCase @Inject constructor(
 
         val netProfit = totalIncome - directExpensesTotal - totalGeneralExpenses
         val totalExpenses = directExpensesTotal + totalGeneralExpenses
+        
         val profitMargin = if (totalIncome > 0) (netProfit / totalIncome) * 100 else 0.0
-        val profitPerHour = if (totalHours > 0) netProfit / totalHours else 0.0
         
         return ProjectProfitability(
-            projectId, totalIncome, directExpensesTotal, totalGeneralExpenses, totalExpenses, netProfit, profitMargin, totalHours, profitPerHour
+            projectId, totalIncome, directExpensesTotal, totalGeneralExpenses, totalExpenses, netProfit, profitMargin
         )
     }
 }

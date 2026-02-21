@@ -3,6 +3,7 @@ package com.antigravity.aegis.presentation.crm
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
@@ -18,6 +19,7 @@ import com.antigravity.aegis.presentation.components.BovedaLogo
 import com.antigravity.aegis.ui.theme.LocalCompanyLogoUri
 import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.platform.LocalContext
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 
@@ -25,17 +27,16 @@ import com.antigravity.aegis.presentation.components.AegisTopAppBar
 @Composable
 fun ProjectDetailScreen(
     viewModel: CrmViewModel,
-    onNavigateToCreateReport: (Int) -> Unit,
     onNavigateToEditBudget: (Int, Int) -> Unit // projectId, quoteId
 ) {
     val project by viewModel.selectedProject.collectAsState()
     val tasks by viewModel.projectTasks.collectAsState()
-    val reports by viewModel.projectReports.collectAsState()
     val subProjects by viewModel.subProjects.collectAsState()
     var showAddTaskDialog by remember { mutableStateOf(false) }
 
     var showAddSubProjectDialog by remember { mutableStateOf(false) }
     var showSaveTemplateDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     if (project == null) {
         Text(stringResource(R.string.crm_project_not_found))
@@ -91,9 +92,15 @@ fun ProjectDetailScreen(
                  // Generate Quote Button (Only for Root Projects ideally, but logic handles it)
                  if (project!!.parentProjectId == null) {
                      FilledTonalButton(onClick = { 
-                         viewModel.createQuoteFromProject(project!!.id) { quoteId ->
-                             onNavigateToEditBudget(project!!.id, quoteId.toInt())
-                         }
+                         viewModel.createQuoteFromProject(
+                             projectId = project!!.id,
+                             onResult = { quoteId ->
+                                 onNavigateToEditBudget(project!!.id, quoteId.toInt())
+                             },
+                             onError = { errorMsg ->
+                                 android.widget.Toast.makeText(context, "Error: $errorMsg", android.widget.Toast.LENGTH_LONG).show()
+                             }
+                         )
                      }) {
                          Text("Generar Presupuesto")
                      }
@@ -117,14 +124,18 @@ fun ProjectDetailScreen(
                     items(subProjects) { sub ->
                         ListItem(
                             headlineContent = { Text(sub.name) },
-                            supportingContent = { Text(sub.status.name) },
-                            trailingContent = {
-                                Button(onClick = {
-                                    viewModel.createWorkOrderFromProject(sub.id) { reportId ->
-                                        onNavigateToCreateReport(project!!.id) 
+                            supportingContent = { 
+                                Column {
+                                    Text(sub.status.name)
+                                    if (sub.price != null) {
+                                        Text("Precio: €${"%.2f".format(sub.price)}")
                                     }
-                                }) {
-                                    Text("Generar Parte")
+                                    if (sub.estimatedTime != null && sub.estimatedTimeUnit != null) {
+                                        Text("Tiempo: ${sub.estimatedTime} ${sub.estimatedTimeUnit}")
+                                    }
+                                    if (!sub.materials.isNullOrBlank()) {
+                                        Text("Materiales: ${sub.materials}", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                                    }
                                 }
                             }
                         )
@@ -185,10 +196,6 @@ fun ProjectDetailScreen(
                                 color = if (financialSummary.netProfit >= 0) androidx.compose.ui.graphics.Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
                             )
                         }
-                         Column(horizontalAlignment = Alignment.End) {
-                            Text(stringResource(R.string.financial_profit_per_hour), style = MaterialTheme.typography.bodySmall)
-                            Text("€${"%.2f".format(financialSummary.profitPerHour)}", style = MaterialTheme.typography.titleMedium)
-                        }
                     }
                     
                     Spacer(modifier = Modifier.height(8.dp))
@@ -197,17 +204,6 @@ fun ProjectDetailScreen(
             }
             
             Spacer(modifier = Modifier.height(16.dp))
-            
-            Button(
-                onClick = { onNavigateToCreateReport(project!!.id) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.crm_report_create_button))
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(stringResource(R.string.crm_reports_section_title), style = MaterialTheme.typography.titleLarge)
 // ...
             // -- BUDGETS SECTION --
             val budgets by viewModel.projectBudgets.collectAsState()
@@ -308,8 +304,16 @@ fun ProjectDetailScreen(
         if (showAddSubProjectDialog) {
              AddSubProjectDialog(
                 onDismiss = { showAddSubProjectDialog = false },
-                onConfirm = { name ->
-                    viewModel.createSubProject(project!!.id, name, System.currentTimeMillis())
+                onConfirm = { name, materials, price, estTime, estUnit ->
+                    viewModel.createSubProject(
+                        parentProjectId = project!!.id, 
+                        name = name, 
+                        startDate = System.currentTimeMillis(),
+                        materials = materials,
+                        price = price,
+                        estimatedTime = estTime,
+                        estimatedTimeUnit = estUnit
+                    )
                     showAddSubProjectDialog = false
                 }
              )
@@ -329,23 +333,93 @@ fun ProjectDetailScreen(
     }
 }
  
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String?, Double?, Double?, String?) -> Unit) {
     var name by remember { mutableStateOf("") }
+    var materials by remember { mutableStateOf("") }
+    var priceStr by remember { mutableStateOf("") }
+    var estimatedTimeStr by remember { mutableStateOf("") }
+    
+    var expandedUnitList by remember { mutableStateOf(false) }
+    var selectedTimeUnit by remember { mutableStateOf("Horas") }
+    val timeUnits = listOf("Horas", "Días", "Semanas")
     
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Nuevo Subproyecto") },
         text = {
-            OutlinedTextField(
-                value = name, 
-                onValueChange = { name = it }, 
-                label = { Text("Nombre del Subproyecto") }
-            )
+            Column(modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+                OutlinedTextField(
+                    value = name, 
+                    onValueChange = { name = it }, 
+                    label = { Text("Nombre del Subproyecto") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = materials,
+                    onValueChange = { materials = it },
+                    label = { Text("Materiales Necesarios") },
+                    minLines = 3,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = priceStr,
+                    onValueChange = { priceStr = it.filter { c -> c.isDigit() || c == '.' || c == ',' }.replace(',', '.') },
+                    label = { Text("Precio (€)") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = estimatedTimeStr,
+                        onValueChange = { estimatedTimeStr = it.filter { c -> c.isDigit() || c == '.' || c == ',' }.replace(',', '.') },
+                        label = { Text("Tiempo Est.") },
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    ExposedDropdownMenuBox(
+                        expanded = expandedUnitList,
+                        onExpandedChange = { expandedUnitList = it },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = selectedTimeUnit,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Unidad") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedUnitList) },
+                            modifier = Modifier.menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedUnitList,
+                            onDismissRequest = { expandedUnitList = false }
+                        ) {
+                            timeUnits.forEach { unit ->
+                                DropdownMenuItem(
+                                    text = { Text(unit) },
+                                    onClick = {
+                                        selectedTimeUnit = unit
+                                        expandedUnitList = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         },
         confirmButton = {
             Button(onClick = { 
-                if (name.isNotBlank()) onConfirm(name) 
+                if (name.isNotBlank()) {
+                    val price = priceStr.toDoubleOrNull()
+                    val estTime = estimatedTimeStr.toDoubleOrNull()
+                    onConfirm(name, materials.takeIf { it.isNotBlank() }, price, estTime, selectedTimeUnit)
+                }
             }) {
                 Text(stringResource(R.string.general_add))
             }
