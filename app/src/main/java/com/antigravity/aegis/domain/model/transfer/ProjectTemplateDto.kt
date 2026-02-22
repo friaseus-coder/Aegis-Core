@@ -5,7 +5,11 @@ import com.antigravity.aegis.data.local.entity.TaskEntity
 
 data class ProjectTemplateDto(
     val name: String,
-    val description: String? = null, // Future use
+    val description: String? = null,
+    val materials: String? = null,
+    val price: Double? = null,
+    val estimatedTime: Double? = null,
+    val estimatedTimeUnit: String? = null, // "Horas", "Días", "Semanas"
     val tasks: List<TaskTemplateDto>,
     val subProjects: List<ProjectTemplateDto>
 )

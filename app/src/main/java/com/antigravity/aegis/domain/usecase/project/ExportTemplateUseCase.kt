@@ -49,6 +49,11 @@ class ExportTemplateUseCase @Inject constructor(
 
         return ProjectTemplateDto(
             name = project.name,
+            description = project.description,
+            materials = project.materials,
+            price = project.price,
+            estimatedTime = project.estimatedTime,
+            estimatedTimeUnit = project.estimatedTimeUnit,
             tasks = taskDtos,
             subProjects = subProjectDtos
         )

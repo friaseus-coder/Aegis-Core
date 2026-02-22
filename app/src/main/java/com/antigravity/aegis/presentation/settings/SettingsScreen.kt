@@ -313,14 +313,7 @@ fun SettingsScreen(
                 ) {
                     Text("Gestionar Plantillas de Proyecto")
                 }
-                
-                Button(
-                    onClick = { viewModel.loadDefaultTemplates() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text("Cargar Plantillas Predeterminadas")
-                }
+
             }
 
             // Legal & Privacy Section

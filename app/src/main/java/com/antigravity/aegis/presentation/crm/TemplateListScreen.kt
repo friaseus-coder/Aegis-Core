@@ -30,6 +30,8 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 
+import androidx.compose.material.icons.filled.FileOpen
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateListScreen(
@@ -90,18 +92,20 @@ fun TemplateListScreen(
     Scaffold(
         topBar = {
             AegisTopAppBar(
-                title = stringResource(R.string.crm_templates_title)
+                title = stringResource(R.string.crm_templates_title),
+                actions = {
+                    IconButton(onClick = { viewModel.shareSampleTemplate() }) {
+                        Icon(
+                            Icons.Default.FileOpen,
+                            contentDescription = stringResource(R.string.crm_templates_download_sample)
+                        )
+                    }
+                }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { importLauncher.launch(arrayOf("application/json")) }) {
                 Icon(Icons.Default.FileDownload, contentDescription = stringResource(R.string.crm_templates_import))
-                // Material Icons: FileUpload (Arrow Up), FileDownload (Arrow Down).
-                // Import = Into App = FileOpen? or Download if from cloud?
-                // Let's use FileUpload usually for "Import" (Load up to app) and Download for "Export" (Save down to disk)? 
-                // Getting confused. "Import" usually text implies "Arrow Into Box".
-                // Let's use generic Add for "Import" if it adds? No, specific import action.
-                // Let's stick with FileDownload for Import (Get file) and Share/Save for export.
             }
         }
     ) { padding ->

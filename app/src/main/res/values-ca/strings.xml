@@ -344,6 +344,7 @@
     
     <string name="crm_templates_title">Plantilles de Projecte</string>
     <string name="crm_templates_import">Importar Plantilla</string>
+    <string name="crm_templates_download_sample">Descarregar Plantilla de Mostra</string>
     <string name="crm_templates_created">Creada: %1$s</string>
     <string name="crm_templates_view_edit">Veure/Editar Detalls</string>
     <string name="crm_templates_export_json">Exportar JSON</string>

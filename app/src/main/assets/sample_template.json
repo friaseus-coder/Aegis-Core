@@ -1,0 +1,77 @@
+{
+  "name": "Ejemplo: Reforma Integral Baño",
+  "description": "Plantilla de muestra. Edita el nombre y las tareas según tu proyecto.",
+  "materials": null,
+  "price": null,
+  "estimatedTime": null,
+  "estimatedTimeUnit": null,
+  "tasks": [
+    {
+      "title": "Planificación y presupuesto",
+      "description": "Revisar materiales y confirmar presupuesto con el cliente."
+    },
+    {
+      "title": "Demolición",
+      "description": "Retirada de alicatados, sanitarios y revestimientos existentes."
+    }
+  ],
+  "subProjects": [
+    {
+      "name": "Fontanería",
+      "description": "Instalación de nueva fontanería.",
+      "materials": "Tuberías PEX 16mm, codos, llaves de paso",
+      "price": 850.00,
+      "estimatedTime": 2.0,
+      "estimatedTimeUnit": "Días",
+      "tasks": [
+        {
+          "title": "Nueva instalación de agua fría y caliente",
+          "description": "Tendido de tuberías de cobre o PEX."
+        },
+        {
+          "title": "Instalación de desagüe",
+          "description": "Conexión de bañera, lavabo e inodoro."
+        }
+      ],
+      "subProjects": []
+    },
+    {
+      "name": "Alicatado y solado",
+      "description": "Colocación de azulejos y suelo.",
+      "materials": "Azulejo 30x60 (25m²), adhesivo, lechada",
+      "price": 1200.00,
+      "estimatedTime": 3.0,
+      "estimatedTimeUnit": "Días",
+      "tasks": [
+        {
+          "title": "Alicatado de paredes",
+          "description": "Colocación de azulejo cerámico hasta 2m de altura."
+        },
+        {
+          "title": "Solado del suelo",
+          "description": "Colocación de gres porcelánico antideslizante."
+        }
+      ],
+      "subProjects": []
+    },
+    {
+      "name": "Acabados y sanitarios",
+      "description": "Instalación de sanitarios, grifería y accesorios.",
+      "materials": "Inodoro, lavabo, plato ducha, grifería termostática, mampara",
+      "price": 1500.00,
+      "estimatedTime": 8.0,
+      "estimatedTimeUnit": "Horas",
+      "tasks": [
+        {
+          "title": "Montaje de sanitarios",
+          "description": "Colocación de inodoro, lavabo y plato de ducha."
+        },
+        {
+          "title": "Instalación de grifería y mampara",
+          "description": "Montaje de griferías termostáticas y mampara de ducha."
+        }
+      ],
+      "subProjects": []
+    }
+  ]
+}

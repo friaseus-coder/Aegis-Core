@@ -46,7 +46,11 @@ class ImportTemplateUseCase @Inject constructor(
             name = dto.name,
             status = CrmStatus.ACTIVE,
             startDate = System.currentTimeMillis(),
-            isTemplate = true
+            isTemplate = true,
+            materials = dto.materials,
+            price = dto.price,
+            estimatedTime = dto.estimatedTime,
+            estimatedTimeUnit = dto.estimatedTimeUnit
         )
 
         // Try to find a valid client ID; fallback to 1

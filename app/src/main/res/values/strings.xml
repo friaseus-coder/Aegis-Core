@@ -346,6 +346,7 @@
     
     <string name="crm_templates_title">Project Templates</string>
     <string name="crm_templates_import">Import Template</string>
+    <string name="crm_templates_download_sample">Download Sample Template</string>
     <string name="crm_templates_created">Created: %1$s</string>
     <string name="crm_templates_view_edit">View/Edit Details</string>
     <string name="crm_templates_export_json">Export JSON</string>

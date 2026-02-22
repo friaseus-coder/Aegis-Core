@@ -551,4 +551,34 @@ class CrmViewModel @Inject constructor(
                 .onError { _transferState.value = TransferState.Error(resId = R.string.general_unknown_error) }
         }
     }
+
+    fun shareSampleTemplate() {
+        viewModelScope.launch {
+            try {
+                // Copiar el asset a un fichero temporal en cache y compartirlo
+                val sampleJson = context.assets.open("sample_template.json").bufferedReader().readText()
+                val cacheFile = java.io.File(context.cacheDir, "sample_template.json")
+                cacheFile.writeText(sampleJson)
+
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    cacheFile
+                )
+
+                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "application/json"
+                    putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(android.content.Intent.createChooser(shareIntent, "Guardar plantilla de muestra en...").apply {
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+            } catch (e: Exception) {
+                android.util.Log.e("CrmViewModel", "Error sharing sample template", e)
+                _transferState.value = TransferState.Error(message = "Error: ${e.message}")
+            }
+        }
+    }
 }
