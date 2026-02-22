@@ -87,15 +87,7 @@ fun DashboardScreen(
             }
         )
     }
-    val modules = listOf(
-        ModuleData("Proyectos", Icons.Filled.Work, Screen.Projects.route),
-        ModuleData("Presupuestos", Icons.Filled.Money, Screen.Budgets.route),
-        ModuleData("Gastos", Icons.Filled.Money, Screen.Expenses.route),
-        ModuleData("Inventario", Icons.Filled.Inventory, Screen.Inventory.route),
-        ModuleData("Control Horario", Icons.Filled.Schedule, Screen.TimeControl.route),
-        ModuleData("Clientes", Icons.Filled.Person, Screen.Clients.route),
-        ModuleData("Kilometraje", Icons.Filled.Map, Screen.Mileage.route)
-    )
+    val modules by viewModel.configuredModules.collectAsState(initial = emptyList())
 
     Scaffold(
         snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },

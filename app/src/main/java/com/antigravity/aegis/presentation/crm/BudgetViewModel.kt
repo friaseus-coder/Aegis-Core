@@ -115,6 +115,28 @@ class BudgetViewModel @Inject constructor(
                 val quoteId = withContext(Dispatchers.IO) {
                     budgetRepository.saveQuoteWithLines(quote, _lines.value)
                 }
+
+                // --- AUTOGENERATE SUBPROJECTS FROM QUOTE LINES ---
+                val currentLines = _lines.value
+                val rootProjectId = quote.projectId
+                if (rootProjectId != null) {
+                    val existingSubProjects = projectRepository.getSubProjectsSync(rootProjectId)
+                    val existingNames = existingSubProjects.map { it.name }.toSet()
+
+                    currentLines.forEach { line ->
+                        if (!existingNames.contains(line.description)) {
+                            val subProject = com.antigravity.aegis.data.local.entity.ProjectEntity(
+                                clientId = quote.clientId,
+                                parentProjectId = rootProjectId,
+                                name = line.description,
+                                status = com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE,
+                                startDate = System.currentTimeMillis(),
+                                price = line.quantity * line.unitPrice
+                            )
+                            projectRepository.insertProject(subProject)
+                        }
+                    }
+                }
                 
                 // Update State on Main Thread
                 _budgetState.value = BudgetState.Saved

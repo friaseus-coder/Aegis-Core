@@ -35,7 +35,7 @@ class CreateQuoteFromProjectUseCase @Inject constructor(
                 quoteId = quoteId.toInt(),
                 description = subProject.name,
                 quantity = 1.0,
-                unitPrice = 0.0,
+                unitPrice = subProject.price ?: 0.0,
                 taxRate = 0.21
             )
         }

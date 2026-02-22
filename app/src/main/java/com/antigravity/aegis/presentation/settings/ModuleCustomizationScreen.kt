@@ -5,6 +5,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,12 +66,28 @@ fun ModuleCustomizationScreen(
                     modifier = Modifier.padding(8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    moduleConfigs.forEach { module ->
+                    moduleConfigs.forEachIndexed { index, module ->
                         ModuleConfigItem(
                             moduleName = stringResource(module.nameResId),
                             isVisible = module.isVisible,
+                            isFirst = index == 0,
+                            isLast = index == moduleConfigs.size - 1,
                             onVisibilityChange = { isVisible ->
                                 viewModel.updateModuleVisibility(module.id, isVisible)
+                            },
+                            onMoveUp = {
+                                if (index > 0) {
+                                    val newList = moduleConfigs.map { it.id }.toMutableList()
+                                    newList.swap(index, index - 1)
+                                    viewModel.updateModuleOrder(newList)
+                                }
+                            },
+                            onMoveDown = {
+                                if (index < moduleConfigs.size - 1) {
+                                    val newList = moduleConfigs.map { it.id }.toMutableList()
+                                    newList.swap(index, index + 1)
+                                    viewModel.updateModuleOrder(newList)
+                                }
                             }
                         )
                     }
@@ -89,11 +107,22 @@ fun ModuleCustomizationScreen(
     }
 }
 
+// Helper extension function for swapping elements
+fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
+    val tmp = this[index1]
+    this[index1] = this[index2]
+    this[index2] = tmp
+}
+
 @Composable
 fun ModuleConfigItem(
     moduleName: String,
     isVisible: Boolean,
-    onVisibilityChange: (Boolean) -> Unit
+    isFirst: Boolean,
+    isLast: Boolean,
+    onVisibilityChange: (Boolean) -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -102,11 +131,38 @@ fun ModuleConfigItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Name
         Text(
             text = moduleName,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
         )
         
+        // Reordering arrows
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(
+                onClick = onMoveUp,
+                enabled = !isFirst
+            ) {
+                Icon(
+                    androidx.compose.material.icons.Icons.Default.KeyboardArrowUp,
+                    contentDescription = "Move Up"
+                )
+            }
+            IconButton(
+                onClick = onMoveDown,
+                enabled = !isLast
+            ) {
+                Icon(
+                    androidx.compose.material.icons.Icons.Default.KeyboardArrowDown,
+                    contentDescription = "Move Down"
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        // Visibility toggle
         Switch(
             checked = isVisible,
             onCheckedChange = onVisibilityChange

@@ -8,7 +8,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import com.antigravity.aegis.presentation.navigation.Screen
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,4 +96,80 @@ class DashboardViewModel @Inject constructor(
     fun clearBackupStatus() {
         _autoBackupStatus.value = null
     }
+
+    // --- Module Customization ---
+
+    val configuredModules: Flow<List<ModuleData>> = 
+        settingsRepository.getUserConfig().map { config ->
+            val defaultModules = listOf(
+                ModuleData("Proyectos", Icons.Filled.Work, Screen.Projects.route),
+                ModuleData("Presupuestos", Icons.Filled.Money, Screen.Budgets.route),
+                ModuleData("Gastos", Icons.Filled.Money, Screen.Expenses.route),
+                ModuleData("Inventario", Icons.Filled.Inventory, Screen.Inventory.route),
+                ModuleData("Control Horario", Icons.Filled.Schedule, Screen.TimeControl.route),
+                ModuleData("Clientes", Icons.Filled.Person, Screen.Clients.route),
+                ModuleData("Kilometraje", Icons.Filled.Map, Screen.Mileage.route)
+            )
+
+            // Map default modules to their string IDs used in config
+            val moduleIdMap = mapOf(
+                "projects" to "Proyectos",
+                "budgets" to "Presupuestos",
+                "expenses" to "Gastos",
+                "inventory" to "Inventario",
+                "time_control" to "Control Horario",
+                "clients" to "Clientes",
+                "mileage" to "Kilometraje"
+            )
+
+            // Reverse map to get module by ID easily
+            val defaultModulesById = defaultModules.associateBy { module ->
+                moduleIdMap.entries.firstOrNull { it.value == module.name }?.key ?: ""
+            }
+
+            val hiddenList = try {
+                if (config == null || config.hiddenModules.isBlank()) {
+                    emptyList<String>()
+                } else {
+                    org.json.JSONArray(config.hiddenModules).let { arr ->
+                        (0 until arr.length()).map { arr.getString(it) }
+                    }
+                }
+            } catch (e: Exception) {
+                emptyList<String>()
+            }
+
+            if (config == null || config.moduleOrder.isBlank()) {
+                // Return default order, but filter out hidden
+                defaultModules.filter { module ->
+                    val id = moduleIdMap.entries.firstOrNull { it.value == module.name }?.key ?: ""
+                    id !in hiddenList
+                }
+            } else {
+                val orderList = try {
+                    org.json.JSONArray(config.moduleOrder).let { arr ->
+                        (0 until arr.length()).map { arr.getString(it) }
+                    }
+                } catch (e: Exception) {
+                    emptyList<String>()
+                }
+
+                val orderedModules = mutableListOf<ModuleData>()
+                val remainingMap = defaultModulesById.toMutableMap()
+
+                orderList.forEach { id ->
+                    remainingMap[id]?.let { module ->
+                        if (id !in hiddenList) orderedModules.add(module)
+                        remainingMap.remove(id)
+                    }
+                }
+
+                remainingMap.values.forEach { module ->
+                    val id = moduleIdMap.entries.firstOrNull { it.value == module.name }?.key ?: ""
+                    if (id !in hiddenList) orderedModules.add(module)
+                }
+
+                orderedModules
+            }
+        }
 }

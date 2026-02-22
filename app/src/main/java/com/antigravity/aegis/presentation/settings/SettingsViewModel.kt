@@ -320,35 +320,55 @@ class SettingsViewModel @Inject constructor(
         return userConfig.map { config ->
             val defaultModules = getDefaultModules()
             
-            if (config == null || config.moduleOrder.isEmpty()) {
-                // Sin configuración, devolver módulos por defecto
-                defaultModules
+            val hiddenList = try {
+                if (config == null || config.hiddenModules.isBlank()) {
+                    emptyList()
+                } else {
+                    org.json.JSONArray(config.hiddenModules).let { arr ->
+                        (0 until arr.length()).map { arr.getString(it) }
+                    }
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
+
+            if (config == null || config.moduleOrder.isBlank()) {
+                // Sin orden personalizado, devolver módulos por defecto aplicando visibilidad
+                defaultModules.map { it.copy(isVisible = it.id !in hiddenList) }
             } else {
-                // Parsear configuración guardada
+                // Parsear configuración guardada de orden
                 val orderList = try {
                     org.json.JSONArray(config.moduleOrder).let { arr ->
                         (0 until arr.length()).map { arr.getString(it) }
                     }
                 } catch (e: Exception) {
-                    emptyList()
+                    emptyList<String>()
                 }
                 
-                val hiddenList = try {
-                    org.json.JSONArray(config.hiddenModules).let { arr ->
-                        (0 until arr.length()).map { arr.getString(it) }
+                // Aplicar configuración de orden y visibilidad
+                val moduleMap = defaultModules.associateBy { it.id }.toMutableMap()
+                val orderedModules = mutableListOf<com.antigravity.aegis.domain.model.ModuleConfig>()
+                
+                // 1. Añadir los módulos usando el orden guardado
+                orderList.forEachIndexed { index, id ->
+                    moduleMap[id]?.let { module ->
+                        orderedModules.add(module.copy(
+                            isVisible = id !in hiddenList,
+                            order = index
+                        ))
+                        moduleMap.remove(id) // Marcar como procesado
                     }
-                } catch (e: Exception) {
-                    emptyList()
                 }
                 
-                // Aplicar configuración
-                val moduleMap = defaultModules.associateBy { it.id }
-                orderList.mapIndexedNotNull { index, id ->
-                    moduleMap[id]?.copy(
-                        isVisible = id !in hiddenList,
-                        order = index
-                    )
+                // 2. Añadir cualquier módulo nuevo (por ej tras una actualización) que no estuviera en el orden guardado
+                moduleMap.values.forEach { module ->
+                    orderedModules.add(module.copy(
+                        isVisible = module.id !in hiddenList,
+                        order = orderedModules.size
+                    ))
                 }
+                
+                orderedModules
             }
         }
     }
