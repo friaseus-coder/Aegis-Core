@@ -56,11 +56,13 @@ fun MileageScreen(
     // Handling Transfer States
     when (val state = transferState) {
         is MileageViewModel.TransferState.Success -> {
-            Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            val msg = if (state.resId != null) stringResource(state.resId, state.arg ?: "") else state.message ?: ""
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
             viewModel.resetTransferState()
         }
         is MileageViewModel.TransferState.Error -> {
-            Toast.makeText(context, "Error: ${state.message}", Toast.LENGTH_LONG).show()
+            val msg = if (state.resId != null) stringResource(state.resId, state.arg ?: "") else state.message ?: ""
+            Toast.makeText(context, stringResource(R.string.general_error_prefix, msg), Toast.LENGTH_LONG).show()
              viewModel.resetTransferState()
         }
         is MileageViewModel.TransferState.ValidationError -> {
@@ -208,13 +210,14 @@ fun MileageScreen(
                             Text(stringResource(R.string.ui_distance, dist))
                             Text(stringResource(R.string.ui_est_cost, cost), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         }
+                        val defaultVehicle = stringResource(R.string.mileage_vehicle_default)
                         Button(
                             onClick = {
                                 viewModel.saveTrip(
                                     date = System.currentTimeMillis(),
                                     origin = origin,
                                     destination = destination,
-                                    vehicle = "Default Car",
+                                    vehicle = defaultVehicle,
                                     startOdo = start,
                                     endOdo = end,
                                     currentPrice = price
@@ -274,9 +277,9 @@ fun MileageItem(log: com.antigravity.aegis.data.local.entity.MileageLogEntity) {
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("${log.distanceKm} km")
+                Text("${log.distanceKm} ${stringResource(R.string.mileage_unit_km)}")
                 Text(
-                    text = String.format("€%.2f", log.calculatedCost),
+                    text = stringResource(R.string.ui_currency_symbol) + String.format("%.2f", log.calculatedCost),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )

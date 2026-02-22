@@ -6,8 +6,9 @@ import com.antigravity.aegis.data.local.entity.BudgetLineEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.domain.repository.BudgetRepository
 import com.antigravity.aegis.domain.repository.ProjectRepository
-import com.antigravity.aegis.domain.repository.CrmRepository
+import kotlinx.coroutines.flow.firstOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,12 +16,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.antigravity.aegis.domain.model.CrmStatus
+import com.antigravity.aegis.domain.util.getOrNull
 
 @HiltViewModel
 class BudgetViewModel @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val projectRepository: ProjectRepository,
-    private val crmRepository: CrmRepository,
+    private val clientRepository: com.antigravity.aegis.domain.repository.ClientRepository,
     private val pdfGenerator: com.antigravity.aegis.domain.services.PdfGeneratorService
 ) : ViewModel() {
 
@@ -48,7 +51,7 @@ class BudgetViewModel @Inject constructor(
                     projectId = project.id,
                     date = System.currentTimeMillis(),
                     totalAmount = 0.0,
-                    status = "Draft",
+                    status = CrmStatus.DRAFT,
                     description = "",
                     title = "Presupuesto para ${project.name}"
                 )
@@ -107,13 +110,13 @@ class BudgetViewModel @Inject constructor(
     fun saveBudget() {
         viewModelScope.launch {
             val quote = _currentQuote.value ?: return@launch
-            
+
             _budgetState.value = BudgetState.Loading
-            
+
             try {
-                // Perform database operations on IO thread
                 val quoteId = withContext(Dispatchers.IO) {
-                    budgetRepository.saveQuoteWithLines(quote, _lines.value)
+                    budgetRepository.saveQuoteWithLines(quote, _lines.value).getOrNull()
+                        ?: throw Exception("Error al guardar el presupuesto en la base de datos")
                 }
 
                 // --- AUTOGENERATE SUBPROJECTS FROM QUOTE LINES ---
@@ -129,21 +132,20 @@ class BudgetViewModel @Inject constructor(
                                 clientId = quote.clientId,
                                 parentProjectId = rootProjectId,
                                 name = line.description,
-                                status = com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE,
+                                status = CrmStatus.ACTIVE,
                                 startDate = System.currentTimeMillis(),
                                 price = line.quantity * line.unitPrice
                             )
                             projectRepository.insertProject(subProject)
+                                .getOrNull() // Si falla, simplemente no crea el subproyecto
                         }
                     }
                 }
-                
-                // Update State on Main Thread
+
                 _budgetState.value = BudgetState.Saved
-                
-                // Update current quote with ID if needed
+
                 if (quote.id == 0) {
-                     _currentQuote.value = quote.copy(id = quoteId.toInt())
+                    _currentQuote.value = quote.copy(id = quoteId.toInt())
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -160,9 +162,10 @@ class BudgetViewModel @Inject constructor(
                  return@launch
             }
             
-            val client = crmRepository.getClientById(quote.clientId)
+            val client = clientRepository.getClientById(quote.clientId).firstOrNull()
             
             val file = pdfGenerator.generateQuotePdf(quote, _lines.value, client)
+
             
             // Log Event
             budgetRepository.insertBudgetLog(

@@ -1,6 +1,7 @@
 package com.antigravity.aegis.domain.usecase
 
 import com.antigravity.aegis.domain.repository.AuthRepository
+import com.antigravity.aegis.domain.util.Result
 import javax.crypto.Cipher
 import javax.inject.Inject
 
@@ -11,3 +12,4 @@ class EnableBiometricsUseCase @Inject constructor(
         return authRepository.enableBiometric(userId, masterKey, cipher)
     }
 }
+

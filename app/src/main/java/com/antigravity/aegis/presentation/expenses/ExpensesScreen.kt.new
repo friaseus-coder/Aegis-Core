@@ -1,0 +1,52 @@
+package com.antigravity.aegis.presentation.expenses
+
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
+import com.antigravity.aegis.R
+import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExpensesScreen(
+    viewModel: ExpensesViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit
+) {
+    val expenses by viewModel.allExpenses.collectAsState()
+    val projects by viewModel.activeProjects.collectAsState()
+    val scannedData by viewModel.scannedData.collectAsState()
+    val exportStatus by viewModel.exportStatus.collectAsState()
+    val transferState by viewModel.transferState.collectAsState()
+    
+    val context = LocalContext.current
+    var showAddDialog by remember { mutableStateOf(false) }

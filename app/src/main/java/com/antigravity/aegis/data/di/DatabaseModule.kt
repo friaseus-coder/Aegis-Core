@@ -48,7 +48,6 @@ object DatabaseModule {
             "aegis_core.db"
         )
             // .openHelperFactory(factory)
-            .fallbackToDestructiveMigration() // Keep this if needed, but we adding migration now
             .addMigrations(
                 AegisDatabase.MIGRATION_18_19,
                 AegisDatabase.MIGRATION_19_20,
@@ -57,7 +56,9 @@ object DatabaseModule {
                 AegisDatabase.MIGRATION_22_23,
                 AegisDatabase.MIGRATION_23_24,
                 AegisDatabase.MIGRATION_24_25,
-                AegisDatabase.MIGRATION_25_26
+                AegisDatabase.MIGRATION_25_26,
+                AegisDatabase.MIGRATION_26_27,
+                AegisDatabase.MIGRATION_27_28
             )
             .build()
     }
@@ -100,5 +101,15 @@ object DatabaseModule {
     @Provides
     fun provideTaskDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.TaskDao {
         return database.taskDao()
+    }
+
+    @Provides
+    fun providePasswordDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.PasswordDao {
+        return database.passwordDao()
+    }
+
+    @Provides
+    fun provideClientDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.ClientDao {
+        return database.clientDao()
     }
 }

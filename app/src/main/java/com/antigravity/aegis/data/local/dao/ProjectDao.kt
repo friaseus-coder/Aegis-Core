@@ -53,10 +53,10 @@ interface ProjectDao {
     @Query("SELECT * FROM projects WHERE isTemplate = 1 AND name = :name LIMIT 1")
     suspend fun getTemplateByName(name: String): ProjectEntity?
 
-    @Query("SELECT * FROM projects WHERE status = 'ACTIVE' AND isTemplate = 0 ORDER BY startDate DESC")
+    @Query("SELECT * FROM projects WHERE status = '${com.antigravity.aegis.domain.model.CrmStatus.ACTIVE}' AND isTemplate = 0 ORDER BY startDate DESC")
     fun getActiveProjects(): Flow<List<ProjectEntity>>
 
-    @Query("SELECT * FROM projects WHERE status = 'ACTIVE' AND isTemplate = 0 AND parentProjectId IS NULL ORDER BY startDate DESC")
+    @Query("SELECT * FROM projects WHERE status != '${com.antigravity.aegis.domain.model.CrmStatus.ARCHIVED}' AND isTemplate = 0 AND parentProjectId IS NULL ORDER BY startDate DESC")
     fun getActiveRootProjects(): Flow<List<ProjectEntity>>
 
     @Query("SELECT * FROM projects WHERE clientId = :clientId AND isTemplate = 0 ORDER BY startDate DESC")

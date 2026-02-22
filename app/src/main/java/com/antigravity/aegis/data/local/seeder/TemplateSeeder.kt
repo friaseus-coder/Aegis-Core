@@ -7,7 +7,7 @@ import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
 import com.antigravity.aegis.data.local.entity.BudgetLineEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
-import com.antigravity.aegis.data.local.entity.ProjectStatus
+import com.antigravity.aegis.domain.model.CrmStatus
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -94,7 +94,7 @@ class TemplateSeeder @Inject constructor(
             description = description,
             clientId = null, // No client for template
             startDate = System.currentTimeMillis(),
-            status = ProjectStatus.ACTIVE,
+            status = CrmStatus.ACTIVE,
             isTemplate = true,
             category = category
         )

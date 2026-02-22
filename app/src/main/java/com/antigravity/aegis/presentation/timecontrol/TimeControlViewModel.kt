@@ -6,7 +6,7 @@ import android.provider.CalendarContract
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.data.local.entity.ProjectEntity
-import com.antigravity.aegis.data.local.entity.ProjectStatus
+import com.antigravity.aegis.domain.model.CrmStatus
 import com.antigravity.aegis.domain.repository.ProjectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -91,7 +91,7 @@ class TimeControlViewModel @Inject constructor(
             }
 
             // Check Status
-            if (project.status != ProjectStatus.ACTIVE) {
+            if (project.status != CrmStatus.ACTIVE) {
                 _pendingSaveAction.value = { saveAction() } // Using invoke wrapper
                 _showStatusDialog.value = true
             } else {
@@ -103,7 +103,7 @@ class TimeControlViewModel @Inject constructor(
     fun onConfirmStatusChange() {
         val project = _selectedProject.value ?: return
         viewModelScope.launch {
-            projectRepository.updateProjectStatus(project.id, ProjectStatus.ACTIVE.name)
+            projectRepository.updateProjectStatus(project.id, CrmStatus.ACTIVE)
             _showStatusDialog.value = false
             _pendingSaveAction.value?.invoke()
             _pendingSaveAction.value = null

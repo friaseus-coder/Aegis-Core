@@ -6,6 +6,9 @@
     <string name="general_save">Guardar</string>
     <string name="general_cancel">Cancel·lar</string>
     <string name="general_delete">Eliminar</string>
+    <string name="general_export">Exportar</string>
+    <string name="general_options">Opcions</string>
+    <string name="general_unknown_error">Error desconegut</string>
     <string name="general_edit">Editar</string>
     <string name="general_create">Crear</string>
     <string name="general_add">Afegir</string>
@@ -20,6 +23,7 @@
     <string name="general_name">Nom</string>
     <string name="general_email">Email</string>
     <string name="general_phone">Telèfon</string>
+    <string name="ui_currency_symbol">€</string>
 
     <!-- Feature: Auth - Login -->
     <string name="auth_login_title">Bloquejat</string>
@@ -86,12 +90,66 @@
     <!-- Feature: CRM/Clients -->
     <string name="crm_clients_title">Clients</string>
     <string name="crm_clients_add_button">Afegir Client</string>
+    <string name="client_edit_title_new">Nou Client</string>
+    <string name="client_edit_title_edit">Editar Client</string>
+    <string name="client_type_particular">Particular</string>
+    <string name="client_type_empresa">Empresa</string>
+    <string name="client_label_name">Nom</string>
+    <string name="client_label_lastname">Cognoms</string>
+    <string name="client_label_nif">NIF</string>
+    <string name="client_label_cif">CIF</string>
+    <string name="client_label_tradename">Nom Comercial</string>
+    <string name="client_label_legalname">Raó Social</string>
+    <string name="client_label_contact_section">Contacte</string>
+    <string name="client_label_contact_person">Persona Contacte</string>
+    <string name="client_label_phone">Telèfon</string>
+    <string name="client_label_email">Email</string>
+    <string name="client_label_address_section">Adreça</string>
+    <string name="client_label_street">Carrer</string>
+    <string name="client_label_number">Número</string>
+    <string name="client_label_floor">Pis/Porta</string>
+    <string name="client_label_zip">C.P.</string>
+    <string name="client_label_city">Població</string>
+    <string name="client_label_others_section">Altres</string>
+    <string name="client_label_notes_public">Notes (Públiques)</string>
+
+    <string name="client_cat_potential">Potencial</string>
+    <string name="client_cat_active">Actiu</string>
+    <string name="client_cat_loyal">Fidelitzat</string>
+    <string name="client_cat_inactive">Inactiu</string>
     <string name="crm_clients_empty">No hi ha clients encara.</string>
+    <string name="crm_client_edit_button">Editar Client</string>
+    <string name="crm_metric_active_projects">Projectes Actius</string>
+    <string name="crm_metric_budgets">Pressupostos</string>
+    <string name="crm_metric_hours_month">Hores/Mes</string>
+
+    <string name="mileage_vehicle_default">Vehicle per Defecte</string>
+    <string name="mileage_unit_km">km</string>
+    <string name="mileage_export_client_success">Dades de quilometratge exportades a %1$s</string>
+    <string name="mileage_import_client_success">Dades de quilometratge importades amb èxit</string>
+    <string name="mileage_report_exporting">Exportant informe...</string>
+    <string name="crm_documents_title">Documents</string>
+    <string name="crm_documents_add_button">Afegir Document</string>
+    <string name="crm_client_contact_label">Contacte: %1$s</string>
+    <string name="crm_client_category_label">Categoria: %1$s</string>
+    <string name="crm_project_template_suffix"> (Plantilla)</string>
+    <string name="crm_duration_days_short">%1$sd</string>
+    <string name="crm_duration_hours_short">%1$sh</string>
+
+    <string name="crm_template_cat_renovation">Reformes</string>
+    <string name="crm_template_cat_marketing">Marketing Digital</string>
+    <string name="crm_template_cat_systems">Sistemes</string>
+    <string name="crm_template_cat_sales">Vendes</string>
+    <string name="crm_template_cat_admin">Administració</string>
+
+    <string name="crm_export_client_success">Clients exportats a %1$s</string>
+    <string name="crm_import_client_success">Clients importats amb èxit</string>
+    <string name="crm_template_export_success">Plantilla exportada amb èxit</string>
+    <string name="crm_template_import_success">Plantilla importada amb èxit</string>
     <string name="crm_client_email_placeholder">Sense email</string>
     <string name="crm_client_detail_email">Email: %1$s</string>
     <string name="crm_client_detail_phone">Tel: %1$s</string>
     <string name="crm_client_detail_notes">Notes: %1$s</string>
-    <string name="crm_client_not_found">Client no trobat o carregant...</string>
     
     <!-- Feature: CRM/Projects -->
     <string name="crm_projects_section_title">Projectes</string>
@@ -176,6 +234,19 @@
     <string name="data_import_db_loading">Important Base de Dades...</string>
     <string name="data_import_db_success">Importació reeixida. Si us plau, torna a iniciar sessió.</string>
     <string name="data_import_db_error">Error en importar: %1$s</string>
+    <string name="data_export_success_path">Exportat a: %1$s</string>
+    <string name="data_export_failed">Exportació fallida: %1$s</string>
+    <string name="data_import_failed">Importació fallida: %1$s</string>
+    <string name="data_no_expenses_quarter">No s\'han trobat despeses per a aquest trimestre.</string>
+    <string name="data_exporting_loading">Exportant...</string>
+    <string name="data_export_ready">Exportació llista: %1$s</string>
+    <string name="data_backup_auto_success">Còpia de seguretat guardada: %1$s</string>
+    <string name="data_backup_auto_error">Error backup automàtic: %1$s</string>
+    <string name="data_backup_permissions_error">Error guardando permisos: %1$s</string>
+    <string name="backup_dialog_title">Còpia de Seguretat</string>
+    <string name="backup_dialog_desc_main">Abans de començar a treballar, és important configurar una ubicació per a les teves còpies de seguretat automàtiques.</string>
+    <string name="backup_dialog_desc_recommend">Et recomanem utilitzar Google Drive per a més seguretat, però també pots utilitzar una carpeta local.</string>
+    <string name="backup_dialog_select_button">Seleccionar Carpeta (Drive / Local)</string>
 
     <!-- Feature: Field Service -->
     <string name="field_service_title">Consola de Servei de Camp</string>
@@ -205,17 +276,27 @@
 
     <!-- Feature: Expenses -->
     <string name="expenses_title">Despeses i Tiquets</string>
-    <string name="expenses_export_quarter_button">Exportar Trimestre</string>
-    <string name="expenses_review_ticket_title">Revisar Tiquet</string>
-    <string name="expenses_merchant_label">Comerç / Concepte</string>
-    <string name="expenses_amount_label">Import</string>
+    <string name="expenses_export_quarter_button">Compartir Resum Trimestral</string>
+    <string name="expenses_review_ticket_title">Revisar Dades del Tiquet</string>
+    <string name="expenses_merchant_label">Comerç/Concepte</string>
+    <string name="expenses_amount_label">Import Total</string>
+    <string name="expense_cat_material">Material</string>
+    <string name="expense_cat_transport">Transport</string>
+    <string name="expense_cat_office">Oficina</string>
+    <string name="expense_cat_food">Menjar</string>
+    <string name="expense_cat_other">Altre</string>
     <string name="expenses_empty">No hi ha despeses registrades.</string>
 
     <!-- Feature: Inventory -->
     <string name="inventory_title">Control d\'Inventari</string>
     <string name="inventory_stock_list_title">Llista d\'Estoc</string>
     <string name="inventory_scan_label">Escanejar</string>
-    <string name="inventory_barcode_label">Codi de Barres: %1$s</string>
+    <string name="inventory_barcode_label">Cod. Barres: %1$s</string>
+    <string name="inventory_new_product_title">Nou Producte</string>
+    <string name="inventory_label_name">Nom del Producte</string>
+    <string name="inventory_label_sku">SKU / Cod. Barres</string>
+    <string name="inventory_label_stock">Stock Actual</string>
+    <string name="inventory_label_min_stock">Stock Mínim</string>
 
     <!-- Feature: Quotes/Budgets -->
     <string name="quotes_title_new">Nou Pressupost</string>
@@ -330,6 +411,8 @@
 
     <!-- Content Descriptions (Accessibility) -->
     <string name="cd_back">Enrere</string>
+    <string name="cd_profile_photo">Foto de Perfil</string>
+    <string name="cd_change_photo">Canviar Foto</string>
     <string name="cd_save">Guardar</string>
     <string name="cd_delete">Eliminar</string>
     <string name="cd_share">Compartir</string>
@@ -347,7 +430,8 @@
     <string name="ui_search_hint">Cercar</string>
     <string name="ui_filter_all">Tots</string>
     <string name="ui_filter_individuals">Particulars</string>
-    <string name="ui_filter_companies">Empreses</string>
+    <string name="filter_companies">Empreses</string>
+    <string name="filter_others">Altres</string>
     <string name="ui_search_min_chars">Escriu almenys 3 lletres per cercar</string>
     <string name="ui_back">Enrere</string>
     <string name="ui_export_csv">Exportar CSV</string>
@@ -425,5 +509,25 @@
     <string name="profile_dual_mode_title">Mode Flexible (Dual)</string>
     <string name="profile_dual_mode_desc">Permet alternar entre la vista de Gestió i Operativa des del tauler principal.</string>
     <string name="profile_save_changes_button">Guardar Canvis</string>
+
+    <!-- Feature: Password Vault -->
+    <string name="vault_title">Volta de Contrasenyes</string>
+    <string name="vault_locked_title">Volta de Contrasenyes Bloquejada</string>
+    <string name="vault_lock_button">Bloquejar</string>
+    <string name="vault_add_password">Afegir Contrasenya</string>
+    <string name="vault_biometric_prompt_title">Desbloquejar Volta</string>
+    <string name="vault_biometric_prompt_desc">Utilitza biometria per accedir a les teves contrasenyes segures</string>
+    <string name="vault_unlock_biometric_button">Desbloquejar amb Biometria</string>
+    <string name="vault_empty_state">No hi ha contrasenyes guardades</string>
+    <string name="vault_visibility_desc">Mostrar/Ocultar</string>
+    <string name="vault_delete_title">Eliminar Contrasenya</string>
+    <string name="vault_delete_confirm_msg">Estàs segur que vols eliminar aquesta entrada de la volta? Aquesta acció no es pot desfer.</string>
+    <string name="vault_new_password_title">Nova Contrasenya</string>
+    <string name="vault_label_title">Títol (ex: Gmail)</string>
+    <string name="vault_label_user">Usuari/Email</string>
+    <string name="vault_label_pass">Contrasenya</string>
+    <string name="vault_label_website">Lloc Web (Opcional)</string>
+    <string name="vault_label_notes">Notes (Opcional)</string>
+    <string name="vault_auth_failed">Fallada d\'autenticació</string>
 
 </resources>

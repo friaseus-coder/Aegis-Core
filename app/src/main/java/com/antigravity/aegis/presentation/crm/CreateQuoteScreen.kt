@@ -17,7 +17,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import com.antigravity.aegis.R
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +38,8 @@ fun CreateQuoteScreen(
     var newItemPrice by remember { mutableStateOf("") }
     
     val clients by viewModel.allClients.collectAsState()
-    var selectedClient by remember { mutableStateOf<ClientEntity?>(null) }
+    var selectedClient by remember { mutableStateOf<Client?>(null) }
+
     var expandedClientDropdown by remember { mutableStateOf(false) }
 
     // Constants
@@ -86,7 +88,8 @@ fun CreateQuoteScreen(
                 onExpandedChange = { expandedClientDropdown = !expandedClientDropdown }
             ) {
                 OutlinedTextField(
-                    value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.quotes_select_client_placeholder),
+                    value = selectedClient?.let { if (it.tipoCliente == ClientType.PARTICULAR) "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.quotes_select_client_placeholder),
+
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.quotes_no_clients_found)) },
@@ -106,7 +109,8 @@ fun CreateQuoteScreen(
                     } else {
                         clients.forEach { client ->
                             DropdownMenuItem(
-                                text = { Text(if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName) },
+                                text = { Text(if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName) },
+
                                 onClick = {
                                     selectedClient = client
                                     expandedClientDropdown = false
@@ -200,7 +204,7 @@ fun CreateQuoteScreen(
                              Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.general_delete))
                         }
                     }
-                    Divider()
+                    HorizontalDivider()
                 }
             }
             

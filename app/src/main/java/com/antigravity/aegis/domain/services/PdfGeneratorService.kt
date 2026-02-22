@@ -7,7 +7,7 @@ import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import com.antigravity.aegis.data.local.entity.BudgetLineEntity
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.domain.model.Client
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -24,7 +24,8 @@ class PdfGeneratorService @Inject constructor(
     fun generateQuotePdf(
         quote: QuoteEntity, 
         lines: List<BudgetLineEntity>, 
-        client: ClientEntity?
+        client: Client?
+
     ): File {
         val pdfDocument = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size
@@ -50,13 +51,14 @@ class PdfGeneratorService @Inject constructor(
         canvas.drawText("Cliente:", 50f, 130f, paint)
         if (client != null) {
             val clientName = if (!client.razonSocial.isNullOrBlank()) client.razonSocial else "${client.firstName} ${client.lastName}".trim()
-            val clientAddress = listOfNotNull(client.calle, client.numero, client.poblacion, client.codigoPostal).joinToString(", ")
+            val clientAddress = listOfNotNull(client.address?.calle, client.address?.numero, client.address?.poblacion, client.address?.codigoPostal).joinToString(", ")
             
             paint.isFakeBoldText = true
             canvas.drawText(clientName, 50f, 150f, paint)
             paint.isFakeBoldText = false
             canvas.drawText("DNI/CIF: ${client.nifCif ?: "-"}", 50f, 165f, paint)
             canvas.drawText("Dirección: $clientAddress", 50f, 180f, paint)
+
         } else {
              canvas.drawText("Cliente Desconocido", 50f, 150f, paint)
         }

@@ -16,12 +16,6 @@ object ClientModule {
 
     @Provides
     @Singleton
-    fun provideClientDao(database: AegisDatabase): ClientDao {
-        return database.clientDao()
-    }
-
-    @Provides
-    @Singleton
     fun provideClientRepository(clientDao: ClientDao): ClientRepository {
         return ClientRepositoryImpl(clientDao)
     }

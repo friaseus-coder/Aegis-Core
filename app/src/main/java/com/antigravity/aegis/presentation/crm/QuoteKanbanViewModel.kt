@@ -5,10 +5,11 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
 import com.antigravity.aegis.data.local.entity.QuoteEntity
-import com.antigravity.aegis.domain.repository.CrmRepository
 import com.antigravity.aegis.domain.reports.PdfGenerator
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +22,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.antigravity.aegis.domain.transfer.DataTransferManager
+import com.antigravity.aegis.domain.util.getOrNull
 import kotlinx.coroutines.flow.firstOrNull
 import android.net.Uri
+import com.antigravity.aegis.domain.model.CrmStatus
 
 @HiltViewModel
 class QuoteKanbanViewModel @Inject constructor(
-    private val repository: CrmRepository,
+    private val clientRepository: com.antigravity.aegis.domain.repository.ClientRepository,
     private val budgetRepository: com.antigravity.aegis.domain.repository.BudgetRepository,
     private val projectRepository: com.antigravity.aegis.domain.repository.ProjectRepository,
     private val pdfGenerator: PdfGenerator,
@@ -95,10 +98,12 @@ class QuoteKanbanViewModel @Inject constructor(
 
 
     // Helper class to combine quote with its client
-    data class QuoteWithClient(val quote: QuoteEntity, val client: ClientEntity?)
+    data class QuoteWithClient(val quote: QuoteEntity, val client: Client?)
 
-    private val _quotes = repository.getAllQuotes()
-    private val _clients = repository.getAllClients()
+
+    private val _quotes = budgetRepository.getAllQuotes()
+    private val _clients = clientRepository.getAllClients()
+
 
     val kanbanState: StateFlow<Map<String, List<QuoteWithClient>>> = combine(_quotes, _clients) { quotes, clients ->
         val clientMap = clients.associateBy { it.id }
@@ -111,23 +116,24 @@ class QuoteKanbanViewModel @Inject constructor(
         
         // Ensure all columns exist
         val result = mutableMapOf<String, List<QuoteWithClient>>()
-        listOf("Draft", "Sent", "Won", "Lost").forEach { status ->
+        listOf(CrmStatus.DRAFT, CrmStatus.SENT, CrmStatus.WON, CrmStatus.LOST).forEach { status ->
             result[status] = grouped[status] ?: emptyList()
         }
         result
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    val allClients: StateFlow<List<ClientEntity>> = _clients.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val allClients: StateFlow<List<Client>> = _clients.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
 
     fun createProjectForQuote(clientId: Int, name: String, onProjectCreated: (Int) -> Unit) {
         viewModelScope.launch {
             val project = com.antigravity.aegis.data.local.entity.ProjectEntity(
                 clientId = clientId,
                 name = name,
-                status = com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE,
+                status = CrmStatus.ACTIVE,
                 startDate = System.currentTimeMillis()
             )
-            val projectId = projectRepository.insertProject(project)
+            val projectId = projectRepository.insertProject(project).getOrNull() ?: return@launch
             onProjectCreated(projectId.toInt())
         }
     }
@@ -140,21 +146,19 @@ class QuoteKanbanViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
              val calculatedTotal = lines.sumOf { it.quantity * it.unitPrice }
-             
-             // Calculate taxes if needed (assuming 21% or from line)
              val totalWithTax = calculatedTotal * 1.21 // Simplified
              
             val newQuote = QuoteEntity(
                 clientId = clientId,
                 date = System.currentTimeMillis(),
                 totalAmount = totalWithTax,
-                status = "Draft",
+                status = CrmStatus.DRAFT,
                 description = description,
                 title = title,
                 calculatedTotal = (totalWithTax * 100).toLong(),
                 version = 1
             )
-            val quoteId = budgetRepository.insertQuote(newQuote)
+            val quoteId = budgetRepository.insertQuote(newQuote).getOrNull() ?: return@launch
             
             // Insert Lines
             val linesWithQuoteId = lines.map { it.copy(quoteId = quoteId.toInt()) }
@@ -164,11 +168,12 @@ class QuoteKanbanViewModel @Inject constructor(
 
     fun updateQuoteStatus(quoteId: Int, newStatus: String) {
         viewModelScope.launch {
-            repository.updateQuoteStatus(quoteId, newStatus)
+            budgetRepository.updateQuoteStatus(quoteId, newStatus)
         }
     }
 
-    fun generateAndSharePdf(quote: QuoteEntity, client: ClientEntity) {
+    fun generateAndSharePdf(quote: QuoteEntity, client: Client) {
+
         viewModelScope.launch {
             try {
                 val config = settingsRepository.getUserConfig().firstOrNull()

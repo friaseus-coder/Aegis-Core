@@ -49,7 +49,7 @@ fun ProjectDetailScreen(
                  actions = {
                     var expanded by remember { mutableStateOf(false) }
                     IconButton(onClick = { expanded = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Opciones")
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.general_options))
                     }
                     DropdownMenu(
                         expanded = expanded,
@@ -98,7 +98,7 @@ fun ProjectDetailScreen(
                                  onNavigateToEditBudget(project!!.id, quoteId.toInt())
                              },
                              onError = { errorMsg ->
-                                 android.widget.Toast.makeText(context, "Error: $errorMsg", android.widget.Toast.LENGTH_LONG).show()
+                                 android.widget.Toast.makeText(context, context.getString(R.string.general_error_prefix, errorMsg), android.widget.Toast.LENGTH_LONG).show()
                              }
                          )
                      }) {
@@ -121,14 +121,14 @@ fun ProjectDetailScreen(
                 }
                 
                 LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
-                    items(subProjects) { sub ->
+                items(subProjects, key = { it.id }) { sub ->
                         ListItem(
                             headlineContent = { Text(sub.name) },
                             supportingContent = { 
                                 Column {
-                                    Text(sub.status.name)
+                                    Text(sub.status)
                                     if (sub.price != null) {
-                                        Text(stringResource(R.string.crm_subproject_price_prefix, "%.2f".format(sub.price)))
+                                        Text(stringResource(R.string.crm_subproject_price_prefix, stringResource(R.string.ui_currency_symbol) + "%.2f".format(sub.price)))
                                     }
                                     if (sub.estimatedTime != null && sub.estimatedTimeUnit != null) {
                                         Text(stringResource(R.string.crm_subproject_time_prefix, sub.estimatedTime.toString(), sub.estimatedTimeUnit))
@@ -162,11 +162,11 @@ fun ProjectDetailScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                          Column {
                             Text(stringResource(R.string.quotes_summary_income), style = MaterialTheme.typography.bodySmall)
-                            Text("€${"%.2f".format(financialSummary.totalIncome)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.totalIncome), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                         }
                         Column(horizontalAlignment = Alignment.End) {
                             Text(stringResource(R.string.quotes_summary_income), style = MaterialTheme.typography.bodySmall)
-                            Text("€${"%.2f".format(financialSummary.totalExpenses)}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                            Text(stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.totalExpenses), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                         }
                     }
                     
@@ -176,11 +176,11 @@ fun ProjectDetailScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
                             Text(stringResource(R.string.financial_direct_expenses), style = MaterialTheme.typography.bodySmall)
-                            Text("€${"%.2f".format(financialSummary.directExpenses)}", style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.directExpenses), style = MaterialTheme.typography.bodyMedium)
                         }
                         Column(horizontalAlignment = Alignment.End) {
                             Text(stringResource(R.string.financial_allocated_general), style = MaterialTheme.typography.bodySmall)
-                            Text("€${"%.2f".format(financialSummary.allocatedGeneralExpenses)}", style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.allocatedGeneralExpenses), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                     
@@ -191,7 +191,7 @@ fun ProjectDetailScreen(
                         Column {
                             Text(stringResource(R.string.quotes_summary_profit), style = MaterialTheme.typography.bodySmall)
                             Text(
-                                "€${"%.2f".format(financialSummary.netProfit)}", 
+                                stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.netProfit), 
                                 style = MaterialTheme.typography.titleMedium, 
                                 color = if (financialSummary.netProfit >= 0) androidx.compose.ui.graphics.Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
                             )
@@ -214,7 +214,7 @@ fun ProjectDetailScreen(
                 }
             }
             LazyColumn(modifier = Modifier.weight(1f)) {
-                 items(budgets) { budget ->
+                 items(budgets, key = { it.id }) { budget ->
                      ListItem(
                          headlineContent = { Text(budget.title) },
                          supportingContent = { Text(stringResource(R.string.financial_total, budget.totalAmount, budget.status)) },
@@ -235,11 +235,13 @@ fun ProjectDetailScreen(
             val expenses by viewModel.projectExpenses.collectAsState()
             Text(stringResource(R.string.home_module_expenses_title), style = MaterialTheme.typography.titleLarge)
              LazyColumn(modifier = Modifier.weight(1f)) {
-                 items(expenses) { expense ->
+                 items(expenses, key = { it.id }) { expense ->
                      ListItem(
                          headlineContent = { Text(expense.category) },
-                         supportingContent = { Text(java.util.Date(expense.date).toString()) },
-                         trailingContent = { Text("-€${expense.totalAmount}", color = MaterialTheme.colorScheme.error) }
+                         supportingContent = { Text(androidx.compose.ui.platform.LocalContext.current.let { ctx -> 
+                             java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(expense.date)) 
+                         }) },
+                         trailingContent = { Text("-" + stringResource(R.string.ui_currency_symbol) + "%.2f".format(expense.totalAmount), color = MaterialTheme.colorScheme.error) }
                      )
                      HorizontalDivider()
                  }
@@ -252,7 +254,7 @@ fun ProjectDetailScreen(
 
             Text(stringResource(R.string.crm_tasks_section_title), style = MaterialTheme.typography.titleLarge)
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(tasks) { task ->
+                items(tasks, key = { it.id }) { task ->
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -274,9 +276,9 @@ fun ProjectDetailScreen(
                              // 1h = 3600000ms
                              val hours = task.estimatedDuration / 3600000
                              val durationText = if (hours >= 8) {
-                                 "${hours / 8}d"
+                                 stringResource(R.string.crm_duration_days_short, (hours / 8).toString())
                              } else {
-                                 "${hours}h"
+                                 stringResource(R.string.crm_duration_hours_short, hours.toString())
                              }
                              
                              SuggestionChip(
@@ -476,7 +478,8 @@ fun AddTaskDialog(onDismiss: () -> Unit, onConfirm: (String, Long?) -> Unit) {
 }
 @Composable
 fun SaveTemplateDialog(currentName: String, onDismiss: () -> Unit, onConfirm: (String, String?) -> Unit) {
-    var name by remember { mutableStateOf(currentName + " (Plantilla)") }
+    val suffix = stringResource(R.string.crm_project_template_suffix)
+    var name by remember { mutableStateOf(currentName + suffix) }
     var category by remember { mutableStateOf("") }
     
     AlertDialog(

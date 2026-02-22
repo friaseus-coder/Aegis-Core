@@ -5,7 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import java.io.File
@@ -19,8 +20,9 @@ class PdfGenerator @Inject constructor() {
     fun generateQuotePdf(
         context: Context,
         quote: QuoteEntity,
-        client: ClientEntity,
+        client: Client,
         config: UserConfig?
+
     ): File {
         val pdfDocument = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4
@@ -104,10 +106,11 @@ class PdfGenerator @Inject constructor() {
         canvas.drawText("Status: ${quote.status}", 50f, yPos, paint)
         yPos += 40f
         
-        val clientName = if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName
+        val clientName = if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName
         canvas.drawText("Client: $clientName", 50f, yPos, paint)
         yPos += 20f
         if (!client.email.isNullOrEmpty()) canvas.drawText("Email: ${client.email}", 50f, yPos, paint) else yPos -= 20f // Adjust if no email?
+
         yPos += 40f
 
         paint.textSize = 18f

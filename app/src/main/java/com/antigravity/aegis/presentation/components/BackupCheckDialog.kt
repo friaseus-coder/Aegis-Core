@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.ui.res.stringResource
+import com.antigravity.aegis.R
+import com.antigravity.aegis.domain.model.CrmStatus
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.antigravity.aegis.R
+
 
 @Composable
 fun BackupCheckDialog(
@@ -59,7 +62,7 @@ fun BackupCheckDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "Copia de Seguridad",
+                    text = stringResource(R.string.backup_dialog_title),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -68,7 +71,7 @@ fun BackupCheckDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "Antes de empezar a trabajar, es importante configurar una ubicación para tus copias de seguridad automáticas.",
+                    text = stringResource(R.string.backup_dialog_desc_main),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -77,7 +80,7 @@ fun BackupCheckDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "Te recomendamos usar Google Drive para mayor seguridad, pero también puedes usar una carpeta local.",
+                    text = stringResource(R.string.backup_dialog_desc_recommend),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -90,7 +93,7 @@ fun BackupCheckDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Seleccionar Carpeta (Drive / Local)")
+                    Text(stringResource(R.string.backup_dialog_select_button))
                 }
             }
         }

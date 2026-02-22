@@ -53,11 +53,13 @@ fun ClientListScreen(
     // Handling States
     when (val state = transferState) {
         is CrmViewModel.TransferState.Success -> {
-            Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            val msg = if (state.resId != null) stringResource(state.resId, state.arg ?: "") else state.message ?: ""
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
             crmViewModel.resetTransferState()
         }
         is CrmViewModel.TransferState.Error -> {
-            Toast.makeText(context, stringResource(R.string.general_error_prefix, state.message), Toast.LENGTH_LONG).show()
+            val msg = if (state.resId != null) stringResource(state.resId, state.arg ?: "") else state.message ?: ""
+            Toast.makeText(context, stringResource(R.string.general_error_prefix, msg), Toast.LENGTH_LONG).show()
              crmViewModel.resetTransferState()
         }
         is CrmViewModel.TransferState.ValidationError -> {
@@ -173,12 +175,22 @@ fun ClientListScreen(
                             supportingContent = { 
                                 Column {
                                     val detalle = if (client.tipoCliente == ClientType.EMPRESA) client.razonSocial else client.nifCif
+                                    val typeStr = when (client.tipoCliente) {
+                                        ClientType.PARTICULAR -> stringResource(R.string.client_type_particular)
+                                        ClientType.EMPRESA -> stringResource(R.string.client_type_empresa)
+                                    }
+                                    val catStr = when (client.categoria) {
+                                        com.antigravity.aegis.domain.model.ClientCategory.POTENTIAL -> stringResource(R.string.client_cat_potential)
+                                        com.antigravity.aegis.domain.model.ClientCategory.ACTIVE -> stringResource(R.string.client_cat_active)
+                                        com.antigravity.aegis.domain.model.ClientCategory.INACTIVE -> stringResource(R.string.client_cat_inactive)
+                                    }
+
                                     Text(
-                                        text = if (!detalle.isNullOrEmpty()) "${client.tipoCliente} • $detalle" else client.tipoCliente.name,
+                                        text = if (!detalle.isNullOrEmpty()) "$typeStr • $detalle" else typeStr,
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                     Text(
-                                        text = client.categoria.name,
+                                        text = catStr,
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                 }

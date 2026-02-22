@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.domain.usecase.CreateBackupUseCase
 import com.antigravity.aegis.domain.usecase.RestoreBackupUseCase
+import com.antigravity.aegis.domain.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,17 +33,18 @@ class ImportExportViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _isLoading.value = true
-            val result = createBackupUseCase()
-            if (result.isSuccess) {
-                try {
-                    val json = result.getOrThrow()
-                    outputStream.use { it.write(json.toByteArray()) }
-                    _status.value = "Copia de seguridad creada correctamente"
-                } catch (e: Exception) {
-                    _status.value = "Error guardando archivo: ${e.message}"
+            when (val result = createBackupUseCase()) {
+                is Result.Success -> {
+                    try {
+                        outputStream.use { it.write(result.data.toByteArray()) }
+                        _status.value = "Copia de seguridad creada correctamente"
+                    } catch (e: Exception) {
+                        _status.value = "Error guardando archivo: ${e.message}"
+                    }
                 }
-            } else {
-                _status.value = "Error creando backup: ${result.exceptionOrNull()?.message}"
+                is Result.Error -> {
+                    _status.value = "Error creando backup: ${result.exception.message}"
+                }
             }
             _isLoading.value = false
         }
@@ -57,11 +59,9 @@ class ImportExportViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 val json = inputStream.bufferedReader().use { it.readText() }
-                val result = restoreBackupUseCase(json)
-                if (result.isSuccess) {
-                     _status.value = "Base de datos restaurada correctamente"
-                } else {
-                     _status.value = "Error restaurando: ${result.exceptionOrNull()?.message}"
+                when (val result = restoreBackupUseCase(json)) {
+                    is Result.Success -> _status.value = "Base de datos restaurada correctamente"
+                    is Result.Error -> _status.value = "Error restaurando: ${result.exception.message}"
                 }
             } catch (e: Exception) {
                 _status.value = "Error leyendo archivo: ${e.message}"
@@ -69,8 +69,9 @@ class ImportExportViewModel @Inject constructor(
             _isLoading.value = false
         }
     }
-    
+
     fun clearStatus() {
         _status.value = null
     }
 }
+

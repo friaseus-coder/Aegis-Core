@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.domain.repository.SettingsRepository
+import com.antigravity.aegis.domain.util.Result as DomainResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,10 +22,16 @@ class DashboardViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
+    sealed class BackupStatus {
+        data class Success(val fileName: String) : BackupStatus()
+        data class Error(val message: String?) : BackupStatus()
+        data class PermissionError(val message: String?) : BackupStatus()
+    }
+
     private val _showBackupDialog = MutableStateFlow(false)
     val showBackupDialog = _showBackupDialog.asStateFlow()
 
-    private val _autoBackupStatus = MutableStateFlow<String?>(null)
+    private val _autoBackupStatus = MutableStateFlow<BackupStatus?>(null)
     val autoBackupStatus = _autoBackupStatus.asStateFlow()
 
     init {
@@ -54,17 +61,15 @@ class DashboardViewModel @Inject constructor(
 
     fun onBackupLocationSelected(uri: Uri) {
         viewModelScope.launch {
-            val persistResult = settingsRepository.persistBackupUri(uri)
-            if (persistResult.isSuccess) {
-                _showBackupDialog.value = false
-                
-                // Perform the first backup immediately
-                 val config = settingsRepository.getUserConfig().firstOrNull()
-                 if (config != null) {
-                     performBackup(config)
-                 }
-            } else {
-                _autoBackupStatus.value = "Error guardando permisos: ${persistResult.exceptionOrNull()?.message}"
+            when (val persistResult = settingsRepository.persistBackupUri(uri)) {
+                is DomainResult.Success -> {
+                    _showBackupDialog.value = false
+                    val config = settingsRepository.getUserConfig().firstOrNull()
+                    if (config != null) performBackup(config)
+                }
+                is DomainResult.Error -> {
+                    _autoBackupStatus.value = BackupStatus.PermissionError(persistResult.exception.message)
+                }
             }
         }
     }
@@ -81,15 +86,9 @@ class DashboardViewModel @Inject constructor(
     }
     
     private suspend fun performBackup(userConfig: com.antigravity.aegis.data.local.entity.UserConfig) {
-        // Maybe check timestamp to not spam backup on every rotation/nav?
-        // But ViewModel survives config changes.
-        // Only on app restart.
-        
-        val result = settingsRepository.performAutoBackup(userConfig)
-        if (result.isSuccess) {
-            _autoBackupStatus.value = "Copia de seguridad guardada: ${result.getOrNull()}"
-        } else {
-             _autoBackupStatus.value = "Error backup automático: ${result.exceptionOrNull()?.message}"
+        when (val result = settingsRepository.performAutoBackup(userConfig)) {
+            is DomainResult.Success -> _autoBackupStatus.value = BackupStatus.Success(result.data)
+            is DomainResult.Error -> _autoBackupStatus.value = BackupStatus.Error(result.exception.message)
         }
     }
 

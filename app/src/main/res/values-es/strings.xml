@@ -6,6 +6,9 @@
     <string name="general_save">Guardar</string>
     <string name="general_cancel">Cancelar</string>
     <string name="general_delete">Eliminar</string>
+    <string name="general_export">Exportar</string>
+    <string name="general_options">Opciones</string>
+    <string name="general_unknown_error">Error desconocido</string>
     <string name="general_edit">Editar</string>
     <string name="general_create">Crear</string>
     <string name="general_add">Añadir</string>
@@ -20,6 +23,7 @@
     <string name="general_name">Nombre</string>
     <string name="general_email">Email</string>
     <string name="general_phone">Teléfono</string>
+    <string name="ui_currency_symbol">€</string>
 
     <!-- Feature: Auth - Login -->
     <string name="auth_login_title">Bloqueado</string>
@@ -66,7 +70,7 @@
     <string name="home_module_crm_subtitle">CRM y Tareas</string>
     <string name="home_module_field_title">Partes de Trabajo</string>
     <string name="home_module_field_subtitle">Servicio de Campo y Firmas</string>
-    <string name="home_module_budgets_title">Presupuestos</string>
+    <string name="home_module_budgets_title">CRM</string>
     <string name="home_module_budgets_subtitle">Kanban y Cotizaciones</string>
     <string name="home_module_expenses_title">Gastos</string>
     <string name="home_module_expenses_subtitle">Escaneo Inteligente y Exportación</string>
@@ -86,11 +90,62 @@
     <!-- Feature: CRM/Clients -->
     <string name="crm_clients_title">Clientes</string>
     <string name="crm_clients_add_button">Añadir Cliente</string>
+    <string name="client_edit_title_new">Nuevo Cliente</string>
+    <string name="client_edit_title_edit">Editar Cliente</string>
+    <string name="client_type_particular">Particular</string>
+    <string name="client_type_empresa">Empresa</string>
+    <string name="client_label_name">Nombre</string>
+    <string name="client_label_lastname">Apellidos</string>
+    <string name="client_label_nif">NIF</string>
+    <string name="client_label_cif">CIF</string>
+    <string name="client_label_tradename">Nombre Comercial</string>
+    <string name="client_label_legalname">Razón Social</string>
+    <string name="client_label_contact_section">Contacto</string>
+    <string name="client_label_contact_person">Persona Contacto</string>
+    <string name="client_label_phone">Teléfono</string>
+    <string name="client_label_email">Email</string>
+    <string name="client_label_address_section">Dirección</string>
+    <string name="client_label_street">Calle</string>
+    <string name="client_label_number">Número</string>
+    <string name="client_label_floor">Piso/Puerta</string>
+    <string name="client_label_zip">C.P.</string>
+    <string name="client_label_city">Población</string>
+    <string name="client_label_others_section">Otros</string>
+    <string name="client_label_notes_public">Notas (Públicas)</string>
+
+    <string name="client_cat_potential">Potencial</string>
+    <string name="client_cat_active">Activo</string>
+    <string name="client_cat_loyal">Fidelizado</string>
+    <string name="client_cat_inactive">Inactivo</string>
     <string name="crm_clients_empty">No hay clientes aún.</string>
-    <string name="crm_client_email_placeholder">Sin email</string>
-    <string name="crm_client_detail_email">Email: %1$s</string>
-    <string name="crm_client_detail_phone">Tel: %1$s</string>
-    <string name="crm_client_detail_notes">Notas: %1$s</string>
+    <string name="crm_client_edit_button">Editar Cliente</string>
+    <string name="crm_metric_active_projects">Proyectos Activos</string>
+    <string name="crm_metric_budgets">Presupuestos</string>
+    <string name="crm_metric_hours_month">Horas/Mes</string>
+
+    <string name="mileage_vehicle_default">Vehículo por Defecto</string>
+    <string name="mileage_unit_km">km</string>
+    <string name="mileage_export_client_success">Datos de kilometraje exportados a %1$s</string>
+    <string name="mileage_import_client_success">Datos de kilometraje importados con éxito</string>
+    <string name="mileage_report_exporting">Exportando informe...</string>
+    <string name="crm_documents_title">Documentos</string>
+    <string name="crm_documents_add_button">Añadir Documento</string>
+    <string name="crm_client_contact_label">Contacto: %1$s</string>
+    <string name="crm_client_category_label">Categoría: %1$s</string>
+    <string name="crm_project_template_suffix"> (Plantilla)</string>
+    <string name="crm_duration_days_short">%1$sd</string>
+    <string name="crm_duration_hours_short">%1$sh</string>
+
+    <string name="crm_template_cat_renovation">Reformas</string>
+    <string name="crm_template_cat_marketing">Marketing Digital</string>
+    <string name="crm_template_cat_systems">Sistemas</string>
+    <string name="crm_template_cat_sales">Ventas</string>
+    <string name="crm_template_cat_admin">Administración</string>
+
+    <string name="crm_export_client_success">Clientes exportados a %1$s</string>
+    <string name="crm_import_client_success">Clientes importados con éxito</string>
+    <string name="crm_template_export_success">Plantilla exportada con éxito</string>
+    <string name="crm_template_import_success">Plantilla importada con éxito</string>
     <string name="crm_client_not_found">Cliente no encontrado o cargando...</string>
     
     <!-- Feature: CRM/Projects -->
@@ -176,6 +231,19 @@
     <string name="data_import_db_loading">Importando Base de Datos...</string>
     <string name="data_import_db_success">Importación exitosa. Por favor, loguéate de nuevo.</string>
     <string name="data_import_db_error">Error al importar: %1$s</string>
+    <string name="data_export_success_path">Exportado a: %1$s</string>
+    <string name="data_export_failed">Exportación fallida: %1$s</string>
+    <string name="data_import_failed">Importación fallida: %1$s</string>
+    <string name="data_no_expenses_quarter">No se han encontrado gastos para este trimestre.</string>
+    <string name="data_exporting_loading">Exportando...</string>
+    <string name="data_export_ready">Exportación lista: %1$s</string>
+    <string name="data_backup_auto_success">Copia de seguridad guardada: %1$s</string>
+    <string name="data_backup_auto_error">Error backup automático: %1$s</string>
+    <string name="data_backup_permissions_error">Error guardando permisos: %1$s</string>
+    <string name="backup_dialog_title">Copia de Seguridad</string>
+    <string name="backup_dialog_desc_main">Antes de empezar a trabajar, es importante configurar una ubicación para tus copias de seguridad automáticas.</string>
+    <string name="backup_dialog_desc_recommend">Te recomendamos usar Google Drive para mayor seguridad, pero también puedes usar una carpeta local.</string>
+    <string name="backup_dialog_select_button">Seleccionar Carpeta (Drive / Local)</string>
 
     <!-- Feature: Field Service -->
     <string name="field_service_title">Consola de Servicio de Campo</string>
@@ -205,17 +273,27 @@
 
     <!-- Feature: Expenses -->
     <string name="expenses_title">Gastos y Tickets</string>
-    <string name="expenses_export_quarter_button">Exportar Trimestre</string>
-    <string name="expenses_review_ticket_title">Revisar Ticket</string>
-    <string name="expenses_merchant_label">Comercio / Concepto</string>
-    <string name="expenses_amount_label">Importe</string>
+    <string name="expenses_export_quarter_button">Compartir Resumen Trimestral</string>
+    <string name="expenses_review_ticket_title">Revisar Datos del Ticket</string>
+    <string name="expenses_merchant_label">Comercio/Concepto</string>
+    <string name="expenses_amount_label">Importe Total</string>
+    <string name="expense_cat_material">Material</string>
+    <string name="expense_cat_transport">Transporte</string>
+    <string name="expense_cat_office">Oficina</string>
+    <string name="expense_cat_food">Comida</string>
+    <string name="expense_cat_other">Otro</string>
     <string name="expenses_empty">No hay gastos registrados.</string>
 
     <!-- Feature: Inventory -->
     <string name="inventory_title">Control de Inventario</string>
     <string name="inventory_stock_list_title">Lista de Stock</string>
     <string name="inventory_scan_label">Escanear</string>
-    <string name="inventory_barcode_label">Código de Barras: %1$s</string>
+    <string name="inventory_barcode_label">Cód. Barras: %1$s</string>
+    <string name="inventory_new_product_title">Nuevo Producto</string>
+    <string name="inventory_label_name">Nombre del Producto</string>
+    <string name="inventory_label_sku">SKU / Cód. Barras</string>
+    <string name="inventory_label_stock">Stock Actual</string>
+    <string name="inventory_label_min_stock">Stock Mínimo</string>
     <string name="ui_product_price_stock">€%1$s - Stock: %2$s</string>
 
     <!-- Feature: Quotes/Budgets -->
@@ -311,7 +389,7 @@
     <string name="module_customization_restored">Módulos restaurados a valores predeterminados</string>
     <string name="module_id_projects">Proyectos</string>
     <string name="module_id_work_reports">Partes Trabajo</string>
-    <string name="module_id_budgets">Presupuestos</string>
+    <string name="module_id_budgets">CRM</string>
     <string name="module_id_expenses">Gastos</string>
     <string name="module_id_inventory">Inventario</string>
     <string name="module_id_time_control">Control Horario</string>
@@ -331,6 +409,8 @@
 
     <!-- Content Descriptions (Accessibility) -->
     <string name="cd_back">Atrás</string>
+    <string name="cd_profile_photo">Foto de Perfil</string>
+    <string name="cd_change_photo">Cambiar Foto</string>
     <string name="cd_save">Guardar</string>
     <string name="cd_delete">Eliminar</string>
     <string name="cd_share">Compartir</string>
@@ -348,7 +428,8 @@
     <string name="ui_search_hint">Buscar</string>
     <string name="ui_filter_all">Todos</string>
     <string name="ui_filter_individuals">Particulares</string>
-    <string name="ui_filter_companies">Empresas</string>
+    <string name="filter_companies">Empresas</string>
+    <string name="filter_others">Otros</string>
     <string name="ui_search_min_chars">Escribe al menos 3 letras para buscar</string>
     <string name="ui_back">Atrás</string>
     <string name="ui_export_csv">Exportar CSV</string>
@@ -426,5 +507,25 @@
     <string name="profile_dual_mode_title">Modo Flexible (Dual)</string>
     <string name="profile_dual_mode_desc">Permite alternar entre vista Gestión y Operativa desde el Dashboard.</string>
     <string name="profile_save_changes_button">Guardar Cambios</string>
+
+    <!-- Feature: Password Vault -->
+    <string name="vault_title">Bóveda de Contraseñas</string>
+    <string name="vault_locked_title">Bóveda de Contraseñas Bloqueada</string>
+    <string name="vault_lock_button">Bloquear</string>
+    <string name="vault_add_password">Añadir Contraseña</string>
+    <string name="vault_biometric_prompt_title">Desbloquear Bóveda</string>
+    <string name="vault_biometric_prompt_desc">Usa biometría para acceder a tus contraseñas seguras</string>
+    <string name="vault_unlock_biometric_button">Desbloquear con Biometría</string>
+    <string name="vault_empty_state">No hay contraseñas guardadas</string>
+    <string name="vault_visibility_desc">Mostrar/Ocultar</string>
+    <string name="vault_delete_title">Eliminar Contraseña</string>
+    <string name="vault_delete_confirm_msg">¿Estás seguro de que deseas eliminar esta entrada de la bóveda? Esta acción no se puede deshacer.</string>
+    <string name="vault_new_password_title">Nueva Contraseña</string>
+    <string name="vault_label_title">Título (ej: Gmail)</string>
+    <string name="vault_label_user">Usuario/Email</string>
+    <string name="vault_label_pass">Contraseña</string>
+    <string name="vault_label_website">Sitio Web (Opcional)</string>
+    <string name="vault_label_notes">Notas (Opcional)</string>
+    <string name="vault_auth_failed">Fallo de autenticación</string>
 
 </resources>

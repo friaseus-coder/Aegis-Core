@@ -10,7 +10,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -35,7 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
+import com.antigravity.aegis.domain.model.ClientCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +60,7 @@ fun ClientDetailScreen(
         topBar = {
             TopAppBar(title = { 
                 Text(
-                    if (client!!.tipoCliente == "Particular") "${client!!.firstName} ${client!!.lastName}" 
+                    if (client!!.tipoCliente == ClientType.PARTICULAR) "${client!!.firstName} ${client!!.lastName}" 
                     else client!!.firstName 
                 ) 
             })
@@ -73,12 +75,13 @@ fun ClientDetailScreen(
             // Client Details
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    val address = listOfNotNull(client!!.calle, client!!.numero, client!!.piso, client!!.codigoPostal, client!!.poblacion).joinToString(", ")
+                    val address = listOfNotNull(client!!.address?.calle, client!!.address?.numero, client!!.address?.piso, client!!.address?.codigoPostal, client!!.address?.poblacion).joinToString(", ")
                     
-                    Text(stringResource(R.string.crm_client_detail_type, client!!.tipoCliente, client!!.categoria))
+                    Text(stringResource(R.string.crm_client_detail_type, client!!.tipoCliente.name, client!!.categoria.name))
                     if (!client!!.nifCif.isNullOrEmpty()) {
-                         Text(stringResource(if (client!!.tipoCliente == "Empresa") R.string.crm_client_detail_cif else R.string.crm_client_detail_nif, client!!.nifCif!!))
+                         Text(stringResource(if (client!!.tipoCliente == ClientType.EMPRESA) R.string.crm_client_detail_cif else R.string.crm_client_detail_nif, client!!.nifCif!!))
                     }
+
                     if (address.isNotBlank()) {
                          Text(stringResource(R.string.crm_client_detail_address, address))
                     }
@@ -93,13 +96,13 @@ fun ClientDetailScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn {
-                items(projects) { project ->
+                items(projects, key = { it.id }) { project ->
                     ListItem(
                         headlineContent = { Text(project.name) },
-                        supportingContent = { Text(project.status.name) },
+                        supportingContent = { Text(project.status) },
                         modifier = Modifier.clickable { onNavigateToProject(project.id) }
                     )
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }

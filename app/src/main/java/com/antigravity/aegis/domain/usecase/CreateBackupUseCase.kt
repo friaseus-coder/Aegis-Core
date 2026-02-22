@@ -1,6 +1,7 @@
 package com.antigravity.aegis.domain.usecase
 
 import com.antigravity.aegis.domain.repository.BackupRepository
+import com.antigravity.aegis.domain.util.Result
 import javax.inject.Inject
 
 class CreateBackupUseCase @Inject constructor(
@@ -10,3 +11,4 @@ class CreateBackupUseCase @Inject constructor(
         return backupRepository.createBackupJson()
     }
 }
+

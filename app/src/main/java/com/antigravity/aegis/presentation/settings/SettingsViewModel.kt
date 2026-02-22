@@ -9,6 +9,7 @@ import com.antigravity.aegis.data.security.EncryptionKeyManager
 import com.antigravity.aegis.domain.repository.AuthRepository
 import com.antigravity.aegis.domain.repository.SettingsRepository
 import com.antigravity.aegis.domain.usecase.EnableBiometricsUseCase
+import com.antigravity.aegis.domain.util.Result as DomainResult
 import com.antigravity.aegis.data.local.seeder.TemplateSeeder
 import com.antigravity.aegis.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -88,11 +89,9 @@ class SettingsViewModel @Inject constructor(
     fun exportDatabase(uri: Uri) {
         viewModelScope.launch {
             _uiState.value = SettingsUiState.Loading(UiText.StringResource(R.string.data_export_db_loading))
-            val result = settingsRepository.exportDatabase(uri)
-            _uiState.value = if (result.isSuccess) {
-                SettingsUiState.Success(UiText.StringResource(R.string.data_export_db_success))
-            } else {
-                SettingsUiState.Error(UiText.StringResource(R.string.data_export_db_error, result.exceptionOrNull()?.message ?: "Unknown"))
+            when (val result = settingsRepository.exportDatabase(uri)) {
+                is DomainResult.Success -> _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.data_export_db_success))
+                is DomainResult.Error -> _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.data_export_db_error, result.exception.message ?: "Unknown"))
             }
         }
     }
@@ -100,14 +99,12 @@ class SettingsViewModel @Inject constructor(
     fun importDatabase(uri: Uri) {
         viewModelScope.launch {
             _uiState.value = SettingsUiState.Loading(UiText.StringResource(R.string.data_import_db_loading))
-            val result = settingsRepository.importDatabase(uri)
-            _uiState.value = if (result.isSuccess) {
-                // Restart App or Navigate to Login? 
-                // DB is replaced, session is invalid (key might be wrong for new DB).
-                logout() 
-                SettingsUiState.Success(UiText.StringResource(R.string.data_import_db_success))
-            } else {
-                SettingsUiState.Error(UiText.StringResource(R.string.data_import_db_error, result.exceptionOrNull()?.message ?: "Unknown"))
+            when (val result = settingsRepository.importDatabase(uri)) {
+                is DomainResult.Success -> {
+                    logout()
+                    _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.data_import_db_success))
+                }
+                is DomainResult.Error -> _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.data_import_db_error, result.exception.message ?: "Unknown"))
             }
         }
     }
@@ -115,38 +112,29 @@ class SettingsViewModel @Inject constructor(
     fun shareBackup(context: android.content.Context) {
         viewModelScope.launch {
             _uiState.value = SettingsUiState.Loading(UiText.StringResource(R.string.settings_share_backup_loading))
-            val result = settingsRepository.createTemporaryBackupFile()
-            
-            if (result.isSuccess) {
-                val file = result.getOrNull()
-                if (file != null) {
+            when (val result = settingsRepository.createTemporaryBackupFile()) {
+                is DomainResult.Success -> {
+                    val file = result.data
                     try {
                         val uri = androidx.core.content.FileProvider.getUriForFile(
-                            context,
-                            "${context.packageName}.provider",
-                            file
+                            context, "${context.packageName}.provider", file
                         )
-                        
                         val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                             type = "application/json"
                             putExtra(android.content.Intent.EXTRA_STREAM, uri)
                             addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
-                        
                         val chooser = android.content.Intent.createChooser(intent, context.getString(R.string.settings_share_chooser_title))
-                        // We need an activity context to start activity from ViewModel is bad practice usually, 
-                        // but we are calling this from UI with context passed in or triggering a side effect.
-                        // Better to expose Intent/Event to UI. But for simplicity here, assuming context is Activity or usign Flag New Task.
                         chooser.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(chooser)
-                        
-                        _uiState.value = SettingsUiState.Idle // Reset to idle after launching
+                        _uiState.value = SettingsUiState.Idle
                     } catch (e: Exception) {
                         _uiState.value = SettingsUiState.Error(UiText.DynamicString(e.message ?: "Error launching share"))
                     }
                 }
-            } else {
-                _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.settings_share_backup_error, result.exceptionOrNull()?.message ?: "Unknown"))
+                is DomainResult.Error -> {
+                    _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.settings_share_backup_error, result.exception.message ?: "Unknown"))
+                }
             }
         }
     }
@@ -161,22 +149,18 @@ class SettingsViewModel @Inject constructor(
         // getKey() now returns raw bytes directly (not Base64 encoded)
         viewModelScope.launch {
             _uiState.value = SettingsUiState.Loading(UiText.StringResource(R.string.general_loading))
-            val result = authRepository.createUser(name, language, pin, role, null, null, masterKey)
-            if (result.isSuccess) {
-                _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.auth_success_user_created))
-            } else {
-                 _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.auth_error_user_create_failed, result.exceptionOrNull()?.message ?: "Unknown"))
+            when (val result = authRepository.createUser(name, language, pin, role, null, null, masterKey)) {
+                is DomainResult.Success -> _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.auth_success_user_created))
+                is DomainResult.Error -> _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.auth_error_user_create_failed, result.exception.message ?: "Unknown"))
             }
         }
     }
 
     fun updateUserRole(userId: Int, role: UserRole) {
         viewModelScope.launch {
-            val result = authRepository.updateUserRole(userId, role)
-            if (result.isSuccess) {
-                _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.settings_role_update_success))
-            } else {
-                _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.settings_role_update_error))
+            when (authRepository.updateUserRole(userId, role)) {
+                is DomainResult.Success -> _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.settings_role_update_success))
+                is DomainResult.Error -> _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.settings_role_update_error))
             }
         }
     }
@@ -217,12 +201,14 @@ class SettingsViewModel @Inject constructor(
             if (cipher != null) {
                 pendingBiometricAction = { validCipher ->
                     viewModelScope.launch {
-                        val result = enableBiometricsUseCase(currentUserId, mk, validCipher)
-                        if (result.isSuccess) {
-                            _isBiometricEnabled.value = true
-                            _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.auth_success_biometric_enabled))
-                        } else {
-                            _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.auth_success_biometric_enable_error))
+                        when (enableBiometricsUseCase(currentUserId, mk, validCipher)) {
+                            is DomainResult.Success -> {
+                                _isBiometricEnabled.value = true
+                                _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.auth_success_biometric_enabled))
+                            }
+                            is DomainResult.Error -> {
+                                _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.auth_success_biometric_enable_error))
+                            }
                         }
                     }
                 }
@@ -286,17 +272,19 @@ class SettingsViewModel @Inject constructor(
     fun updateCompanyLogo(uri: Uri) {
         viewModelScope.launch {
             _uiState.value = SettingsUiState.Loading(UiText.StringResource(R.string.settings_logo_saving))
-            val result = settingsRepository.saveImageToInternalStorage(uri)
-            if (result.isSuccess) {
-                val path = result.getOrNull()
-                val currentConfig = userConfig.value
-                if (currentConfig != null && path != null) {
-                     val newConfig = currentConfig.copy(companyLogoUri = path)
-                     settingsRepository.insertOrUpdateConfig(newConfig)
-                     _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.settings_logo_updated))
+            when (val result = settingsRepository.saveImageToInternalStorage(uri)) {
+                is DomainResult.Success -> {
+                    val path = result.data
+                    val currentConfig = userConfig.value
+                    if (currentConfig != null) {
+                        val newConfig = currentConfig.copy(companyLogoUri = path)
+                        settingsRepository.insertOrUpdateConfig(newConfig)
+                        _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.settings_logo_updated))
+                    }
                 }
-            } else {
-                _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.general_error_prefix, result.exceptionOrNull()?.message ?: "Unknown"))
+                is DomainResult.Error -> {
+                    _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.general_error_prefix, result.exception.message ?: "Unknown"))
+                }
             }
         }
     }

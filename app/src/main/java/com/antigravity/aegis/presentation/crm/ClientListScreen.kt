@@ -29,6 +29,8 @@ import com.antigravity.aegis.presentation.components.AegisTopAppBar
 import com.antigravity.aegis.presentation.components.BovedaLogo
 import com.antigravity.aegis.ui.theme.LocalCompanyLogoUri
 import androidx.compose.ui.Alignment
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
 import com.antigravity.aegis.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,33 +163,34 @@ fun ClientListScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().weight(1f)
             ) {
-                items(clients) { client ->
+                items(clients, key = { it.id }) { client ->
                     ListItem(
                         headlineContent = { 
                             Text(
-                                if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" 
+                                if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" 
                                 else client.firstName // "Nombre Comercial"
                             ) 
                         },
                         supportingContent = { 
                             Column {
-                                val detalle = if (client.tipoCliente == "Empresa") client.razonSocial else client.nifCif
+                                val detalle = if (client.tipoCliente == ClientType.EMPRESA) client.razonSocial else client.nifCif
                                 Text(
-                                    text = if (!detalle.isNullOrEmpty()) "${client.tipoCliente} • $detalle" else client.tipoCliente,
+                                    text = if (!detalle.isNullOrEmpty()) "${client.tipoCliente.name} • $detalle" else client.tipoCliente.name,
                                     style = MaterialTheme.typography.bodySmall
                                 )
                                 Text(
-                                    text = client.categoria,
+                                    text = client.categoria.name,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = if (client.categoria == "Activo") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                    color = if (client.categoria.name == "ACTIVE") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                                 )
                             }
+
                         },
                         modifier = Modifier.clickable { 
                              onNavigateToClientDetail(client.id) 
                         }
                     )
-                    Divider()
+                    HorizontalDivider()
                 }
                 if (clients.isEmpty()) {
                     item {

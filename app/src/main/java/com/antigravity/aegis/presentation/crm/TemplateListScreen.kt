@@ -112,15 +112,19 @@ fun TemplateListScreen(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
             if (transferState is CrmViewModel.TransferState.Success) {
+                val state = transferState as CrmViewModel.TransferState.Success
+                val msg = if (state.resId != null) stringResource(state.resId, state.arg ?: "") else state.message ?: ""
                 Text(
-                    text = (transferState as CrmViewModel.TransferState.Success).message,
+                    text = msg,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(8.dp)
                 )
             }
-             if (transferState is CrmViewModel.TransferState.Error) {
+            if (transferState is CrmViewModel.TransferState.Error) {
+                val state = transferState as CrmViewModel.TransferState.Error
+                val msg = if (state.resId != null) stringResource(state.resId, state.arg ?: "") else state.message ?: ""
                 Text(
-                    text = (transferState as CrmViewModel.TransferState.Error).message,
+                    text = msg,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(8.dp)
                 )

@@ -16,8 +16,12 @@ sealed class Screen(val route: String) {
 
     // CRM Sub-routes
     data object Clients : Screen("clients")
-    data object ClientDetail : Screen("client_detail")
-    data object ProjectDetail : Screen("project_detail")
+    data object ClientDetail : Screen("client_detail/{clientId}") {
+        fun createRoute(clientId: Int) = "client_detail/$clientId"
+    }
+    data object ProjectDetail : Screen("project_detail/{projectId}") {
+        fun createRoute(projectId: Int) = "project_detail/$projectId"
+    }
     data object ClientEdit : Screen("client_edit/{clientId}") {
         fun createRoute(clientId: Int) = "client_edit/$clientId"
     }
@@ -32,4 +36,10 @@ sealed class Screen(val route: String) {
     data object ModuleCustomization : Screen("module_customization")
     data object Templates : Screen("templates")
     data object ArchivedProjects : Screen("archived_projects")
+
+    // Graph Roots
+    data object AuthGraph : Screen("auth_graph")
+    data object CrmGraph : Screen("crm_graph")
+    data object SettingsGraph : Screen("settings_graph")
+    data object FeaturesGraph : Screen("features_graph")
 }

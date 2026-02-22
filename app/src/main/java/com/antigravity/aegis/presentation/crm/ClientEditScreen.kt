@@ -3,14 +3,17 @@ package com.antigravity.aegis.presentation.crm
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import com.antigravity.aegis.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.antigravity.aegis.R
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
+import com.antigravity.aegis.domain.model.Address
+import com.antigravity.aegis.domain.model.ClientCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +27,8 @@ fun ClientEditScreen(
     // Form State
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var tipoCliente by remember { mutableStateOf("Particular") }
+    var tipoCliente by remember { mutableStateOf(ClientType.PARTICULAR) }
+
     var razonSocial by remember { mutableStateOf("") }
     var nifCif by remember { mutableStateOf("") }
     var personaContacto by remember { mutableStateOf("") }
@@ -52,26 +56,27 @@ fun ClientEditScreen(
                  personaContacto = it.personaContacto ?: ""
                  phone = it.phone ?: ""
                  email = it.email ?: ""
-                 calle = it.calle ?: ""
-                 numero = it.numero ?: ""
-                 piso = it.piso ?: ""
-                 poblacion = it.poblacion ?: ""
-                 codigoPostal = it.codigoPostal ?: ""
+                 calle = it.address?.calle ?: ""
+                 numero = it.address?.numero ?: ""
+                 piso = it.address?.piso ?: ""
+                 poblacion = it.address?.poblacion ?: ""
+                 codigoPostal = it.address?.codigoPostal ?: ""
                  notas = it.notas ?: ""
              }
+
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (clientId == null || clientId == 0) "Nuevo Cliente" else "Editar Cliente") },
+                title = { Text(if (clientId == null || clientId == 0) stringResource(R.string.client_edit_title_new) else stringResource(R.string.client_edit_title_edit)) },
                 navigationIcon = {
-                    TextButton(onClick = onNavigateBack) { Text("Cancelar") }
+                    TextButton(onClick = onNavigateBack) { Text(stringResource(R.string.general_cancel)) }
                 },
                 actions = {
                     TextButton(onClick = {
-                        val client = ClientEntity(
+                        val client = Client(
                             id = clientId ?: 0,
                             firstName = firstName,
                             lastName = lastName,
@@ -81,18 +86,21 @@ fun ClientEditScreen(
                             personaContacto = personaContacto.ifBlank { null },
                             phone = phone.ifBlank { null },
                             email = email.ifBlank { null },
-                            calle = calle.ifBlank { null },
-                            numero = numero.ifBlank { null },
-                            piso = piso.ifBlank { null },
-                            poblacion = poblacion.ifBlank { null },
-                            codigoPostal = codigoPostal.ifBlank { null },
+                            address = Address(
+                                calle = calle.ifBlank { null },
+                                numero = numero.ifBlank { null },
+                                piso = piso.ifBlank { null },
+                                poblacion = poblacion.ifBlank { null },
+                                codigoPostal = codigoPostal.ifBlank { null }
+                            ),
                             notas = notas.ifBlank { null },
-                            categoria = selectedClient?.categoria ?: "Potencial" // Keep existing category or default
+                            categoria = selectedClient?.categoria ?: ClientCategory.POTENTIAL // Keep existing category or default
                         )
                         viewModel.updateClient(client) // Handles both insert and update provided ID is correct
+
                         onNavigateBack()
                     }) {
-                        Text("Guardar")
+                        Text(stringResource(R.string.general_save))
                     }
                 }
             )
@@ -108,58 +116,61 @@ fun ClientEditScreen(
         ) {
             // Tipo Cliente
             Row {
-                FilterChip(selected = tipoCliente == "Particular", onClick = { tipoCliente = "Particular" }, label = { Text("Particular") })
+                FilterChip(selected = tipoCliente == ClientType.PARTICULAR, onClick = { tipoCliente = ClientType.PARTICULAR }, label = { Text(stringResource(R.string.client_type_particular)) })
                 Spacer(modifier = Modifier.width(8.dp))
-                FilterChip(selected = tipoCliente == "Empresa", onClick = { tipoCliente = "Empresa" }, label = { Text("Empresa") })
+                FilterChip(selected = tipoCliente == ClientType.EMPRESA, onClick = { tipoCliente = ClientType.EMPRESA }, label = { Text(stringResource(R.string.client_type_empresa)) })
             }
+
             
             Spacer(modifier = Modifier.height(16.dp))
             
             // Name Fields
-            if (tipoCliente == "Particular") {
-                 OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
-                 OutlinedTextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Apellidos") }, modifier = Modifier.fillMaxWidth())
-                 OutlinedTextField(value = nifCif, onValueChange = { nifCif = it }, label = { Text("NIF") }, modifier = Modifier.fillMaxWidth())
+            if (tipoCliente == ClientType.PARTICULAR) {
+
+                 OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text(stringResource(R.string.client_label_name)) }, modifier = Modifier.fillMaxWidth())
+                 OutlinedTextField(value = lastName, onValueChange = { lastName = it }, label = { Text(stringResource(R.string.client_label_lastname)) }, modifier = Modifier.fillMaxWidth())
+                 OutlinedTextField(value = nifCif, onValueChange = { nifCif = it }, label = { Text(stringResource(R.string.client_label_nif)) }, modifier = Modifier.fillMaxWidth())
             } else {
-                 OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text("Nombre Comercial") }, modifier = Modifier.fillMaxWidth())
-                 OutlinedTextField(value = razonSocial, onValueChange = { razonSocial = it }, label = { Text("Razón Social") }, modifier = Modifier.fillMaxWidth())
-                 OutlinedTextField(value = nifCif, onValueChange = { nifCif = it }, label = { Text("CIF") }, modifier = Modifier.fillMaxWidth())
+                 OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text(stringResource(R.string.client_label_tradename)) }, modifier = Modifier.fillMaxWidth())
+                 OutlinedTextField(value = razonSocial, onValueChange = { razonSocial = it }, label = { Text(stringResource(R.string.client_label_legalname)) }, modifier = Modifier.fillMaxWidth())
+                 OutlinedTextField(value = nifCif, onValueChange = { nifCif = it }, label = { Text(stringResource(R.string.client_label_cif)) }, modifier = Modifier.fillMaxWidth())
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Contacto", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.client_label_contact_section), style = MaterialTheme.typography.titleMedium)
             
-            if (tipoCliente == "Empresa") {
-                OutlinedTextField(value = personaContacto, onValueChange = { personaContacto = it }, label = { Text("Persona Contacto") }, modifier = Modifier.fillMaxWidth())
+            if (tipoCliente == ClientType.EMPRESA) {
+
+                OutlinedTextField(value = personaContacto, onValueChange = { personaContacto = it }, label = { Text(stringResource(R.string.client_label_contact_person)) }, modifier = Modifier.fillMaxWidth())
             }
-            OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(stringResource(R.string.client_label_phone)) }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(stringResource(R.string.client_label_email)) }, modifier = Modifier.fillMaxWidth())
             
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Dirección", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.client_label_address_section), style = MaterialTheme.typography.titleMedium)
             
-            OutlinedTextField(value = calle, onValueChange = { calle = it }, label = { Text("Calle") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = calle, onValueChange = { calle = it }, label = { Text(stringResource(R.string.client_label_street)) }, modifier = Modifier.fillMaxWidth())
             Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(value = numero, onValueChange = { numero = it }, label = { Text("Número") }, modifier = Modifier.weight(1f))
+                OutlinedTextField(value = numero, onValueChange = { numero = it }, label = { Text(stringResource(R.string.client_label_number)) }, modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.width(8.dp))
-                OutlinedTextField(value = piso, onValueChange = { piso = it }, label = { Text("Piso/Puerta") }, modifier = Modifier.weight(1f))
+                OutlinedTextField(value = piso, onValueChange = { piso = it }, label = { Text(stringResource(R.string.client_label_floor)) }, modifier = Modifier.weight(1f))
             }
             Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(value = codigoPostal, onValueChange = { codigoPostal = it }, label = { Text("C.P.") }, modifier = Modifier.weight(1f))
+                OutlinedTextField(value = codigoPostal, onValueChange = { codigoPostal = it }, label = { Text(stringResource(R.string.client_label_zip)) }, modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.width(8.dp))
-                OutlinedTextField(value = poblacion, onValueChange = { poblacion = it }, label = { Text("Población") }, modifier = Modifier.weight(2f))
+                OutlinedTextField(value = poblacion, onValueChange = { poblacion = it }, label = { Text(stringResource(R.string.client_label_city)) }, modifier = Modifier.weight(2f))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             Divider()
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text("Otros", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.client_label_others_section), style = MaterialTheme.typography.titleMedium)
             
             OutlinedTextField(
                 value = notas, 
                 onValueChange = { notas = it }, 
-                label = { Text("Notas (Públicas)") }, 
+                label = { Text(stringResource(R.string.client_label_notes_public)) }, 
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )

@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.antigravity.aegis.data.local.AegisDatabase
 import com.antigravity.aegis.domain.repository.SettingsRepository
+import com.antigravity.aegis.domain.util.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,26 +21,16 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun exportDatabase(destinationUri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // Checkpoint to ensure WAL is merged to DB file
-            // Note: If using WAL, we should export -shm and -wal too, OR checkpoint.
-            // Checkpoint is safer for single file export.
             val dbName = "aegis_core.db"
             val dbPath = context.getDatabasePath(dbName)
-            
-            // Force checkpoint (This assumes we can access the SupportSQLiteDatabase)
             database.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)")
-            
-            if (!dbPath.exists()) return@withContext Result.failure(Exception("Database file not found"))
-
+            if (!dbPath.exists()) return@withContext Result.Error(Exception("Database file not found"))
             context.contentResolver.openOutputStream(destinationUri)?.use { output ->
-                FileInputStream(dbPath).use { input ->
-                    input.copyTo(output)
-                }
-            } ?: return@withContext Result.failure(Exception("Could not open destination stream"))
-
-            Result.success(Unit)
+                FileInputStream(dbPath).use { input -> input.copyTo(output) }
+            } ?: return@withContext Result.Error(Exception("Could not open destination stream"))
+            Result.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 
@@ -47,27 +38,17 @@ class SettingsRepositoryImpl @Inject constructor(
         try {
             val dbName = "aegis_core.db"
             val dbPath = context.getDatabasePath(dbName)
-            
-            // Close DB connections if possible? Room doesn't expose easy close-reopen without destroying instance.
-            // Dangerous operation while App is running. Ideally we should kill process after import.
-            // Or use Room's close().
             database.close()
-
             context.contentResolver.openInputStream(sourceUri)?.use { input ->
-                FileOutputStream(dbPath).use { output ->
-                    input.copyTo(output)
-                }
-            } ?: return@withContext Result.failure(Exception("Could not open source stream"))
-            
-            // Delete WAL and SHM to avoid corruption on restart
+                FileOutputStream(dbPath).use { output -> input.copyTo(output) }
+            } ?: return@withContext Result.Error(Exception("Could not open source stream"))
             val walFile = File(dbPath.parent, "$dbName-wal")
             val shmFile = File(dbPath.parent, "$dbName-shm")
             if (walFile.exists()) walFile.delete()
             if (shmFile.exists()) shmFile.delete()
-
-            Result.success(Unit)
+            Result.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 
@@ -102,20 +83,13 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun saveImageToInternalStorage(uri: Uri): Result<String> = withContext(Dispatchers.IO) {
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
-                ?: return@withContext Result.failure(Exception("Cannot open input stream"))
-
-            // Decodificar imagen a Bitmap
+                ?: return@withContext Result.Error(Exception("Cannot open input stream"))
             val originalBitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
-                ?: return@withContext Result.failure(Exception("Cannot decode image"))
+                ?: return@withContext Result.Error(Exception("Cannot decode image"))
             inputStream.close()
-
-            // Redimensionar si es necesario (máximo 1024x1024 manteniendo aspect ratio)
             val maxDimension = 1024
             val scaledBitmap = if (originalBitmap.width > maxDimension || originalBitmap.height > maxDimension) {
-                val scale = minOf(
-                    maxDimension.toFloat() / originalBitmap.width,
-                    maxDimension.toFloat() / originalBitmap.height
-                )
+                val scale = minOf(maxDimension.toFloat() / originalBitmap.width, maxDimension.toFloat() / originalBitmap.height)
                 val newWidth = (originalBitmap.width * scale).toInt()
                 val newHeight = (originalBitmap.height * scale).toInt()
                 android.graphics.Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true).also {
@@ -124,24 +98,17 @@ class SettingsRepositoryImpl @Inject constructor(
             } else {
                 originalBitmap
             }
-
             val directory = File(context.filesDir, "company_assets")
             if (!directory.exists()) directory.mkdirs()
-
-            val fileName = "company_logo_${System.currentTimeMillis()}.jpg" 
+            val fileName = "company_logo_${System.currentTimeMillis()}.jpg"
             val file = File(directory, fileName)
-            
-            // Comprimir y guardar con calidad 80%
             FileOutputStream(file).use { output ->
                 scaledBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, output)
             }
-            
-            // Liberar memoria
             scaledBitmap.recycle()
-            
-            Result.success(file.absolutePath)
+            Result.Success(file.absolutePath)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 
@@ -149,19 +116,14 @@ class SettingsRepositoryImpl @Inject constructor(
         try {
             val takeFlags: Int = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            // Check if the URI is a tree URI or document URI. 
-            // For OpenDocumentTree, we take persistable permission.
             context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-            
-            // Save to UserConfig
             ensureConfigExists()
             val current = database.userConfigDao().getUserConfigOneShot()!!
             val newConfig = current.copy(backupLocationUri = uri.toString())
             database.userConfigDao().insertOrUpdate(newConfig)
-            
-            Result.success(Unit)
+            Result.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 
@@ -206,57 +168,50 @@ class SettingsRepositoryImpl @Inject constructor(
     
     override suspend fun performAutoBackup(userConfig: com.antigravity.aegis.data.local.entity.UserConfig): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val uriString = userConfig.backupLocationUri ?: return@withContext Result.failure(Exception("No backup location configured"))
+            val uriString = userConfig.backupLocationUri ?: return@withContext Result.Error(Exception("No backup location configured"))
             val treeUri = Uri.parse(uriString)
-            
-            // Generate JSON using BackupRepository
-            val jsonResult = backupRepository.createBackupJson()
-            if (jsonResult.isFailure) return@withContext Result.failure(jsonResult.exceptionOrNull()!!)
-            val jsonString = jsonResult.getOrNull()!!
 
-            // Use DocumentFile to create a file in the directory
-            // Note: Should check if we have write permission, but we took persistable permission.
+            val jsonString = when (val jsonResult = backupRepository.createBackupJson()) {
+                is Result.Success -> jsonResult.data
+                is Result.Error -> return@withContext Result.Error(jsonResult.exception)
+            }
+
             val docFile = androidx.documentfile.provider.DocumentFile.fromTreeUri(context, treeUri)
-            if (docFile == null || !docFile.isDirectory) return@withContext Result.failure(Exception("Invalid directory URI"))
+            if (docFile == null || !docFile.isDirectory) return@withContext Result.Error(Exception("Invalid directory URI"))
 
             val dateFormat = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
             val timestamp = dateFormat.format(java.util.Date())
             val fileName = "aegis_backup_$timestamp.json"
             val newFile = docFile.createFile("application/json", fileName)
-                ?: return@withContext Result.failure(Exception("Could not create file in directory"))
-            
+                ?: return@withContext Result.Error(Exception("Could not create file in directory"))
+
             context.contentResolver.openOutputStream(newFile.uri)?.use { output ->
                 output.write(jsonString.toByteArray())
-            } ?: return@withContext Result.failure(Exception("Could not open output stream"))
-            
-            // Update user config with last backup timestamp
-             val newConfig = userConfig.copy(lastBackupTimestamp = System.currentTimeMillis())
-             database.userConfigDao().insertOrUpdate(newConfig)
+            } ?: return@withContext Result.Error(Exception("Could not open output stream"))
 
-            Result.success(newFile.uri.toString())
+            val newConfig = userConfig.copy(lastBackupTimestamp = System.currentTimeMillis())
+            database.userConfigDao().insertOrUpdate(newConfig)
+
+            Result.Success(newFile.uri.toString())
         } catch (e: Exception) {
-             Result.failure(e)
+            Result.Error(e)
         }
     }
 
     override suspend fun createTemporaryBackupFile(): Result<File> = withContext(Dispatchers.IO) {
         try {
-            val jsonResult = backupRepository.createBackupJson()
-            if (jsonResult.isFailure) return@withContext Result.failure(jsonResult.exceptionOrNull()!!)
-            val jsonString = jsonResult.getOrNull()!!
-
+            val jsonString = when (val jsonResult = backupRepository.createBackupJson()) {
+                is Result.Success -> jsonResult.data
+                is Result.Error -> return@withContext Result.Error(jsonResult.exception)
+            }
             val dateFormat = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
             val timestamp = dateFormat.format(java.util.Date())
             val fileName = "aegis_data_$timestamp.json"
             val file = File(context.cacheDir, fileName)
-            
-            FileOutputStream(file).use { output ->
-                output.write(jsonString.toByteArray())
-            }
-            
-            Result.success(file)
+            FileOutputStream(file).use { output -> output.write(jsonString.toByteArray()) }
+            Result.Success(file)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 }

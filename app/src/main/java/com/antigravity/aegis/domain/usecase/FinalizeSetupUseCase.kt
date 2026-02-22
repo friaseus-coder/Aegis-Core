@@ -2,6 +2,7 @@ package com.antigravity.aegis.domain.usecase
 
 import com.antigravity.aegis.data.security.EncryptionKeyManager
 import com.antigravity.aegis.domain.repository.AuthRepository
+import com.antigravity.aegis.domain.util.Result
 import javax.inject.Inject
 
 class FinalizeSetupUseCase @Inject constructor(
@@ -9,13 +10,13 @@ class FinalizeSetupUseCase @Inject constructor(
     private val encryptionKeyManager: EncryptionKeyManager
 ) {
     suspend operator fun invoke(name: String, language: String, pin: String, role: com.antigravity.aegis.data.local.entity.UserRole, email: String?, phone: String?, seedPhrase: List<String>, masterKey: ByteArray): Result<Unit> {
-        val saveResult = authRepository.createAdmin(name, language, pin, role, email, phone, seedPhrase, masterKey)
-        if (saveResult.isSuccess) {
-            // Set the key in memory so the session is active immediately
-            // Use raw bytes directly for consistency with LoginWithPinUseCase
-            encryptionKeyManager.setMasterKey(masterKey)
-            return Result.success(Unit)
+        return when (val saveResult = authRepository.createAdmin(name, language, pin, role, email, phone, seedPhrase, masterKey)) {
+            is Result.Success -> {
+                encryptionKeyManager.setMasterKey(masterKey)
+                Result.Success(Unit)
+            }
+            is Result.Error -> Result.Error(saveResult.exception)
         }
-        return Result.failure(saveResult.exceptionOrNull() ?: Exception("Unknown error"))
     }
 }
+

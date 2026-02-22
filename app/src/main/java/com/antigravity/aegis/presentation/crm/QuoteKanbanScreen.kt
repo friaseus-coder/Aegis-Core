@@ -35,13 +35,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.antigravity.aegis.data.local.entity.ClientEntity
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.domain.reports.PdfGenerator
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import java.text.NumberFormat
 import java.util.Locale
+import com.antigravity.aegis.domain.model.CrmStatus // Import de estados
 
 import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -106,7 +108,7 @@ fun QuoteKanbanScreen(
     }
     
     // Simple statuses
-    val statuses = listOf("Draft", "Sent", "Won", "Lost")
+    val statuses = listOf(CrmStatus.DRAFT, CrmStatus.SENT, CrmStatus.WON, CrmStatus.LOST)
     
     Scaffold(
         topBar = {
@@ -146,7 +148,7 @@ fun QuoteKanbanScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(statuses) { status ->
+            items(statuses, key = { it }) { status ->
                 KanbanColumn(
                     status = status,
                     quotes = kanbanState[status] ?: emptyList(),
@@ -180,7 +182,8 @@ fun QuoteKanbanScreen(
         if (showCreateDialog) {
             var projectName by remember { mutableStateOf("") }
             var expandedClient by remember { mutableStateOf(false) }
-            var selectedClient by remember { mutableStateOf<ClientEntity?>(null) }
+            var selectedClient by remember { mutableStateOf<Client?>(null) }
+
             
             AlertDialog(
                 onDismissRequest = { showCreateDialog = false },
@@ -194,7 +197,8 @@ fun QuoteKanbanScreen(
                             onExpandedChange = { expandedClient = !expandedClient }
                         ) {
                             OutlinedTextField(
-                                value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.quotes_select_client_placeholder),
+                                value = selectedClient?.let { if (it.tipoCliente == ClientType.PARTICULAR) "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.quotes_select_client_placeholder),
+
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedClient) },
@@ -206,7 +210,8 @@ fun QuoteKanbanScreen(
                             ) {
                                 allClients.forEach { client ->
                                     DropdownMenuItem(
-                                        text = { Text(if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName) },
+                                        text = { Text(if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName) },
+
                                         onClick = {
                                             selectedClient = client
                                             expandedClient = false
@@ -252,8 +257,9 @@ fun KanbanColumn(
     status: String,
     quotes: List<QuoteKanbanViewModel.QuoteWithClient>,
     onMoveQuote: (Int, String) -> Unit,
-    onShareQuote: (QuoteEntity, ClientEntity) -> Unit
+    onShareQuote: (QuoteEntity, Client) -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .width(300.dp)
@@ -285,7 +291,7 @@ fun KanbanColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)
         ) {
-            items(quotes) { item ->
+            items(quotes, key = { it.quote.id }) { item ->
                 QuoteCard(
                     quote = item.quote,
                     client = item.client,
@@ -305,7 +311,7 @@ fun KanbanColumn(
 @Composable
 fun QuoteCard(
     quote: QuoteEntity,
-    client: ClientEntity?,
+    client: Client?,
     currentStatus: String,
     onMoveTo: (String) -> Unit,
     onShare: () -> Unit
@@ -336,8 +342,9 @@ fun QuoteCard(
                     )
                     if (client != null) {
                         Text(
-                            text = if (client.tipoCliente == "Particular") "${client.firstName} ${client.lastName}" else client.firstName,
+                            text = if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName,
                             style = MaterialTheme.typography.bodySmall,
+
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -360,7 +367,7 @@ fun QuoteCard(
                         )
                         HorizontalDivider()
                         Text(stringResource(R.string.ui_move_to), modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.labelSmall)
-                        listOf("Draft", "Sent", "Won", "Lost").filter { it != currentStatus }.forEach { targetStatus ->
+                        listOf(CrmStatus.DRAFT, CrmStatus.SENT, CrmStatus.WON, CrmStatus.LOST).filter { it != currentStatus }.forEach { targetStatus ->
                             DropdownMenuItem(
                                 text = { Text(targetStatus) },
                                 onClick = {

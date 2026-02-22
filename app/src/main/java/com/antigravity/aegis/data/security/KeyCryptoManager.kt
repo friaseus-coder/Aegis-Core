@@ -79,6 +79,44 @@ class KeyCryptoManager @Inject constructor() {
         return cipher.doFinal(encryptedBytes)
     }
 
+    /**
+     * Encrypts plain text using the provided secret key.
+     * Returns encoded string: iv (base64) + ":" + encryptedData (base64)
+     */
+    fun encryptData(plainText: String, secretKey: ByteArray): String {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        val iv = ByteArray(IV_LENGTH)
+        SecureRandom().nextBytes(iv)
+        val key = SecretKeySpec(secretKey, AES_ALGORITHM)
+        cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(128, iv))
+        
+        val encrypted = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
+        
+        val ivBase64 = android.util.Base64.encodeToString(iv, android.util.Base64.NO_WRAP)
+        val encryptedBase64 = android.util.Base64.encodeToString(encrypted, android.util.Base64.NO_WRAP)
+        
+        return "$ivBase64:$encryptedBase64"
+    }
+
+    /**
+     * Decrypts text using the provided secret key.
+     * Expects: iv (base64) + ":" + encryptedData (base64)
+     */
+    fun decryptData(encryptedText: String, secretKey: ByteArray): String {
+        val parts = encryptedText.split(":")
+        if (parts.size != 2) throw IllegalArgumentException("Invalid encrypted text format")
+        
+        val iv = android.util.Base64.decode(parts[0], android.util.Base64.NO_WRAP)
+        val encrypted = android.util.Base64.decode(parts[1], android.util.Base64.NO_WRAP)
+        
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        val key = SecretKeySpec(secretKey, AES_ALGORITHM)
+        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
+        
+        val decrypted = cipher.doFinal(encrypted)
+        return String(decrypted, Charsets.UTF_8)
+    }
+
     private fun deriveKey(password: CharArray, salt: ByteArray): SecretKey {
         val spec = PBEKeySpec(password, salt, ITERATIONS, KEY_LENGTH)
         val factory = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM)

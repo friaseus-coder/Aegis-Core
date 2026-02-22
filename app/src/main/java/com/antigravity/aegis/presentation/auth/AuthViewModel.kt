@@ -6,6 +6,7 @@ import com.antigravity.aegis.domain.repository.AuthRepository
 import com.antigravity.aegis.domain.usecase.FinalizeSetupUseCase
 import com.antigravity.aegis.domain.usecase.InitSetupUseCase
 import com.antigravity.aegis.domain.usecase.LoginWithPinUseCase
+import com.antigravity.aegis.domain.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -144,23 +145,23 @@ class AuthViewModel @Inject constructor(
                 seedPhrase = currentSetup.seedPhrase, 
                 masterKey = currentSetup.masterKey
             )
-            if (result.isSuccess) {
-                _authState.value = AuthState.Authenticated
-            } else {
-                // Todo: Handle error
+            when (result) {
+                is Result.Success -> _authState.value = AuthState.Authenticated
+                is Result.Error -> { /* Todo: Handle error */ }
             }
         }
     }
     
     fun recoverWithWords(words: List<String>) {
         viewModelScope.launch {
-            val result = authRepository.recoverWithSeed(words)
-            if (result.isSuccess) {
-                val mk = result.getOrThrow()
-                encryptionKeyManager.setMasterKey(mk)
-                _authState.value = AuthState.RecoverySuccess
-            } else {
-                _loginError.value = UiText.StringResource(R.string.auth_error_invalid_seed)
+            when (val result = authRepository.recoverWithSeed(words)) {
+                is Result.Success -> {
+                    encryptionKeyManager.setMasterKey(result.data)
+                    _authState.value = AuthState.RecoverySuccess
+                }
+                is Result.Error -> {
+                    _loginError.value = UiText.StringResource(R.string.auth_error_invalid_seed)
+                }
             }
         }
     }
@@ -168,14 +169,15 @@ class AuthViewModel @Inject constructor(
     fun recoverWithEmailPhone(email: String, phone: String) {
         val user = _selectedUser.value ?: return
         viewModelScope.launch {
-             val result = authRepository.recoverWithEmailPhone(user.id, email, phone)
-             if (result.isSuccess) {
-                 val mk = result.getOrThrow()
-                 encryptionKeyManager.setMasterKey(mk)
-                 _authState.value = AuthState.RecoverySuccess
-             } else {
-                 _loginError.value = UiText.StringResource(R.string.auth_error_invalid_credentials)
-             }
+            when (val result = authRepository.recoverWithEmailPhone(user.id, email, phone)) {
+                is Result.Success -> {
+                    encryptionKeyManager.setMasterKey(result.data)
+                    _authState.value = AuthState.RecoverySuccess
+                }
+                is Result.Error -> {
+                    _loginError.value = UiText.StringResource(R.string.auth_error_invalid_credentials)
+                }
+            }
         }
     }
 
@@ -183,18 +185,17 @@ class AuthViewModel @Inject constructor(
         val user = _selectedUser.value ?: return
         _loginError.value = null // Clear any previous error
         viewModelScope.launch {
-            val result = loginWithPinUseCase(user.id, pin)
-            if (result.isSuccess) {
-                 // Key is already set by usecase
-                 
-                 // Check if forcePinChange is true
-                 if (user.forcePinChange) {
-                     _authState.value = AuthState.RecoverySuccess // Reusing this state to trigger ChangePin nav
-                 } else {
-                     _authState.value = AuthState.Authenticated
-                 }
-            } else {
-                _loginError.value = UiText.StringResource(R.string.auth_error_pin_incorrect)
+            when (val result = loginWithPinUseCase(user.id, pin)) {
+                is Result.Success -> {
+                    if (user.forcePinChange) {
+                        _authState.value = AuthState.RecoverySuccess
+                    } else {
+                        _authState.value = AuthState.Authenticated
+                    }
+                }
+                is Result.Error -> {
+                    _loginError.value = UiText.StringResource(R.string.auth_error_pin_incorrect)
+                }
             }
         }
     }
@@ -204,13 +205,9 @@ class AuthViewModel @Inject constructor(
         val mk = encryptionKeyManager.getKey() ?: return
         
         viewModelScope.launch {
-            val result = authRepository.updatePin(user.id, newPin, mk)
-            if (result.isSuccess) {
-                // Pin changed successfully
-                // Also ensures forcePinChange is cleared in Repo
-                _authState.value = AuthState.Authenticated
-            } else {
-                // Handle error
+            when (authRepository.updatePin(user.id, newPin, mk)) {
+                is Result.Success -> _authState.value = AuthState.Authenticated
+                is Result.Error -> { /* Handle error */ }
             }
         }
     }
@@ -225,18 +222,18 @@ class AuthViewModel @Inject constructor(
             
             if (currentSetup != null) {
                  // Case: Initial Setup / First User
-                 val result = finalizeSetupUseCase(
-                    name = name, 
-                    language = language, 
-                    pin = pin, 
+                 when (val result = finalizeSetupUseCase(
+                    name = name,
+                    language = language,
+                    pin = pin,
                     role = com.antigravity.aegis.data.local.entity.UserRole.ADMIN,
                     email = email,
                     phone = phone,
-                    seedPhrase = currentSetup.seedPhrase, 
+                    seedPhrase = currentSetup.seedPhrase,
                     masterKey = currentSetup.masterKey
-                 )
-                 if (result.isSuccess) {
-                     _authState.value = AuthState.Authenticated
+                 )) {
+                     is Result.Success -> _authState.value = AuthState.Authenticated
+                     is Result.Error -> { /* Handle error */ }
                  }
             } else {
                 // Case: Adding subsequent user
@@ -261,9 +258,9 @@ class AuthViewModel @Inject constructor(
             if (cipher != null) {
                 pendingBiometricAction = { validCipher ->
                     viewModelScope.launch {
-                        val result = loginWithBiometricsUseCase(user.id, validCipher)
-                        if (result.isSuccess) {
-                            _authState.value = AuthState.Authenticated
+                        when (loginWithBiometricsUseCase(user.id, validCipher)) {
+                            is Result.Success -> _authState.value = AuthState.Authenticated
+                            is Result.Error -> { /* Biometric failed silently; cipher was valid but key decrypt failed */ }
                         }
                     }
                 }
@@ -287,13 +284,12 @@ class AuthViewModel @Inject constructor(
             val cipher = authRepository.getBiometricEncryptCipher(user.id)
             if (cipher != null) {
                  pendingBiometricAction = { validCipher ->
-                    viewModelScope.launch {
-                         val result = enableBiometricsUseCase(user.id, mk, validCipher)
-                         if (result.isSuccess) {
-                             // Success
-                             checkBiometricAvailability(user.id)
+                     viewModelScope.launch {
+                         when (enableBiometricsUseCase(user.id, mk, validCipher)) {
+                             is Result.Success -> checkBiometricAvailability(user.id)
+                             is Result.Error -> { /* Handle silently */ }
                          }
-                    }
+                     }
                 }
                 _biometricPromptState.value = BiometricPromptConfig(
                     titleResId = R.string.auth_login_biometric_enable_title,

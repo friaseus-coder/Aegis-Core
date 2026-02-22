@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileWriter
+import com.antigravity.aegis.R
 import javax.inject.Inject
 
 import com.antigravity.aegis.domain.transfer.DataTransferManager
@@ -39,9 +40,9 @@ class MileageViewModel @Inject constructor(
             _transferState.value = TransferState.Loading
             val result = transferManager.exportData(DataTransferManager.EntityType.MILEAGE)
             result.onSuccess { file ->
-                 _transferState.value = TransferState.Success("Exported to ${file.absolutePath}")
+                 _transferState.value = TransferState.Success(resId = R.string.mileage_export_client_success, arg = file.absolutePath)
             }.onFailure {
-                 _transferState.value = TransferState.Error(it.message ?: "Export failed")
+                 _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
     }
@@ -63,9 +64,9 @@ class MileageViewModel @Inject constructor(
             _transferState.value = TransferState.Loading
             val result = transferManager.importData(DataTransferManager.EntityType.MILEAGE, uri, wipe)
             result.onSuccess {
-                 _transferState.value = TransferState.Success("Import Successful")
+                 _transferState.value = TransferState.Success(resId = R.string.mileage_import_client_success)
             }.onFailure {
-                 _transferState.value = TransferState.Error(it.message ?: "Import failed")
+                 _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
     }
@@ -77,8 +78,8 @@ class MileageViewModel @Inject constructor(
     sealed class TransferState {
         object Idle : TransferState()
         object Loading : TransferState()
-        data class Success(val message: String) : TransferState()
-        data class Error(val message: String) : TransferState()
+        data class Success(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
+        data class Error(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
         data class ValidationError(val errors: List<String>) : TransferState()
         data class ValidationSuccess(val uri: Uri) : TransferState()
     }
@@ -131,7 +132,7 @@ class MileageViewModel @Inject constructor(
 
     fun exportAnnualReport() {
         viewModelScope.launch {
-            _exportStatus.value = "Exporting..."
+            _exportStatus.value = context.getString(R.string.mileage_report_exporting)
             try {
                 val allLogs = logs.value
                 val exportDir = File(context.cacheDir, "exports")
@@ -157,9 +158,9 @@ class MileageViewModel @Inject constructor(
                         )
                     }
                 }
-                _exportStatus.value = "Exported to: ${csvFile.absolutePath}"
+                _exportStatus.value = context.getString(R.string.mileage_export_client_success, csvFile.absolutePath)
             } catch (e: Exception) {
-                _exportStatus.value = "Error: ${e.message}"
+                _exportStatus.value = context.getString(R.string.general_unknown_error)
             }
         }
     }

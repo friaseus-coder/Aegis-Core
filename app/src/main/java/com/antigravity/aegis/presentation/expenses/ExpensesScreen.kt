@@ -6,11 +6,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -19,23 +23,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.antigravity.aegis.R
+import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
+import com.antigravity.aegis.presentation.components.AegisTopAppBar
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.compose.ui.res.stringResource
-import com.antigravity.aegis.R
-
-import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.ArrowDownward
-import com.antigravity.aegis.presentation.components.AegisTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,15 +62,16 @@ fun ExpensesScreen(
         }
     }
 
-    // Apply Transfer Logic, Export Logic as before...
-     // Handling Transfer States
+    // Handling Transfer States
     when (val state = transferState) {
         is ExpensesViewModel.TransferState.Success -> {
-            Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            val msg = state.message ?: state.resId?.let { if (state.arg != null) stringResource(it, state.arg) else stringResource(it) } ?: ""
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
             viewModel.resetTransferState()
         }
         is ExpensesViewModel.TransferState.Error -> {
-            Toast.makeText(context, "Error: ${state.message}", Toast.LENGTH_LONG).show()
+            val msg = state.message ?: state.resId?.let { if (state.arg != null) stringResource(it, state.arg) else stringResource(it) } ?: ""
+            Toast.makeText(context, stringResource(R.string.general_error_prefix, msg), Toast.LENGTH_LONG).show()
              viewModel.resetTransferState()
         }
         is ExpensesViewModel.TransferState.ValidationError -> {
@@ -89,7 +91,7 @@ fun ExpensesScreen(
         else -> {}
     }
 
-    // Camera Logic ...
+    // Camera Logic
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -138,7 +140,7 @@ fun ExpensesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
-                Text("+", style = MaterialTheme.typography.headlineLarge)
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.ui_new_entry))
             }
         }
     ) { padding ->
@@ -162,7 +164,7 @@ fun ExpensesScreen(
                     onClick = { viewModel.exportQuarter() },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Default.Share, contentDescription = null)
+                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.expenses_export_quarter_button))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.expenses_export_quarter_button))
                 }
@@ -178,7 +180,7 @@ fun ExpensesScreen(
                     modifier = Modifier.weight(1f),
                      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
-                    Icon(Icons.Default.CameraAlt, contentDescription = null)
+                    Icon(Icons.Default.CameraAlt, contentDescription = stringResource(R.string.inventory_scan_label))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.inventory_scan_label))
                 }
@@ -189,11 +191,8 @@ fun ExpensesScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(expenses) { expense ->
+                items(expenses, key = { it.id }) { expense ->
                     ExpenseCard(expense, onDistribute = {
-                         // Distribute Logic: For now, splitting equally among all active projects if it's general
-                         // In reality, we'd show a dialog to select projects.
-                         // For MVP: Passing all active project IDs
                          viewModel.distributeExpense(expense, projects.map { it.id })
                     })
                 }
@@ -212,12 +211,17 @@ fun AddExpenseDialog(
 ) {
     var merchant by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf(scannedData?.totalAmount?.toString() ?: "") }
-    var category by remember { mutableStateOf("Material") }
+    
+    val categories = listOf(
+        stringResource(R.string.expense_cat_material),
+        stringResource(R.string.expense_cat_transport),
+        stringResource(R.string.expense_cat_office),
+        stringResource(R.string.expense_cat_food),
+        stringResource(R.string.expense_cat_other)
+    )
+    var category by remember { mutableStateOf(categories[0]) }
     var selectedProject by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
     var date by remember { mutableStateOf(scannedData?.date ?: System.currentTimeMillis()) }
-    
-    // Simple Category Dropdown logic (could be improved)
-    val categories = listOf("Material", "Transport", "Office", "Food", "Other")
     var expandedCat by remember { mutableStateOf(false) }
     var expandedProj by remember { mutableStateOf(false) }
 
@@ -322,7 +326,7 @@ fun ExpenseCard(
                     )
                 }
                 Text(
-                    text = String.format("€%.2f", expense.totalAmount),
+                    text = stringResource(R.string.ui_currency_symbol) + String.format("%.2f", expense.totalAmount),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

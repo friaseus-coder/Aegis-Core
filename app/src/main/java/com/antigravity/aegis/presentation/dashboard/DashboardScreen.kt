@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.antigravity.aegis.presentation.components.BovedaLogo
 import com.antigravity.aegis.presentation.navigation.Screen
+import com.antigravity.aegis.R
+import androidx.compose.ui.platform.LocalContext
 
 data class ModuleData(
     val titleResId: Int,
@@ -73,9 +75,15 @@ fun DashboardScreen(
     val backupStatus by viewModel.autoBackupStatus.collectAsState()
     val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
 
+    val context = LocalContext.current
     androidx.compose.runtime.LaunchedEffect(backupStatus) {
-        backupStatus?.let {
-            snackbarHostState.showSnackbar(it)
+        backupStatus?.let { status ->
+            val message = when (status) {
+                is DashboardViewModel.BackupStatus.Success -> context.getString(R.string.data_backup_auto_success, status.fileName)
+                is DashboardViewModel.BackupStatus.Error -> context.getString(R.string.data_backup_auto_error, status.message ?: "")
+                is DashboardViewModel.BackupStatus.PermissionError -> context.getString(R.string.data_backup_permissions_error, status.message ?: "")
+            }
+            snackbarHostState.showSnackbar(message)
             viewModel.clearBackupStatus()
         }
     }

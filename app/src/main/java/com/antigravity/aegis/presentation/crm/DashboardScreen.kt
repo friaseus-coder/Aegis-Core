@@ -1,5 +1,7 @@
 package com.antigravity.aegis.presentation.crm
 
+import com.antigravity.aegis.domain.model.CrmStatus
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -31,6 +35,7 @@ fun DashboardScreen(
     val allClients by viewModel.allClients.collectAsState()
     val templates by viewModel.templates.collectAsState()
     val categories by viewModel.templateCategories.collectAsState()
+    val selectedStatuses by viewModel.selectedProjectStatuses.collectAsState()
 
     var showCreateDialog by remember { mutableStateOf(false) }
 
@@ -72,6 +77,23 @@ fun DashboardScreen(
                 stringResource(R.string.dashboard_active_projects),
                 style = MaterialTheme.typography.titleLarge
             )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // -- Status Filter --
+            val allStatuses = listOf(CrmStatus.DRAFT, CrmStatus.SENT, CrmStatus.ACTIVE, CrmStatus.WON, CrmStatus.LOST, CrmStatus.ARCHIVED, CrmStatus.CLOSED)
+            androidx.compose.foundation.lazy.LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+            ) {
+                items(allStatuses) { status ->
+                    FilterChip(
+                        selected = selectedStatuses.contains(status),
+                        onClick = { viewModel.toggleProjectStatusFilter(status) },
+                        label = { Text(status) }
+                    )
+                }
+            }
             
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -125,7 +147,7 @@ fun DashboardScreen(
 
 @Composable
 fun CreateProjectWizard(
-    clients: List<com.antigravity.aegis.data.local.entity.ClientEntity>,
+    clients: List<Client>,
     categories: List<String>,
     templates: List<com.antigravity.aegis.data.local.entity.ProjectEntity>,
     onDismiss: () -> Unit,
@@ -133,7 +155,8 @@ fun CreateProjectWizard(
     onCreateClient: () -> Unit
 ) {
     var step by remember { mutableStateOf(1) }
-    var selectedClient by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ClientEntity?>(null) }
+    var selectedClient by remember { mutableStateOf<Client?>(null) }
+
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedTemplate by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
     var projectName by remember { mutableStateOf("") }
@@ -170,13 +193,17 @@ fun CreateProjectWizard(
                              LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                                  items(clients) { client ->
                                      ListItem(
-                                         headlineContent = { Text("${client.firstName} ${client.lastName}") },
+                                         headlineContent = { 
+                                             val name = if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName
+                                             Text(name) 
+                                         },
                                          modifier = Modifier.clickable {
                                              selectedClient = client
                                              step = 2
                                          }
                                      )
-                                     Divider()
+
+                                     HorizontalDivider()
                                  }
                              }
                          }
@@ -249,8 +276,12 @@ fun CreateProjectWizard(
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.crm_wizard_summary_client, "${selectedClient?.firstName} ${selectedClient?.lastName}"))
+                        val clientName = selectedClient?.let { 
+                            if (it.tipoCliente == ClientType.PARTICULAR) "${it.firstName} ${it.lastName}" else it.firstName
+                        } ?: ""
+                        Text(stringResource(R.string.crm_wizard_summary_client, clientName))
                         Text(stringResource(R.string.crm_wizard_summary_template, selectedTemplate?.name ?: stringResource(R.string.general_none)))
+
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {

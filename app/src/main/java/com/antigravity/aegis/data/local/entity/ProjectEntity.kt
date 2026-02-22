@@ -6,12 +6,6 @@ import androidx.room.PrimaryKey
 import androidx.room.Index
 import com.antigravity.aegis.data.local.entity.ClientEntity
 
-enum class ProjectStatus {
-    ACTIVE,
-    CLOSED,
-    ARCHIVED
-}
-
 @Entity(
     tableName = "projects",
     foreignKeys = [
@@ -38,7 +32,7 @@ data class ProjectEntity(
     val clientId: Int? = null,
     val parentProjectId: Int? = null, // Para subproyectos
     val name: String,
-    val status: ProjectStatus, // "Active", "Closed", "Archived"
+    val status: String, // Ahora usa CrmStatus constants como "Draft", "Archived", etc.
     val startDate: Long,
     val endDate: Long? = null,
     val isArchived: Boolean = false,
@@ -51,3 +45,4 @@ data class ProjectEntity(
     val estimatedTime: Double? = null,
     val estimatedTimeUnit: String? = null
 )
+

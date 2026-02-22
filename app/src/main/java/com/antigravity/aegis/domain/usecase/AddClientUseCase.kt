@@ -2,6 +2,7 @@ package com.antigravity.aegis.domain.usecase
 
 import com.antigravity.aegis.domain.model.Client
 import com.antigravity.aegis.domain.repository.ClientRepository
+import com.antigravity.aegis.domain.util.Result
 import javax.inject.Inject
 
 class AddClientUseCase @Inject constructor(
@@ -10,13 +11,16 @@ class AddClientUseCase @Inject constructor(
     suspend operator fun invoke(client: Client): Result<Int> {
         return try {
             if (client.firstName.isBlank()) {
-                return Result.failure(IllegalArgumentException("Name cannot be empty"))
+                return Result.Error(IllegalArgumentException("Name cannot be empty"))
             }
-            // Add more validation logic here if needed
             val id = repository.insertClient(client)
-            Result.success(id)
+            when (id) {
+                is Result.Success -> id
+                is Result.Error -> id
+            }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 }
+

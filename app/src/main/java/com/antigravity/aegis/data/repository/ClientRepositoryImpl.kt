@@ -7,6 +7,7 @@ import com.antigravity.aegis.domain.model.Client
 import com.antigravity.aegis.domain.model.ClientCategory
 import com.antigravity.aegis.domain.model.ClientType
 import com.antigravity.aegis.domain.repository.ClientRepository
+import com.antigravity.aegis.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -25,16 +26,22 @@ class ClientRepositoryImpl @Inject constructor(
         return clientDao.getClientById(id).map { it?.toDomain() }
     }
 
-    override suspend fun insertClient(client: Client): Int {
-        return clientDao.insertClient(client.toEntity()).toInt()
+    override suspend fun insertClient(client: Client): Result<Int> = try {
+        Result.Success(clientDao.insertClient(client.toEntity()).toInt())
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
-    override suspend fun updateClient(client: Client) {
-        clientDao.updateClient(client.toEntity())
+    override suspend fun updateClient(client: Client): Result<Unit> = try {
+        Result.Success(clientDao.updateClient(client.toEntity()))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
-    override suspend fun deleteClient(client: Client) {
-        clientDao.deleteClient(client.toEntity())
+    override suspend fun deleteClient(client: Client): Result<Unit> = try {
+        Result.Success(clientDao.deleteClient(client.toEntity()))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
     override fun searchClients(query: String): Flow<List<Client>> {
@@ -49,8 +56,10 @@ class ClientRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateClientCategoria(clientId: Int, categoria: String) {
-        clientDao.updateClientCategoria(clientId, categoria)
+    override suspend fun updateClientCategoria(clientId: Int, categoria: String): Result<Unit> = try {
+        Result.Success(clientDao.updateClientCategoria(clientId, categoria))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
     override suspend fun getAllClientsSync(): List<Client> {
@@ -80,7 +89,7 @@ class ClientRepositoryImpl @Inject constructor(
             id = id,
             firstName = firstName,
             lastName = lastName,
-            tipoCliente = tipoCliente.name, // o name.lowercase().capitalize() si se prefiere formato visual
+            tipoCliente = tipoCliente.name,
             razonSocial = razonSocial,
             nifCif = nifCif,
             personaContacto = personaContacto,
@@ -96,3 +105,4 @@ class ClientRepositoryImpl @Inject constructor(
         )
     }
 }
+

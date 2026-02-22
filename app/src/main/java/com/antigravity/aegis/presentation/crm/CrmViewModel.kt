@@ -1,15 +1,25 @@
 package com.antigravity.aegis.presentation.crm
 
+import com.antigravity.aegis.R
+import com.antigravity.aegis.domain.model.CrmStatus
+
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
 import com.antigravity.aegis.data.local.entity.BudgetLineEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
-import com.antigravity.aegis.data.local.entity.ClientEntity
-import com.antigravity.aegis.domain.repository.CrmRepository
+import com.antigravity.aegis.domain.model.Client
+import com.antigravity.aegis.domain.model.ClientType
+import com.antigravity.aegis.domain.model.Address
+import com.antigravity.aegis.domain.model.ClientCategory
+import com.antigravity.aegis.domain.repository.ClientRepository
+import com.antigravity.aegis.domain.repository.TaskRepository
+import com.antigravity.aegis.domain.repository.DocumentRepository
 import com.antigravity.aegis.domain.repository.ProjectRepository
 import com.antigravity.aegis.domain.repository.BudgetRepository
 import com.antigravity.aegis.domain.repository.ExpenseRepository
 import com.antigravity.aegis.domain.reports.PdfGenerator
+import com.antigravity.aegis.domain.util.onError
+import com.antigravity.aegis.domain.util.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.antigravity.aegis.domain.transfer.DataTransferManager
 import com.antigravity.aegis.data.repository.AttachmentRepository
@@ -32,11 +42,14 @@ import androidx.lifecycle.viewModelScope
 
 @HiltViewModel
 class CrmViewModel @Inject constructor(
-    private val repository: CrmRepository,
+    private val clientRepository: ClientRepository,
+    private val taskRepository: TaskRepository,
+    private val documentRepository: DocumentRepository,
     private val projectRepository: ProjectRepository,
     private val budgetRepository: BudgetRepository,
     private val expenseRepository: ExpenseRepository,
     private val getProjectRealProfitUseCase: com.antigravity.aegis.domain.usecase.GetProjectRealProfitUseCase,
+
     private val pdfGenerator: PdfGenerator,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val transferManager: DataTransferManager,
@@ -57,40 +70,70 @@ class CrmViewModel @Inject constructor(
     // --- Clients ---
     // We combine the search query and the filter type.
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val allClients: StateFlow<List<ClientEntity>> = combine(
+    val allClients: StateFlow<List<Client>> = combine(
+
         _searchQuery,
         _filterType
     ) { query, type ->
         Pair(query, type)
     }.flatMapLatest { (query, type) ->
         val sourceFlow = if (query.length >= 3) {
-            repository.searchClients(query)
+            clientRepository.searchClients(query)
         } else {
-            repository.getAllClients()
+            clientRepository.getAllClients()
         }
+
         
         combine(sourceFlow, kotlinx.coroutines.flow.flowOf(type)) { clients, filterType ->
-             if (filterType == null || filterType == "Todos") {
+             if (filterType == null) {
                  clients
              } else {
-                 clients.filter { client -> client.tipoCliente == filterType }
+                 val targetType = when(filterType) {
+                     "Particular" -> ClientType.PARTICULAR
+                     "Empresa" -> ClientType.EMPRESA
+                     else -> null
+                 }
+                 if (targetType != null) {
+                     clients.filter { client -> client.tipoCliente == targetType }
+                 } else {
+                     clients
+                 }
              }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+
     fun setSearchQuery(query: String) { _searchQuery.value = query }
     fun setFilterType(type: String?) { _filterType.value = type }
+
+    // --- Project Filters ---
+    private val _selectedProjectStatuses = MutableStateFlow(setOf(CrmStatus.ACTIVE, CrmStatus.DRAFT, CrmStatus.SENT))
+    val selectedProjectStatuses = _selectedProjectStatuses.asStateFlow()
+
+    fun toggleProjectStatusFilter(status: String) {
+        _selectedProjectStatuses.value = if (_selectedProjectStatuses.value.contains(status)) {
+            _selectedProjectStatuses.value - status
+        } else {
+            _selectedProjectStatuses.value + status
+        }
+    }
 
     // --- Projects ---
     val activeProjects: StateFlow<List<ProjectEntity>> = projectRepository.getActiveProjects()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val activeRootProjects: StateFlow<List<ProjectEntity>> = projectRepository.getActiveRootProjects()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val activeRootProjects: StateFlow<List<ProjectEntity>> = combine(
+        projectRepository.getActiveRootProjects(), // Idealmente esto ahora devuelve todos los que no esten archivados si cambiamos la query, o podemos filtrar en memoria.
+        _selectedProjectStatuses
+    ) { projects, selectedStatuses ->
+        projects.filter { selectedStatuses.contains(it.status) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // --- Selection State ---
-    private val _selectedClient = MutableStateFlow<ClientEntity?>(null)
-    val selectedClient: StateFlow<ClientEntity?> = _selectedClient
+    private val _selectedClient = MutableStateFlow<Client?>(null)
+    val selectedClient: StateFlow<Client?> = _selectedClient
+
 
     private val _selectedProject = MutableStateFlow<ProjectEntity?>(null)
     val selectedProject: StateFlow<ProjectEntity?> = _selectedProject
@@ -120,9 +163,9 @@ class CrmViewModel @Inject constructor(
             _transferState.value = TransferState.Loading
             val result = transferManager.exportData(DataTransferManager.EntityType.CLIENTS)
             result.onSuccess { file ->
-                 _transferState.value = TransferState.Success("Exported to ${file.absolutePath}")
+                 _transferState.value = TransferState.Success(resId = R.string.crm_export_client_success, arg = file.absolutePath)
             }.onFailure {
-                 _transferState.value = TransferState.Error(it.message ?: "Export failed")
+                 _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
     }
@@ -144,9 +187,9 @@ class CrmViewModel @Inject constructor(
             _transferState.value = TransferState.Loading
             val result = transferManager.importData(DataTransferManager.EntityType.CLIENTS, uri, wipe)
             result.onSuccess {
-                 _transferState.value = TransferState.Success("Import Successful")
+                 _transferState.value = TransferState.Success(resId = R.string.crm_import_client_success)
             }.onFailure {
-                 _transferState.value = TransferState.Error(it.message ?: "Import failed")
+                 _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
     }
@@ -158,8 +201,8 @@ class CrmViewModel @Inject constructor(
     sealed class TransferState {
         object Idle : TransferState()
         object Loading : TransferState()
-        data class Success(val message: String) : TransferState()
-        data class Error(val message: String) : TransferState()
+        data class Success(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
+        data class Error(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
         data class ValidationError(val errors: List<String>) : TransferState()
         data class ValidationSuccess(val uri: android.net.Uri) : TransferState()
     }
@@ -184,32 +227,36 @@ class CrmViewModel @Inject constructor(
         notas: String?
     ) {
         viewModelScope.launch {
-            val client = ClientEntity(
+            val client = Client(
                 firstName = firstName,
                 lastName = lastName,
-                tipoCliente = tipoCliente,
+                tipoCliente = if (tipoCliente == "Empresa") ClientType.EMPRESA else ClientType.PARTICULAR,
                 razonSocial = razonSocial,
                 nifCif = nifCif,
                 personaContacto = personaContacto,
                 phone = phone,
                 email = email,
-                calle = calle,
-                numero = numero,
-                piso = piso,
-                poblacion = poblacion,
-                codigoPostal = codigoPostal,
+                address = Address(
+                    calle = calle,
+                    numero = numero,
+                    piso = piso,
+                    poblacion = poblacion,
+                    codigoPostal = codigoPostal
+                ),
                 notas = notas,
-                categoria = "Potencial" // Default
+                categoria = ClientCategory.POTENTIAL
             )
-            repository.createClient(client)
+            clientRepository.insertClient(client)
+
         }
     }
 
-    fun updateClient(client: ClientEntity) {
+    fun updateClient(client: Client) {
         viewModelScope.launch {
-            repository.createClient(client) // Room Insert(OnConflictStrategy.REPLACE) acts as update
+            clientRepository.insertClient(client) // Room Insert(OnConflictStrategy.REPLACE) acts as update
         }
     }
+
 
     fun uploadDocument(uri: Uri) {
         val client = _selectedClient.value ?: return
@@ -246,7 +293,7 @@ class CrmViewModel @Inject constructor(
                     size = size,
                     dateAdded = System.currentTimeMillis()
                 )
-                repository.addDocument(doc)
+                documentRepository.addDocument(doc)
             } catch (e: Exception) {
                 e.printStackTrace()
                 // Handle error
@@ -262,20 +309,17 @@ class CrmViewModel @Inject constructor(
     
     fun deleteDocument(document: DocumentEntity) {
         viewModelScope.launch {
-            repository.deleteDocument(document)
+            documentRepository.deleteDocument(document)
             attachmentRepository.deleteAttachment(document.fileName)
         }
     }
 
     fun createProject(clientId: Int, name: String, status: String, startDate: Long, endDate: Long?, category: String? = null) {
         viewModelScope.launch {
-            val projectStatus = try {
-                com.antigravity.aegis.data.local.entity.ProjectStatus.valueOf(status.uppercase())
-            } catch (e: Exception) {
-                com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE
-            }
-            val project = ProjectEntity(clientId = clientId, name = name, status = projectStatus, startDate = startDate, endDate = endDate, category = category)
+            val validStatus = if (CrmStatus.isValid(status)) status else CrmStatus.DRAFT
+            val project = ProjectEntity(clientId = clientId, name = name, status = validStatus, startDate = startDate, endDate = endDate, category = category)
             projectRepository.insertProject(project)
+                .onError { android.util.Log.e("CrmViewModel", "Error al crear proyecto: ${it.message}") }
         }
     }
 
@@ -297,19 +341,19 @@ class CrmViewModel @Inject constructor(
                 description = "",
                 estimatedDuration = estimatedDuration
             ) 
-            repository.createTask(task)
+            taskRepository.insertTask(task)
         }
     }
     
     fun updateTaskStatus(task: TaskEntity, isCompleted: Boolean) {
          viewModelScope.launch {
-            repository.updateTaskStatus(task.id, isCompleted)
+            taskRepository.updateTaskStatus(task.id, isCompleted)
         }
     }
     // Navigation and Selection
     fun selectClient(clientId: Int) {
         viewModelScope.launch {
-            _selectedClient.value = repository.getClientById(clientId)
+            _selectedClient.value = clientRepository.getClientById(clientId).firstOrNull()
             
             launch {
                 projectRepository.getProjectsByClient(clientId).collect { projects ->
@@ -318,10 +362,11 @@ class CrmViewModel @Inject constructor(
             }
             
             launch {
-                repository.getDocumentsForClient(clientId).collect { docs ->
+                documentRepository.getDocumentsForClient(clientId).collect { docs ->
                     _clientDocuments.value = docs
                 }
             }
+
         }
     }
 
@@ -348,7 +393,7 @@ class CrmViewModel @Inject constructor(
             // Since UseCase pulls from DB, we might want to observe DB changes.
             // But UseCase uses multiple repos. 
             // Better approach: Trigger recalculation when relevant flows emit.
-            combine(_projectBudgets, _projectExpenses) { _, _ -> 
+            combine(_projectBudgets, _projectExpenses) { _, _: Any -> 
                 // Recalculate
                 try {
                    val profitability = getProjectRealProfitUseCase(project.id)
@@ -370,12 +415,12 @@ class CrmViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), FinancialSummary())
     
     // Archived Projects
-    val archivedProjects: StateFlow<List<ProjectEntity>> = projectRepository.getProjectsByStatus(com.antigravity.aegis.data.local.entity.ProjectStatus.ARCHIVED.name)
+    val archivedProjects: StateFlow<List<ProjectEntity>> = projectRepository.getProjectsByStatus(CrmStatus.ARCHIVED)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun reactivateProject(projectId: Int) {
         viewModelScope.launch {
-            projectRepository.updateProjectStatus(projectId, com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE.name)
+            projectRepository.updateProjectStatus(projectId, CrmStatus.ACTIVE)
         }
     }
 
@@ -384,10 +429,11 @@ class CrmViewModel @Inject constructor(
             _selectedProject.value = projectRepository.getProjectById(projectId)
             // Fetch tasks
             launch {
-                repository.getTasksForProject(projectId).collect { tasks ->
+                taskRepository.getTasksByProject(projectId).collect { tasks ->
                     _projectTasks.value = tasks
                 }
             }
+
             // Fetch budgets
             launch {
                 budgetRepository.getQuotesByProject(projectId).collect { budgets ->
@@ -434,7 +480,7 @@ class CrmViewModel @Inject constructor(
                 clientId = parent.clientId,
                 parentProjectId = parentProjectId,
                 name = name,
-                status = com.antigravity.aegis.data.local.entity.ProjectStatus.ACTIVE,
+                status = CrmStatus.ACTIVE,
                 startDate = startDate,
                 materials = materials,
                 price = price,
@@ -442,6 +488,7 @@ class CrmViewModel @Inject constructor(
                 estimatedTimeUnit = estimatedTimeUnit
             )
             projectRepository.insertProject(subProject)
+                .onError { android.util.Log.e("CrmViewModel", "Error al crear subproyecto: ${it.message}") }
         }
     }
 
@@ -461,20 +508,19 @@ class CrmViewModel @Inject constructor(
     val templates: StateFlow<List<ProjectEntity>> = projectRepository.getTemplates()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val defaultCategories = listOf(
-        "Reformas", 
-        "Marketing Digital", 
-        "Sistemas", 
-        "Ventas", 
-        "Administración", 
-        "Otros"
-    )
-
     val templateCategories: StateFlow<List<String>> = projectRepository.getAllCategories()
         .map { dbCategories -> 
-            (dbCategories + defaultCategories).distinct().sorted()
+            val localizedDefaults = listOf(
+                context.getString(R.string.crm_template_cat_renovation),
+                context.getString(R.string.crm_template_cat_marketing),
+                context.getString(R.string.crm_template_cat_systems),
+                context.getString(R.string.crm_template_cat_sales),
+                context.getString(R.string.crm_template_cat_admin),
+                context.getString(R.string.filter_others)
+            )
+            (dbCategories + localizedDefaults).distinct().sorted()
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), defaultCategories.sorted())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun saveAsTemplate(projectId: Int, templateName: String, category: String? = null) {
         viewModelScope.launch {
@@ -492,17 +538,17 @@ class CrmViewModel @Inject constructor(
         viewModelScope.launch {
             _transferState.value = TransferState.Loading
             exportTemplateUseCase(templateId, uri)
-                .onSuccess { _transferState.value = TransferState.Success("Template Exported") }
-                .onFailure { _transferState.value = TransferState.Error(it.message ?: "Export Failed") }
+                .onSuccess { _transferState.value = TransferState.Success(resId = R.string.crm_template_export_success) }
+                .onError { _transferState.value = TransferState.Error(resId = R.string.general_unknown_error) }
         }
     }
 
     fun importTemplate(uri: Uri) {
         viewModelScope.launch {
-             _transferState.value = TransferState.Loading
+            _transferState.value = TransferState.Loading
             importTemplateUseCase(uri)
-                .onSuccess { _transferState.value = TransferState.Success("Template Imported") }
-                .onFailure { _transferState.value = TransferState.Error(it.message ?: "Import Failed") }
+                .onSuccess { _transferState.value = TransferState.Success(resId = R.string.crm_template_import_success) }
+                .onError { _transferState.value = TransferState.Error(resId = R.string.general_unknown_error) }
         }
     }
 }

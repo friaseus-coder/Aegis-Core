@@ -8,7 +8,7 @@ import com.antigravity.aegis.R
 import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.domain.expenses.ExportManager
 import com.antigravity.aegis.domain.expenses.OcrManager
-import com.antigravity.aegis.domain.repository.CrmRepository
+import com.antigravity.aegis.domain.repository.ExpenseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import com.antigravity.aegis.domain.transfer.DataTransferManager
 
 @HiltViewModel
 class ExpensesViewModel @Inject constructor(
-    private val repository: CrmRepository,
+    private val expenseRepository: ExpenseRepository,
     private val projectRepository: com.antigravity.aegis.domain.repository.ProjectRepository,
     private val budgetRepository: com.antigravity.aegis.domain.repository.BudgetRepository,
     private val ocrManager: OcrManager,
@@ -43,9 +43,9 @@ class ExpensesViewModel @Inject constructor(
             _transferState.value = TransferState.Loading
             val result = transferManager.exportData(DataTransferManager.EntityType.EXPENSES)
             result.onSuccess { file ->
-                 _transferState.value = TransferState.Success("Exported to ${file.absolutePath}")
+                 _transferState.value = TransferState.Success(resId = com.antigravity.aegis.R.string.data_export_success_path, arg = file.absolutePath)
             }.onFailure {
-                 _transferState.value = TransferState.Error(it.message ?: "Export failed")
+                 _transferState.value = TransferState.Error(message = it.message, resId = com.antigravity.aegis.R.string.data_export_failed)
             }
         }
     }
@@ -67,9 +67,9 @@ class ExpensesViewModel @Inject constructor(
             _transferState.value = TransferState.Loading
             val result = transferManager.importData(DataTransferManager.EntityType.EXPENSES, uri, wipe)
             result.onSuccess {
-                 _transferState.value = TransferState.Success(context.getString(R.string.data_import_success))
+                 _transferState.value = TransferState.Success(resId = com.antigravity.aegis.R.string.data_import_success)
             }.onFailure {
-                 _transferState.value = TransferState.Error(it.message ?: context.getString(R.string.data_import_db_error))
+                 _transferState.value = TransferState.Error(message = it.message, resId = com.antigravity.aegis.R.string.data_import_db_error)
             }
         }
     }
@@ -81,8 +81,8 @@ class ExpensesViewModel @Inject constructor(
     sealed class TransferState {
         object Idle : TransferState()
         object Loading : TransferState()
-        data class Success(val message: String) : TransferState()
-        data class Error(val message: String) : TransferState()
+        data class Success(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
+        data class Error(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
         data class ValidationError(val errors: List<String>) : TransferState()
         data class ValidationSuccess(val uri: Uri) : TransferState()
     }
@@ -91,7 +91,7 @@ class ExpensesViewModel @Inject constructor(
     val activeProjects: StateFlow<List<com.antigravity.aegis.data.local.entity.ProjectEntity>> = projectRepository.getAllProjects()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val allExpenses: StateFlow<List<ExpenseEntity>> = repository.getAllExpenses()
+    val allExpenses: StateFlow<List<ExpenseEntity>> = expenseRepository.getAllExpenses()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _scannedData = MutableStateFlow<OcrManager.ExtractedData?>(null)
@@ -109,11 +109,29 @@ class ExpensesViewModel @Inject constructor(
     
     fun clearScannedData() {
         _scannedData.value = null
+        ocrManager.cleanupCacheFiles(context)
     }
 
     fun saveExpense(date: Long, amount: Double, merchant: String, imageUri: Uri?, category: String, projectId: Int?) {
         viewModelScope.launch {
-            val imagePath = imageUri?.toString() // Ideally copy to internal storage
+            var imagePath: String? = imageUri?.toString()
+            
+            // Persist image if it's in cache
+            if (imageUri != null && imageUri.toString().contains("cache")) {
+                try {
+                    val inputStream = context.contentResolver.openInputStream(imageUri)
+                    val fileName = "expense_${System.currentTimeMillis()}.jpg"
+                    val file = File(context.filesDir, fileName)
+                    inputStream?.use { input ->
+                        file.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    imagePath = Uri.fromFile(file).toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
             
             val expense = ExpenseEntity(
                 date = date,
@@ -123,7 +141,7 @@ class ExpensesViewModel @Inject constructor(
                 category = category,
                 projectId = projectId
             )
-            repository.createExpense(expense)
+            expenseRepository.insertExpense(expense)
             clearScannedData()
         }
     }
@@ -157,17 +175,12 @@ class ExpensesViewModel @Inject constructor(
                     category = "${expense.category} (Reparto)",
                     merchantName = "${expense.merchantName ?: "Gasto"} [${String.format("%.1f", ratio * 100)}%]"
                 )
-                repository.createExpense(childExpense)
+                expenseRepository.insertExpense(childExpense)
             }
             
-            // 4. Update Original as "Distributed" or Delete? 
-            // For now, let's mark it as Distributed by setting status
+            // 4. Update Original as "Distributed"
             val updatedOriginal = expense.copy(status = "Distributed")
-            repository.updateExpense(updatedOriginal) 
-            // Note: UpdateExpense needs to be in Repository. Assuming it exists or I use create/insert with conflict replace.
-            // If repository doesn't have update, I might just leave it or duplicate. 
-            // Assuming createExpense handles insert. I should probably add updateExpense to repo if missing. 
-            // For safety, I'll just leave it for now or assume insertOnConflictReplace.
+            expenseRepository.updateExpense(updatedOriginal)
         }
     }
 
@@ -189,18 +202,18 @@ class ExpensesViewModel @Inject constructor(
                 calendar.add(Calendar.MILLISECOND, -1)
                 val endDate = calendar.timeInMillis
                 
-                val expenses = repository.getExpensesByDateRange(startDate, endDate)
+                val expenses = expenseRepository.getExpensesByDateRangeSync(startDate, endDate)
                 
                 if (expenses.isEmpty()) {
-                    _exportStatus.value = "No expenses found for this quarter."
+                    _exportStatus.value = context.getString(R.string.data_no_expenses_quarter)
                     return@launch
                 }
 
                 val zipFile = exportManager.exportToZip(context, expenses, startDate, endDate)
-                _exportStatus.value = "Export ready: ${zipFile.absolutePath}"
+                _exportStatus.value = context.getString(R.string.data_export_ready, zipFile.absolutePath)
                 // Real app would trigger Sharing Intent here
             } catch (e: Exception) {
-               _exportStatus.value = "Error: ${e.message}"
+               _exportStatus.value = context.getString(R.string.general_error_prefix, e.message ?: "")
             }
         }
     }

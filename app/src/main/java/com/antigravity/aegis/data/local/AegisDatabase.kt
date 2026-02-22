@@ -22,6 +22,7 @@ import com.antigravity.aegis.data.local.dao.BudgetDao
 import com.antigravity.aegis.data.local.dao.ExpenseDao
 import com.antigravity.aegis.data.local.dao.TaskDao
 import com.antigravity.aegis.data.local.entity.UserConfig
+import com.antigravity.aegis.data.local.entity.PasswordEntity
 
 @Database(
     entities = [
@@ -36,9 +37,10 @@ import com.antigravity.aegis.data.local.entity.UserConfig
         UserConfig::class,
         DocumentEntity::class,
         BudgetLineEntity::class,
-        BudgetLogEntity::class
+        BudgetLogEntity::class,
+        PasswordEntity::class
     ],
-    version = 27,
+    version = 28,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -52,7 +54,13 @@ abstract class AegisDatabase : RoomDatabase() {
     abstract fun budgetDao(): BudgetDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun taskDao(): TaskDao
+    abstract fun passwordDao(): com.antigravity.aegis.data.local.dao.PasswordDao
     companion object {
+        val MIGRATION_27_28 = object : androidx.room.migration.Migration(27, 28) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT NOT NULL, username TEXT NOT NULL, encryptedPassword TEXT NOT NULL, website TEXT, notes TEXT, lastModified INTEGER NOT NULL)")
+            }
+        }
         val MIGRATION_18_19 = object : androidx.room.migration.Migration(18, 19) {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE clients ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0")

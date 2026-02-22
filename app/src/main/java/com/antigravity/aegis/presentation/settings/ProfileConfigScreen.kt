@@ -114,7 +114,7 @@ fun ProfileConfigScreen(
                                     .data(selectedImageUri)
                                     .build()
                             ),
-                            contentDescription = "Profile",
+                            contentDescription = stringResource(R.string.cd_profile_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -126,7 +126,7 @@ fun ProfileConfigScreen(
                                     .data(file)
                                     .build()
                             ),
-                            contentDescription = "Profile",
+                            contentDescription = stringResource(R.string.cd_profile_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -149,7 +149,7 @@ fun ProfileConfigScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Icon(Icons.Default.CameraAlt, contentDescription = "Change Photo")
+                    Icon(Icons.Default.CameraAlt, contentDescription = stringResource(R.string.cd_change_photo))
                 }
             }
             

@@ -6,6 +6,7 @@ import com.antigravity.aegis.data.local.AegisDatabase
 import com.antigravity.aegis.data.local.entity.*
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.domain.repository.BackupRepository
+import com.antigravity.aegis.domain.util.Result
 import com.google.gson.Gson
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +44,7 @@ class BackupRepositoryImpl @Inject constructor(
             val mileageLogs = database.crmDao().getAllMileageLogsSync()
             val userConfigs = database.userConfigDao().getAllUserConfigsSync()
             val documents = database.documentDao().getAllDocumentsSync()
-            
+
             val data = BackupData(
                 users = users,
                 clients = clients,
@@ -56,48 +57,45 @@ class BackupRepositoryImpl @Inject constructor(
                 documents = documents,
                 userConfigs = userConfigs
             )
-            
-            Result.success(gson.toJson(data)) 
+
+            Result.Success(gson.toJson(data))
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 
     override suspend fun restoreBackupJson(json: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val backupData = gson.fromJson(json, BackupData::class.java)
-            
-            // Re-implementing with withTransaction for suspend support
-            // androidx.room.withTransaction(database) {
-            // Note: withTransaction was failing with suspend errors, running sequentially in IO context for now.
-                // Clear
-                database.crmDao().deleteAllTasks()
-                database.crmDao().deleteAllProjects()
-                database.crmDao().deleteAllQuotes()
-                database.crmDao().deleteAllExpenses()
-                database.crmDao().deleteAllProducts()
-                database.crmDao().deleteAllMileageLogs()
-                database.documentDao().deleteAllDocuments()
-                database.crmDao().deleteAllClients()
-                database.userConfigDao().deleteAllUserConfigs()
-                database.userEntityDao().deleteAllUsers()
-                
-                // Insert
-                if (backupData.users.isNotEmpty()) database.userEntityDao().insertUsers(backupData.users)
-                if (backupData.clients.isNotEmpty()) database.crmDao().insertClients(backupData.clients)
-                if (backupData.projects.isNotEmpty()) database.crmDao().insertProjects(backupData.projects)
-                if (backupData.tasks.isNotEmpty()) database.crmDao().insertTasks(backupData.tasks)
-                if (backupData.quotes.isNotEmpty()) database.crmDao().insertQuotes(backupData.quotes)
-                if (backupData.expenses.isNotEmpty()) database.crmDao().insertExpenses(backupData.expenses)
-                if (backupData.products.isNotEmpty()) database.crmDao().insertProducts(backupData.products)
-                if (backupData.mileageLogs.isNotEmpty()) database.crmDao().insertMileageLogs(backupData.mileageLogs)
-                if (backupData.documents.isNotEmpty()) database.documentDao().insertDocuments(backupData.documents)
-                if (backupData.userConfigs.isNotEmpty()) database.userConfigDao().insertUserConfigs(backupData.userConfigs)
-            // }
-            
-            Result.success(Unit)
+
+            // Clear
+            database.crmDao().deleteAllTasks()
+            database.crmDao().deleteAllProjects()
+            database.crmDao().deleteAllQuotes()
+            database.crmDao().deleteAllExpenses()
+            database.crmDao().deleteAllProducts()
+            database.crmDao().deleteAllMileageLogs()
+            database.documentDao().deleteAllDocuments()
+            database.crmDao().deleteAllClients()
+            database.userConfigDao().deleteAllUserConfigs()
+            database.userEntityDao().deleteAllUsers()
+
+            // Insert
+            if (backupData.users.isNotEmpty()) database.userEntityDao().insertUsers(backupData.users)
+            if (backupData.clients.isNotEmpty()) database.crmDao().insertClients(backupData.clients)
+            if (backupData.projects.isNotEmpty()) database.crmDao().insertProjects(backupData.projects)
+            if (backupData.tasks.isNotEmpty()) database.crmDao().insertTasks(backupData.tasks)
+            if (backupData.quotes.isNotEmpty()) database.crmDao().insertQuotes(backupData.quotes)
+            if (backupData.expenses.isNotEmpty()) database.crmDao().insertExpenses(backupData.expenses)
+            if (backupData.products.isNotEmpty()) database.crmDao().insertProducts(backupData.products)
+            if (backupData.mileageLogs.isNotEmpty()) database.crmDao().insertMileageLogs(backupData.mileageLogs)
+            if (backupData.documents.isNotEmpty()) database.documentDao().insertDocuments(backupData.documents)
+            if (backupData.userConfigs.isNotEmpty()) database.userConfigDao().insertUserConfigs(backupData.userConfigs)
+
+            Result.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 }
+

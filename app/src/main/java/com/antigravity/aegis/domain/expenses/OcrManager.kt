@@ -68,6 +68,16 @@ class OcrManager @Inject constructor() {
         return null
     }
 
+    fun cleanupCacheFiles(context: Context) {
+        try {
+            val cacheDir = context.cacheDir
+            val files = cacheDir.listFiles { _, name -> name.startsWith("scan_") && name.endsWith(".jpg") }
+            files?.forEach { it.delete() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     data class ExtractedData(
         val rawText: String,
         val totalAmount: Double?,

@@ -3,6 +3,7 @@ package com.antigravity.aegis.data.repository
 import com.antigravity.aegis.data.local.dao.TaskDao
 import com.antigravity.aegis.data.local.entity.TaskEntity
 import com.antigravity.aegis.domain.repository.TaskRepository
+import com.antigravity.aegis.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -14,16 +15,22 @@ class TaskRepositoryImpl @Inject constructor(
     private val taskDao: TaskDao
 ) : TaskRepository {
 
-    override suspend fun insertTask(task: TaskEntity): Long {
-        return taskDao.insertTask(task)
+    override suspend fun insertTask(task: TaskEntity): Result<Long> = try {
+        Result.Success(taskDao.insertTask(task))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
-    override suspend fun updateTask(task: TaskEntity) {
-        taskDao.updateTask(task)
+    override suspend fun updateTask(task: TaskEntity): Result<Unit> = try {
+        Result.Success(taskDao.updateTask(task))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
-    override suspend fun deleteTask(task: TaskEntity) {
-        taskDao.deleteTask(task)
+    override suspend fun deleteTask(task: TaskEntity): Result<Unit> = try {
+        Result.Success(taskDao.deleteTask(task))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
     override suspend fun getTaskById(id: Int): TaskEntity? {
@@ -38,11 +45,16 @@ class TaskRepositoryImpl @Inject constructor(
         return taskDao.getAllTasks()
     }
 
-    override suspend fun updateTaskStatus(taskId: Int, isCompleted: Boolean) {
-        taskDao.updateTaskStatus(taskId, isCompleted)
+    override suspend fun updateTaskStatus(taskId: Int, isCompleted: Boolean): Result<Unit> = try {
+        Result.Success(taskDao.updateTaskStatus(taskId, isCompleted))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
-    override suspend fun updateTaskStatusString(taskId: Int, status: String) {
-        taskDao.updateTaskStatusString(taskId, status)
+    override suspend fun updateTaskStatusString(taskId: Int, status: String): Result<Unit> = try {
+        Result.Success(taskDao.updateTaskStatusString(taskId, status))
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 }
+
