@@ -4,6 +4,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.antigravity.aegis.presentation.auth.*
@@ -28,23 +29,15 @@ fun NavGraphBuilder.authGraph(
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
-                onLogin = {
-                    navController.navigate(Screen.Dashboard.route) {
-                        popUpTo(Screen.AuthGraph.route) { inclusive = true }
-                    }
-                },
                 onNavigateToCreateUser = {
                     navController.navigate(Screen.CreateUser.route)
-                },
-                onNavigateToRecovery = {
-                    navController.navigate(Screen.Recovery.route)
                 },
                 onNavigateToImport = {
                     navController.navigate(Screen.ImportBackup.route)
                 },
-                onNavigateToChangePin = {
-                    navController.navigate(Screen.ChangePin.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                onLoginSuccess = {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.AuthGraph.route) { inclusive = true }
                     }
                 }
             )
@@ -57,45 +50,30 @@ fun NavGraphBuilder.authGraph(
             if (authState == AuthState.NeedsSetup && setupState != null) {
                 SetupScreen(
                     state = setupState!!,
-                    onConfirm = { name, language, pin, role, email, phone ->
-                        authViewModel.confirmSetup(name, language, pin, role, email, phone)
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
+                    onConfirm = { language ->
+                        authViewModel.setLanguage(language)
+                        authViewModel.confirmSetup() // Inicia el OS lock
                     }
                 )
-            } else {
-                CreateUserScreen(
-                    onUserCreated = { name, lang, pin ->
-                        authViewModel.createUser(name, lang, pin, null, null)
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.AuthGraph.route) { inclusive = true }
-                        }
-                    }
-                )
-            }
-        }
-
-        composable(Screen.Recovery.route) {
-            RecoveryScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToChangePin = {
-                    navController.navigate(Screen.ChangePin.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Screen.ChangePin.route) {
-            ChangePinScreen(
-                onPinChanged = {
+            } else if (authState == AuthState.Authenticated) {
+                androidx.compose.runtime.LaunchedEffect(Unit) {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.AuthGraph.route) { inclusive = true }
                     }
                 }
-            )
+            } else {
+                androidx.compose.foundation.layout.Box(
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            }
         }
+
+
+
+
     }
 }
 

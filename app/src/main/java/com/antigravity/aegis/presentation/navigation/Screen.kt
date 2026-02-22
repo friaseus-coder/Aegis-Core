@@ -30,7 +30,6 @@ sealed class Screen(val route: String) {
     }
     
     // Auth & Utilities
-    data object Recovery : Screen("recovery")
     data object ChangePin : Screen("change_pin")
     data object ImportBackup : Screen("import_backup")
     data object ModuleCustomization : Screen("module_customization")

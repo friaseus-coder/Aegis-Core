@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.data.local.dao.PasswordDao
 import com.antigravity.aegis.data.local.entity.PasswordEntity
+import com.antigravity.aegis.data.datasource.SecurityDataSource
 import com.antigravity.aegis.data.security.EncryptionKeyManager
 import com.antigravity.aegis.data.security.KeyCryptoManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +16,8 @@ import javax.inject.Inject
 class PasswordVaultViewModel @Inject constructor(
     private val passwordDao: PasswordDao,
     private val encryptionKeyManager: EncryptionKeyManager,
-    private val cryptoManager: KeyCryptoManager
+    private val cryptoManager: KeyCryptoManager,
+    private val securityDataSource: SecurityDataSource
 ) : ViewModel() {
 
     private val _allPasswords = passwordDao.getAllPasswords()
@@ -27,6 +29,14 @@ class PasswordVaultViewModel @Inject constructor(
 
     private val _decryptedPasswords = MutableStateFlow<Map<Int, String>>(emptyMap())
     val decryptedPasswords = _decryptedPasswords.asStateFlow()
+
+    private val _isDisclaimerAccepted = MutableStateFlow(securityDataSource.isVaultDisclaimerAccepted())
+    val isDisclaimerAccepted = _isDisclaimerAccepted.asStateFlow()
+
+    fun acceptDisclaimer() {
+        securityDataSource.setVaultDisclaimerAccepted(true)
+        _isDisclaimerAccepted.value = true
+    }
 
     fun unlockVault() {
         // Biometric auth would be triggered here in the UI, 

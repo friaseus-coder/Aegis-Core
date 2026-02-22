@@ -2,9 +2,7 @@ package com.antigravity.aegis.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.antigravity.aegis.data.local.dao.UserEntityDao
 import com.antigravity.aegis.data.local.dao.CrmDao
-import com.antigravity.aegis.data.local.entity.UserEntity
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
@@ -26,7 +24,6 @@ import com.antigravity.aegis.data.local.entity.PasswordEntity
 
 @Database(
     entities = [
-        UserEntity::class,
         ClientEntity::class,
         ProjectEntity::class,
         TaskEntity::class,
@@ -40,12 +37,11 @@ import com.antigravity.aegis.data.local.entity.PasswordEntity
         BudgetLogEntity::class,
         PasswordEntity::class
     ],
-    version = 28,
+    version = 30,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
 abstract class AegisDatabase : RoomDatabase() {
-    abstract fun userEntityDao(): UserEntityDao
     abstract fun clientDao(): com.antigravity.aegis.data.local.dao.ClientDao
     abstract fun crmDao(): CrmDao
     abstract fun userConfigDao(): UserConfigDao
@@ -56,6 +52,23 @@ abstract class AegisDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun passwordDao(): com.antigravity.aegis.data.local.dao.PasswordDao
     companion object {
+        val MIGRATION_29_30 = object : androidx.room.migration.Migration(29, 30) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                // Drop users table as we migrated to OS-Level authentication
+                database.execSQL("DROP TABLE IF EXISTS users")
+            }
+        }
+
+        val MIGRATION_28_29 = object : androidx.room.migration.Migration(28, 29) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                // Drop email and phone columns by recreating the table
+                database.execSQL("ALTER TABLE users RENAME TO users_old")
+                database.execSQL("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT NOT NULL, role TEXT NOT NULL, pin_hash TEXT, biometric_enabled INTEGER NOT NULL, price_per_km REAL NOT NULL, language TEXT NOT NULL, force_pin_change INTEGER NOT NULL)")
+                database.execSQL("INSERT INTO users (id, name, role, pin_hash, biometric_enabled, price_per_km, language, force_pin_change) SELECT id, name, role, pin_hash, biometric_enabled, price_per_km, language, force_pin_change FROM users_old")
+                database.execSQL("DROP TABLE users_old")
+            }
+        }
+
         val MIGRATION_27_28 = object : androidx.room.migration.Migration(27, 28) {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT NOT NULL, username TEXT NOT NULL, encryptedPassword TEXT NOT NULL, website TEXT, notes TEXT, lastModified INTEGER NOT NULL)")

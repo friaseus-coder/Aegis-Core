@@ -134,6 +134,8 @@ class PdfGenerator @Inject constructor() {
         paint.isFakeBoldText = true
         canvas.drawText("Total Amount: $${quote.totalAmount}", 50f, yPos, paint)
 
+        drawLegalFooter(canvas, pageInfo.pageWidth.toFloat(), pageInfo.pageHeight.toFloat())
+
         pdfDocument.finishPage(page)
 
         val directory = File(context.filesDir, "quotes")
@@ -150,5 +152,22 @@ class PdfGenerator @Inject constructor() {
         }
 
         return file
+    }
+
+    private fun drawLegalFooter(canvas: Canvas, pageWidth: Float, pageHeight: Float) {
+        val paint = Paint().apply {
+            color = Color.GRAY
+            textSize = 7f
+            isAntiAlias = true
+        }
+        val text = "Documento firmado electrónicamente de mutuo acuerdo mediante la plataforma Aegis. Esta firma tiene carácter de cortesía y no constituye un certificado digital cualificado."
+        
+        // Split text if it's too long for one line? 
+        // For A4 (595 points), 7f text is small enough if we use margins.
+        val margin = 50f
+        val x = margin
+        val y = pageHeight - 30f
+        
+        canvas.drawText(text, x, y, paint)
     }
 }

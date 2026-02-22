@@ -100,6 +100,8 @@ class PdfService @Inject constructor(
         }
         canvas.drawText("TOTAL: ${String.format("%.2f€", total)}", 400f, yPosition, totalPaint)
 
+        drawLegalFooter(canvas, pageInfo.pageWidth.toFloat(), pageInfo.pageHeight.toFloat())
+
         document.finishPage(page)
 
         // Save
@@ -154,6 +156,8 @@ class PdfService @Inject constructor(
         y += 20f
         canvas.drawText("TOTAL: ${String.format("%.2f€", totalAmount)}", 400f, y, titlePaint)
         
+        drawLegalFooter(canvas, pageInfo.pageWidth.toFloat(), pageInfo.pageHeight.toFloat())
+
         document.finishPage(page1)
         
         // Could ensure "Dossier" pages here for images
@@ -175,5 +179,18 @@ class PdfService @Inject constructor(
 
     private fun formatDate(timestamp: Long): String {
         return SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
+    }
+
+    private fun drawLegalFooter(canvas: Canvas, pageWidth: Float, pageHeight: Float) {
+        val paint = Paint().apply {
+            color = Color.GRAY
+            textSize = 7f
+            isAntiAlias = true
+        }
+        val text = "Documento firmado electrónicamente de mutuo acuerdo mediante la plataforma Aegis. Esta firma tiene carácter de cortesía y no constituye un certificado digital cualificado."
+        val margin = 50f
+        val x = margin
+        val y = pageHeight - 30f
+        canvas.drawText(text, x, y, paint)
     }
 }

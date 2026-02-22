@@ -9,8 +9,11 @@ class FinalizeSetupUseCase @Inject constructor(
     private val authRepository: AuthRepository,
     private val encryptionKeyManager: EncryptionKeyManager
 ) {
-    suspend operator fun invoke(name: String, language: String, pin: String, role: com.antigravity.aegis.data.local.entity.UserRole, email: String?, phone: String?, seedPhrase: List<String>, masterKey: ByteArray): Result<Unit> {
-        return when (val saveResult = authRepository.createAdmin(name, language, pin, role, email, phone, seedPhrase, masterKey)) {
+    suspend operator fun invoke(
+        masterKey: ByteArray,
+        cipher: javax.crypto.Cipher
+    ): Result<Unit> {
+        return when (val saveResult = authRepository.finalizeSetup(masterKey, cipher)) {
             is Result.Success -> {
                 encryptionKeyManager.setMasterKey(masterKey)
                 Result.Success(Unit)

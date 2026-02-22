@@ -18,56 +18,22 @@ class SecurityDataSource @Inject constructor(
     }
 
     companion object {
-        private const val KEY_PIN_WRAPPED_MK_PREFIX = "pin_wrapped_mk_"
-        private const val KEY_RECOVERY_WRAPPED_MK = "recovery_wrapped_mk"
+        private const val KEY_OS_WRAPPED_MK = "os_wrapped_mk"
         private const val KEY_IS_SETUP_DONE = "is_setup_done"
+        private const val KEY_VAULT_DISCLAIMER_ACCEPTED = "vault_disclaimer_accepted"
     }
 
-    fun savePinWrappedMk(userId: Int, wrappedKey: ByteArray) {
+    fun saveOsWrappedMk(wrappedKey: ByteArray) {
         val encoded = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
-        sharedPreferences.edit().putString(getPinnedWrappedKey(userId), encoded).apply()
+        sharedPreferences.edit().putString(KEY_OS_WRAPPED_MK, encoded).apply()
     }
 
-    fun getPinWrappedMk(userId: Int): ByteArray? {
-        val encoded = sharedPreferences.getString(getPinnedWrappedKey(userId), null) ?: return null
+    fun getOsWrappedMk(): ByteArray? {
+        val encoded = sharedPreferences.getString(KEY_OS_WRAPPED_MK, null) ?: return null
         return Base64.decode(encoded, Base64.NO_WRAP)
     }
 
-    private fun getPinnedWrappedKey(userId: Int) = "${KEY_PIN_WRAPPED_MK_PREFIX}$userId"
 
-    fun saveRecoveryWrappedMk(wrappedKey: ByteArray) {
-        val encoded = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
-        sharedPreferences.edit().putString(KEY_RECOVERY_WRAPPED_MK, encoded).apply()
-    }
-
-    fun getRecoveryWrappedMk(): ByteArray? {
-        val encoded = sharedPreferences.getString(KEY_RECOVERY_WRAPPED_MK, null) ?: return null
-        return Base64.decode(encoded, Base64.NO_WRAP)
-    }
-
-    fun saveBiometricWrappedMk(userId: Int, wrappedKey: ByteArray) {
-        val encoded = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
-        sharedPreferences.edit().putString(getBiometricWrappedKey(userId), encoded).apply()
-    }
-
-    fun getBiometricWrappedMk(userId: Int): ByteArray? {
-        val encoded = sharedPreferences.getString(getBiometricWrappedKey(userId), null) ?: return null
-        return Base64.decode(encoded, Base64.NO_WRAP)
-    }
-
-    private fun getBiometricWrappedKey(userId: Int) = "biometric_wrapped_mk_$userId"
-    
-    fun saveEmailPhoneWrappedMk(userId: Int, wrappedKey: ByteArray) {
-        val encoded = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
-        sharedPreferences.edit().putString(getEmailPhoneWrappedKey(userId), encoded).apply()
-    }
-
-    fun getEmailPhoneWrappedMk(userId: Int): ByteArray? {
-        val encoded = sharedPreferences.getString(getEmailPhoneWrappedKey(userId), null) ?: return null
-        return Base64.decode(encoded, Base64.NO_WRAP)
-    }
-
-    private fun getEmailPhoneWrappedKey(userId: Int) = "email_phone_wrapped_mk_$userId"
 
     fun setSetupDone(isDone: Boolean) {
         sharedPreferences.edit().putBoolean(KEY_IS_SETUP_DONE, isDone).apply()
@@ -75,5 +41,13 @@ class SecurityDataSource @Inject constructor(
     
     fun isSetupDone(): Boolean {
         return sharedPreferences.getBoolean(KEY_IS_SETUP_DONE, false)
+    }
+
+    fun setVaultDisclaimerAccepted(accepted: Boolean) {
+        sharedPreferences.edit().putBoolean(KEY_VAULT_DISCLAIMER_ACCEPTED, accepted).apply()
+    }
+
+    fun isVaultDisclaimerAccepted(): Boolean {
+        return sharedPreferences.getBoolean(KEY_VAULT_DISCLAIMER_ACCEPTED, false)
     }
 }

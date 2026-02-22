@@ -1,0 +1,123 @@
+﻿> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+
+> Task :app:compileDebugKotlin
+./gradlew : e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/AuthRepositoryImpl.kt:7:21 
+Conflicting import, imported name 'Inject' is ambiguous
+En línea: 1 Carácter: 1
++ ./gradlew assembleDebug > build_err3.txt 2>&1; Get-Content build_err3 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (e: file:///C:/U...t' is ambiguous:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/AuthRepositoryImpl.kt:9:21 Conflicting import, 
+imported name 'Inject' is ambiguous
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/AuthRepositoryImpl.kt:12:1 Class 
+'AuthRepositoryImpl' is not abstract and does not implement abstract member public abstract fun getAllUsers(): Flow<List<[Error type: Unresolved type for UserEntity]>> defined in 
+com.antigravity.aegis.domain.repository.AuthRepository
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/AuthRepositoryImpl.kt:42:5 'updateOsKey' 
+overrides nothing
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/AuthRepositoryImpl.kt:61:5 'loginWithOs' 
+overrides nothing
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/BackupRepositoryImpl.kt:24:21 Unresolved 
+reference: UserEntity
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/BackupRepositoryImpl.kt:46:34 Unresolved 
+reference: userEntityDao
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/BackupRepositoryImpl.kt:90:22 Unresolved 
+reference: userEntityDao
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/data/repository/BackupRepositoryImpl.kt:93:57 Unresolved 
+reference: userEntityDao
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/repository/AuthRepository.kt:10:34 Unresolved 
+reference: UserEntity
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/repository/AuthRepository.kt:11:43 Unresolved 
+reference: UserEntity
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/repository/AuthRepository.kt:15:80 Unresolved 
+reference: UserRole
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/repository/AuthRepository.kt:15:146 Unresolved 
+reference: UserEntity
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/repository/AuthRepository.kt:18:79 Unresolved 
+reference: UserRole
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/repository/AuthRepository.kt:18:119 Unresolved 
+reference: UserEntity
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/domain/repository/AuthRepository.kt:20:51 Unresolved 
+reference: UserRole
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/auth/AuthViewModel.kt:122:59 Unresolved 
+reference: loginWithOs
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/auth/AuthViewModel.kt:123:32 One type argument 
+expected. Use 'Success<*>' if you don't want to pass type arguments
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/auth/ChangePinScreen.kt:90:31 Unresolved 
+reference: changePin
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/auth/LoginScreen.kt:64:48 Unresolved reference: 
+RecoverySuccess
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/navigation/Graphs.kt:31:17 Cannot find a 
+parameter with this name: onLogin
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/navigation/Graphs.kt:43:17 Cannot find a 
+parameter with this name: onNavigateToChangePin
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/navigation/Graphs.kt:43:17 No value passed for 
+parameter 'onLoginSuccess'
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/navigation/Graphs.kt:65:61 Unresolved reference: 
+fillMaxSize
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/settings/SettingsScreen.kt:23:30 Conflicting 
+import, imported name 'R' is ambiguous
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/settings/SettingsScreen.kt:24:30 Conflicting 
+import, imported name 'R' is ambiguous
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/settings/SettingsScreen.kt:58:32 Unresolved 
+reference: context
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/settings/SettingsScreen.kt:58:64 Unresolved 
+reference: context
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/settings/SettingsScreen.kt:62:32 Unresolved 
+reference: context
+e: file:///C:/Users/Usuario/Documents/Javier%20Frias/Antigravity/aegis%20core/app/src/main/java/com/antigravity/aegis/presentation/settings/SettingsScreen.kt:62:64 Unresolved 
+reference: context
+
+> Task :app:compileDebugKotlin FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 17s
+32 actionable tasks: 2 executed, 30 up-to-date

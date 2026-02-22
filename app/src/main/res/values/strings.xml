@@ -540,4 +540,13 @@
     <string name="vault_label_notes">Notes (Optional)</string>
     <string name="vault_auth_failed">Authentication failed</string>
 
+    <string name="vault_disclaimer_title">Legal Disclaimer &amp; Responsibility</string>
+    <string name="vault_disclaimer_message">Aegis is not responsible for the loss, theft, or corruption of credentials. The user is solely responsible for the management and security of their data.</string>
+    <string name="vault_disclaimer_accept">Accept and Understand</string>
+
+    <!-- Feature: Privacy & Legal -->
+    <string name="settings_section_legal">Legal &amp; Privacy</string>
+    <string name="settings_privacy_policy_button">Privacy Policy (GDPR)</string>
+    <string name="privacy_policy_title">Privacy Policy</string>
+    <string name="privacy_policy_content">Aegis Core is a local-first application. Your data is stored exclusively on your device and, if enabled, in your personal Google Drive space (AppData). No data is sent to our servers. All sensitive information is encrypted locally using AES-256 logic. By using this app, you agree to the local processing of your data for the sole purpose of providing the service.</string>
 </resources>

@@ -1,4 +1,12 @@
 <resources>
+    <string name="vault_disclaimer_title">Aviso Legal y Responsabilidad</string>
+    <string name="vault_disclaimer_message">Aegis no se hace responsable por la pérdida, robo o corrupción de las credenciales. El usuario es el único responsable de la gestión y seguridad de sus datos.</string>
+    <string name="vault_disclaimer_accept">Aceptar y Entender</string>
+
+    <string name="settings_section_legal">Legal y Privacidad</string>
+    <string name="settings_privacy_policy_button">Política de Privacidad (GDPR)</string>
+    <string name="privacy_policy_title">Política de Privacidad</string>
+    <string name="privacy_policy_content">Aegis Core es una aplicación de primer uso local (local-first). Sus datos se almacenan exclusivamente en su dispositivo y, si se activa, en su espacio personal de Google Drive (AppData). No se envían datos a nuestros servidores. Toda la información sensible se cifra localmente mediante lógica AES-256. Al utilizar esta aplicación, usted acepta el procesamiento local de sus datos con el único fin de prestar el servicio.</string>
     <string name="app_name">Aegis Core</string>
 
     <!-- General Actions & Labels -->

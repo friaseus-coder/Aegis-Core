@@ -113,6 +113,8 @@ class PdfGeneratorService @Inject constructor(
         canvas.drawText("TOTAL:", 350f, currentY, paint)
         canvas.drawText(String.format("€%.2f", quote.totalAmount), 460f, currentY, paint)
 
+        drawLegalFooter(canvas, pageInfo.pageWidth.toFloat(), pageInfo.pageHeight.toFloat())
+
         pdfDocument.finishPage(page)
 
         // Save
@@ -125,5 +127,18 @@ class PdfGeneratorService @Inject constructor(
             pdfDocument.close()
         }
         return file
+    }
+
+    private fun drawLegalFooter(canvas: Canvas, pageWidth: Float, pageHeight: Float) {
+        val paint = Paint().apply {
+            color = Color.GRAY
+            textSize = 7f
+            isAntiAlias = true
+        }
+        val text = "Documento firmado electrónicamente de mutuo acuerdo mediante la plataforma Aegis. Esta firma tiene carácter de cortesía y no constituye un certificado digital cualificado."
+        val margin = 50f
+        val x = margin
+        val y = pageHeight - 30f
+        canvas.drawText(text, x, y, paint)
     }
 }

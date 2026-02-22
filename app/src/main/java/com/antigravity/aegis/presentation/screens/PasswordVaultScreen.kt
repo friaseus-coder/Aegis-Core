@@ -34,6 +34,7 @@ fun PasswordVaultScreen(
     val passwords by viewModel.allPasswords.collectAsState()
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val decryptedPasswords by viewModel.decryptedPasswords.collectAsState()
+    val isDisclaimerAccepted by viewModel.isDisclaimerAccepted.collectAsState()
     
     val context = LocalContext.current
     val activity = context as? FragmentActivity
@@ -152,6 +153,19 @@ fun PasswordVaultScreen(
             onConfirm = { title, user, pass, web, note ->
                 viewModel.addPassword(title, user, pass, web, note)
                 showAddDialog = false
+            }
+        )
+    }
+
+    if (!isDisclaimerAccepted) {
+        AlertDialog(
+            onDismissRequest = { /* Bloquear cierre manual si es imperativo */ },
+            title = { Text(stringResource(R.string.vault_disclaimer_title)) },
+            text = { Text(stringResource(R.string.vault_disclaimer_message)) },
+            confirmButton = {
+                Button(onClick = { viewModel.acceptDisclaimer() }) {
+                    Text(stringResource(R.string.vault_disclaimer_accept))
+                }
             }
         )
     }

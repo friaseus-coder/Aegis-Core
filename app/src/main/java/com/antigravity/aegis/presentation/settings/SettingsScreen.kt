@@ -19,11 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
-import com.antigravity.aegis.data.local.entity.UserRole
-import com.antigravity.aegis.data.security.BiometricPromptManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,34 +34,8 @@ fun SettingsScreen(
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
-    val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
-    val biometricPromptState by viewModel.biometricPromptState.collectAsState()
     val context = LocalContext.current
-    
-    // BiometricPromptManager
-    val activity = context as? androidx.fragment.app.FragmentActivity
-    val biometricPromptManager = remember(activity) {
-        if (activity != null) BiometricPromptManager(activity) else null
-    }
-    
-    // Observe biometric prompt trigger
-    LaunchedEffect(biometricPromptState) {
-        biometricPromptState?.let { config ->
-            biometricPromptManager?.showBiometricPrompt(
-                title = context.getString(config.titleResId),
-                description = context.getString(config.descriptionResId),
-                cryptoObject = config.cryptoObject
-            )
-            viewModel.onBiometricPromptShown()
-        }
-    }
-    
-    // Observe biometric results
-    LaunchedEffect(biometricPromptManager) {
-        biometricPromptManager?.promptResults?.collect { result ->
-            viewModel.onBiometricResult(result)
-        }
-    }
+
 
     // Launchers
     val exportLauncher = rememberLauncherForActivityResult(
@@ -94,9 +66,8 @@ fun SettingsScreen(
         }
     }
     
-    // Add User Dialog State
-    var showAddUserDialog by remember { mutableStateOf(false) }
-    var userToEdit by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.UserEntity?>(null) }
+
+    var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -200,23 +171,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Security Section
-            SettingsSection(title = stringResource(R.string.settings_section_security)) {
-                if (isBiometricEnabled) {
-                    Text(
-                        text = stringResource(R.string.settings_biometric_status_enabled),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Button(
-                        onClick = { viewModel.enableBiometric() },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.auth_login_enable_biometrics_button))
-                    }
-                }
-            }
+
 
             // Database Section
             SettingsSection(title = stringResource(R.string.settings_section_database)) {
@@ -236,57 +191,7 @@ fun SettingsScreen(
                 }
             }
 
-            // User Management Section
-            SettingsSection(title = stringResource(R.string.settings_section_users)) {
-                Button(
-                    onClick = { showAddUserDialog = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.settings_create_user_button))
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                val users by viewModel.users.collectAsState()
-                
-                if (users.isNotEmpty()) {
-                    Text(stringResource(R.string.settings_users_list_title), style = MaterialTheme.typography.titleSmall)
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        users.forEach { user ->
-                            Card(
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { userToEdit = user }
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column {
-                                        Text(user.name, fontWeight = FontWeight.Bold)
-                                        val roleText = when (user.role) {
-                                            UserRole.ADMIN -> stringResource(R.string.settings_role_admin_desc)
-                                            UserRole.MANAGER -> stringResource(R.string.settings_role_manager_title)
-                                            UserRole.USER, UserRole.GUEST -> stringResource(R.string.settings_role_worker_title)
-                                        }
-                                        Text(
-                                            text = roleText, 
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = if (user.role == UserRole.ADMIN || user.role == UserRole.MANAGER) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                                        )
-                                    }
-                                    Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+
 
             // Company Details Section
             val configState = viewModel.userConfig.collectAsState()
@@ -418,6 +323,17 @@ fun SettingsScreen(
                 }
             }
 
+            // Legal & Privacy Section
+            SettingsSection(title = stringResource(R.string.settings_section_legal)) {
+                Button(
+                    onClick = { showPrivacyPolicyDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer, contentColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                ) {
+                    Text(stringResource(R.string.settings_privacy_policy_button))
+                }
+            }
+
             // Session Section
             SettingsSection(title = stringResource(R.string.settings_section_session)) {
                 OutlinedButton(
@@ -431,23 +347,21 @@ fun SettingsScreen(
         }
     }
     
-    if (showAddUserDialog) {
-        AddUserDialog(
-            onDismiss = { showAddUserDialog = false },
-            onConfirm = { name, pin, role ->
-                viewModel.createNewUser(name = name, language = "es", pin = pin, role = role)
-                showAddUserDialog = false
-            }
-        )
-    }
-    
-    userToEdit?.let { user ->
-        EditRoleDialog(
-            user = user,
-            onDismiss = { userToEdit = null },
-            onConfirm = { newRole ->
-                viewModel.updateUserRole(user.id, newRole)
-                userToEdit = null
+
+
+    if (showPrivacyPolicyDialog) {
+        AlertDialog(
+            onDismissRequest = { showPrivacyPolicyDialog = false },
+            title = { Text(stringResource(R.string.privacy_policy_title)) },
+            text = { 
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(stringResource(R.string.privacy_policy_content))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacyPolicyDialog = false }) {
+                    Text(stringResource(android.R.string.ok))
+                }
             }
         )
     }
@@ -461,139 +375,3 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
     }
 }
 
-@Composable
-fun AddUserDialog(onDismiss: () -> Unit, onConfirm: (String, String, UserRole) -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var pin by remember { mutableStateOf("") }
-    
-    var isEmpresa by remember { mutableStateOf(false) }
-    var isParticular by remember { mutableStateOf(true) } // Default to Worker
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_create_user_button)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = name, 
-                    onValueChange = { name = it }, 
-                    label = { Text(stringResource(R.string.general_name)) },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = pin, 
-                    onValueChange = { if (it.length <= 6) pin = it }, 
-                    label = { Text(stringResource(R.string.auth_login_pin_label)) },
-                    singleLine = true
-                )
-                
-                // Role Selection
-                Column {
-                    Text(stringResource(R.string.settings_profile_active_label), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = isEmpresa,
-                            onCheckedChange = { isEmpresa = it }
-                        )
-                        Column {
-                            Text(stringResource(R.string.settings_role_manager_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                            Text(stringResource(R.string.settings_role_manager_desc), style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                    
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = isParticular,
-                            onCheckedChange = { isParticular = it }
-                        )
-                         Column {
-                            Text(stringResource(R.string.settings_role_worker_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                            Text(stringResource(R.string.settings_role_worker_desc), style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            val isValid = name.isNotBlank() && pin.length >= 4 && (isEmpresa || isParticular)
-            TextButton(
-                onClick = { 
-                    val role = when {
-                        isEmpresa && isParticular -> UserRole.ADMIN
-                        isEmpresa -> UserRole.MANAGER
-                        else -> UserRole.USER
-                    }
-                    onConfirm(name, pin, role) 
-                }, 
-                enabled = isValid
-            ) {
-                Text(stringResource(R.string.general_create))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
-        }
-    )
-}
-
-@Composable
-fun EditRoleDialog(
-    user: com.antigravity.aegis.data.local.entity.UserEntity,
-    onDismiss: () -> Unit,
-    onConfirm: (UserRole) -> Unit
-) {
-     var isEmpresa by remember { mutableStateOf(user.role == UserRole.MANAGER || user.role == UserRole.ADMIN) }
-     var isParticular by remember { mutableStateOf(user.role == UserRole.USER || user.role == UserRole.ADMIN) }
-     
-     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_role_edit_prefix, user.name)) },
-        text = {
-             Column {
-                Text(stringResource(R.string.settings_profile_active_label), style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isEmpresa,
-                        onCheckedChange = { isEmpresa = it }
-                    )
-                    Column {
-                        Text(stringResource(R.string.settings_role_manager_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                    }
-                }
-                
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isParticular,
-                        onCheckedChange = { isParticular = it }
-                    )
-                     Column {
-                        Text(stringResource(R.string.settings_role_worker_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            val isValid = isEmpresa || isParticular
-            TextButton(
-                onClick = { 
-                    val newRole = when {
-                        isEmpresa && isParticular -> UserRole.ADMIN
-                        isEmpresa -> UserRole.MANAGER
-                        else -> UserRole.USER
-                    }
-                    onConfirm(newRole)
-                },
-                enabled = isValid
-            ) {
-                Text(stringResource(R.string.general_save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
-        }
-     )
-}

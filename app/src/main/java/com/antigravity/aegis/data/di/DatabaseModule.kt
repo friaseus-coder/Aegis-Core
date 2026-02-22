@@ -3,7 +3,6 @@ package com.antigravity.aegis.data.di
 import android.content.Context
 import androidx.room.Room
 import com.antigravity.aegis.data.local.AegisDatabase
-import com.antigravity.aegis.data.local.dao.UserEntityDao
 import com.antigravity.aegis.data.local.dao.CrmDao
 import com.antigravity.aegis.data.local.dao.DocumentDao
 import com.antigravity.aegis.data.security.EncryptionKeyManager
@@ -58,14 +57,11 @@ object DatabaseModule {
                 AegisDatabase.MIGRATION_24_25,
                 AegisDatabase.MIGRATION_25_26,
                 AegisDatabase.MIGRATION_26_27,
-                AegisDatabase.MIGRATION_27_28
+                AegisDatabase.MIGRATION_27_28,
+                AegisDatabase.MIGRATION_28_29,
+                AegisDatabase.MIGRATION_29_30
             )
             .build()
-    }
-
-    @Provides
-    fun provideUserEntityDao(database: AegisDatabase): UserEntityDao {
-        return database.userEntityDao()
     }
 
     @Provides

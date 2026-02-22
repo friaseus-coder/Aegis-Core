@@ -47,6 +47,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/DEPENDENCIES"
         }
     }
 }
@@ -111,4 +112,10 @@ dependencies {
 
     // File Management
     implementation("androidx.documentfile:documentfile:1.0.1")
+
+    // Google Drive & Auth
+    implementation(libs.google.api.client.android)
+    implementation(libs.google.api.services.drive)
+    implementation(libs.google.http.client.gson)
+    implementation(libs.play.services.auth)
 }

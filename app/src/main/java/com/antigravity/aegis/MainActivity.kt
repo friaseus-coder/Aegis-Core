@@ -21,6 +21,7 @@ import com.antigravity.aegis.presentation.theme.ThemeViewModel
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import com.antigravity.aegis.data.worker.CloudSyncWorker
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -29,6 +30,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Enqueue Cloud Sync Worker
+        CloudSyncWorker.enqueue(this)
         
         // Collect Theme Mode
         setContent {

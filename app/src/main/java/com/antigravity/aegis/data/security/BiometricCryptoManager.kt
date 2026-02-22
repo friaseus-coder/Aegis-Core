@@ -66,16 +66,25 @@ class BiometricCryptoManager @Inject constructor() {
     }
 
     private fun generateSecretKey(keyName: String): SecretKey {
-        val keyGenParameterSpec = KeyGenParameterSpec.Builder(
+        val builder = KeyGenParameterSpec.Builder(
             keyName,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
         )
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setUserAuthenticationRequired(true)
-            .build()
 
-        keyGenerator.init(keyGenParameterSpec)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            builder.setUserAuthenticationParameters(
+                15, // 15 seconds validity
+                KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            builder.setUserAuthenticationValidityDurationSeconds(15)
+        }
+
+        keyGenerator.init(builder.build())
         return keyGenerator.generateKey()
     }
     
