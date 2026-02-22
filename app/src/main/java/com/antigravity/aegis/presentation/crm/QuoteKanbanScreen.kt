@@ -187,14 +187,14 @@ fun QuoteKanbanScreen(
                 title = { Text(stringResource(R.string.ui_new_quote)) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Se creará automáticamente un Proyecto Activo asociado a este presupuesto.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.crm_quote_kanban_create_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         
                         ExposedDropdownMenuBox(
                             expanded = expandedClient,
                             onExpandedChange = { expandedClient = !expandedClient }
                         ) {
                             OutlinedTextField(
-                                value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: "Seleccionar Cliente",
+                                value = selectedClient?.let { if (it.tipoCliente == "Particular") "${it.firstName} ${it.lastName}" else it.firstName } ?: stringResource(R.string.quotes_select_client_placeholder),
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedClient) },
@@ -219,7 +219,7 @@ fun QuoteKanbanScreen(
                         OutlinedTextField(
                             value = projectName,
                             onValueChange = { projectName = it },
-                            label = { Text("Nombre del Proyecto/Presupuesto") },
+                            label = { Text(stringResource(R.string.crm_quote_kanban_project_name_label)) },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

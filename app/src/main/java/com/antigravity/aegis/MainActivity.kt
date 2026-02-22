@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             androidx.compose.runtime.LaunchedEffect(language) {
                  language?.let { lang ->
                      val currentLocales = AppCompatDelegate.getApplicationLocales()
-                     val currentLang = if (!currentLocales.isEmpty) currentLocales.get(0)?.language else "es"
+                     val currentLang = if (!currentLocales.isEmpty) currentLocales.get(0)?.language else com.antigravity.aegis.presentation.util.LanguageUtils.getDefaultPlatformLanguage()
                      
                      if (currentLang != lang) {
                          val appLocale = LocaleListCompat.forLanguageTags(lang)

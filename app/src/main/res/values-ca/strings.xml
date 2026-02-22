@@ -1,0 +1,429 @@
+<resources>
+    <string name="app_name">Aegis Core</string>
+
+    <!-- General Actions & Labels -->
+    <string name="general_loading">Carregant...</string>
+    <string name="general_save">Guardar</string>
+    <string name="general_cancel">Cancel·lar</string>
+    <string name="general_delete">Eliminar</string>
+    <string name="general_edit">Editar</string>
+    <string name="general_create">Crear</string>
+    <string name="general_add">Afegir</string>
+    <string name="general_back">Enrere</string>
+    <string name="general_ok">D\'acord</string>
+    <string name="general_none">Cap</string>
+    <string name="general_error_prefix">Error: %1$s</string>
+    <string name="general_success">Èxit</string>
+    <string name="general_na">N/D</string>
+    <string name="general_language">Idioma</string>
+    <string name="general_theme">Tema</string>
+    <string name="general_name">Nom</string>
+    <string name="general_email">Email</string>
+    <string name="general_phone">Telèfon</string>
+
+    <!-- Feature: Auth - Login -->
+    <string name="auth_login_title">Bloquejat</string>
+    <string name="auth_login_pin_label">Introdueix PIN</string>
+    <string name="auth_login_pin_hint">PIN</string>
+    <string name="auth_login_unlock_button">Desbloquejar</string>
+    <string name="auth_login_create_user_button">Crear Usuari</string>
+    <string name="auth_login_select_user_title">Seleccionar Usuari</string>
+    <string name="auth_login_biometric_button">Login Biomètric</string>
+    <string name="auth_login_enable_biometrics_button">Activar Biometria (Has d\'iniciar sessió)</string>
+    <string name="auth_login_forgot_pin_button">Has oblidat el teu PIN?</string>
+    <string name="auth_login_import_backup_button">Importar Còpia</string>
+    <string name="auth_login_biometric_prompt_title">Login Biomètric</string>
+    <string name="auth_login_biometric_prompt_desc">Autentica\'t per desbloquejar</string>
+    <string name="auth_login_biometric_enable_title">Activar Biometria</string>
+    <string name="auth_login_biometric_enable_desc">Autentica\'t per activar el login biomètric</string>
+
+    <!-- Feature: Auth - Create User/Setup -->
+    <string name="auth_setup_welcome_title">Benvingut a Aegis Core</string>
+    <string name="auth_setup_recovery_kit_title">El teu Kit de Recuperació (Frase Llavor)</string>
+    <string name="auth_setup_recovery_kit_desc">Escriu aquestes paraules en ordre. Són l\'ÚNICA manera de recuperar les teves dades si oblides el PIN.</string>
+    <string name="auth_setup_init_vault_button">Inicialitzar Volta</string>
+    <string name="auth_create_user_title">Crear Nou Usuari</string>
+    <string name="auth_create_user_button">Crear i Entrar</string>
+    <string name="auth_create_user_pin_instruction">Crear PIN (4-6 dígits)</string>
+
+    <!-- Feature: Auth - Messages -->
+    <string name="auth_error_pin_incorrect">PIN Incorrecte</string>
+    <string name="auth_error_invalid_seed">Paraules invàlides</string>
+    <string name="auth_error_invalid_credentials">Dades incorrectes</string>
+    <string name="auth_error_biometric_unavailable">Biometria no disponible per a aquest usuari</string>
+    <string name="auth_error_biometric_generic">Error biomètric: %1$s</string>
+    <string name="auth_error_session_locked">Sessió bloquejada. No es pot crear usuari.</string>
+    <string name="auth_error_user_create_failed">Fallada en crear usuari: %1$s</string>
+    <string name="auth_success_user_created">Usuari creat correctament</string>
+    <string name="auth_success_biometric_enabled">Biometria activada correctament</string>
+    <string name="auth_success_biometric_enable_error">Error en activar biometria</string>
+    <string name="auth_success_session_expired">Sessió expirada. Identifica\'t de nou.</string>
+
+    <!-- Feature: Main Menu -->
+    <string name="main_menu_title">Aegis Core</string>
+    <string name="main_menu_select_module">Seleccionar Mòdul</string>
+    <string name="home_module_crm_title">Gestió Projectes</string>
+    <string name="home_module_crm_subtitle">CRM i Tasques</string>
+    <string name="home_module_field_title">Comunicats de Treball</string>
+    <string name="home_module_field_subtitle">Servei de Camp i Firmes</string>
+    <string name="home_module_budgets_title">Pressupostos</string>
+    <string name="home_module_budgets_subtitle">Kanban i Cotitzacions</string>
+    <string name="home_module_expenses_title">Despeses</string>
+    <string name="home_module_expenses_subtitle">Escaneig Intel·ligent i Exportació</string>
+    <string name="home_module_inventory_title">Inventari</string>
+    <string name="home_module_inventory_subtitle">Control d\'Estoc</string>
+    <string name="home_module_mileage_title">Quilometratge</string>
+    <string name="home_module_mileage_subtitle">Registre de Viatges i Calculadora</string>
+
+    <!-- Feature: Dashboard -->
+    <string name="dashboard_title">Taulell de Control</string>
+    <string name="dashboard_manage_clients">Gestionar Clients</string>
+    <string name="dashboard_active_projects">Projectes Actius</string>
+    <string name="dashboard_no_projects">No hi ha projectes actius.</string>
+    <string name="dashboard_status_label">Estat: %1$s</string>
+    <string name="dashboard_deadline_label">Data límit: %1$s</string>
+    
+    <!-- Feature: CRM/Clients -->
+    <string name="crm_clients_title">Clients</string>
+    <string name="crm_clients_add_button">Afegir Client</string>
+    <string name="crm_clients_empty">No hi ha clients encara.</string>
+    <string name="crm_client_email_placeholder">Sense email</string>
+    <string name="crm_client_detail_email">Email: %1$s</string>
+    <string name="crm_client_detail_phone">Tel: %1$s</string>
+    <string name="crm_client_detail_notes">Notes: %1$s</string>
+    <string name="crm_client_not_found">Client no trobat o carregant...</string>
+    
+    <!-- Feature: CRM/Projects -->
+    <string name="crm_projects_section_title">Projectes</string>
+    <string name="crm_project_add_button">Afegir Projecte</string>
+    <string name="crm_project_new_dialog_title">Nou Projecte</string>
+    <string name="crm_project_name_label">Nom del Projecte</string>
+    <string name="crm_project_not_found">Projecte no trobat...</string>
+    <string name="crm_project_id_label">ID Projecte: %1$d</string>
+    <string name="crm_project_subprojects_title">Subprojectes</string>
+    <string name="crm_subproject_price_prefix">Preu: €%1$s</string>
+    <string name="crm_subproject_time_prefix">Temps: %1$s %2$s</string>
+    <string name="crm_subproject_materials_prefix">Materiales: %1$s</string>
+    <string name="crm_subproject_empty">No hi ha subprojectes</string>
+    <string name="crm_subproject_new_title">Nou Subprojecte</string>
+    <string name="crm_subproject_name_label">Nom del Subprojecte</string>
+    <string name="crm_subproject_materials_label">Materials Necessaris</string>
+    <string name="crm_subproject_price_label">Preu (€)</string>
+    <string name="crm_subproject_time_label">Temps Est.</string>
+    <string name="crm_subproject_unit_hours">Hores</string>
+    <string name="crm_subproject_unit_days">Dies</string>
+    <string name="crm_subproject_unit_weeks">Setmanes</string>
+    <string name="crm_subproject_unit_label">Unitat</string>
+    <string name="crm_archived_projects_title">Projectes Arxivats</string>
+    <string name="crm_archived_projects_empty">No hi ha projectes arxivats.</string>
+    <string name="crm_project_reactivate_button">Reactivar</string>
+
+    <!-- Feature: CRM/Dashboard & Wizard -->
+    <string name="crm_dashboard_new_project">Nou Projecte</string>
+    <string name="crm_wizard_select_client">Seleccionar Client</string>
+    <string name="crm_wizard_select_category">Seleccionar Categoria</string>
+    <string name="crm_wizard_select_template">Seleccionar Plantilla</string>
+    <string name="crm_wizard_project_details">Detalls del Projecte</string>
+    <string name="crm_wizard_no_clients">No hi ha clients. Crea\'n un primer.</string>
+    <string name="crm_wizard_create_client">Crear Client</string>
+    <string name="crm_wizard_no_category">Sense Categoria / Personalitzat</string>
+    <string name="crm_wizard_blank_project">Projecte en Blanc (Sense Plantilla)</string>
+    <string name="crm_wizard_summary_client">Client: %1$s</string>
+    <string name="crm_wizard_summary_template">Plantilla: %1$s</string>
+
+    <!-- Feature: Quote Kanban -->
+    <string name="crm_quote_kanban_create_desc">Es crearà automàticament un Projecte Actiu associat a aquest pressupost.</string>
+    <string name="crm_quote_kanban_project_name_label">Nom del Projecte/Pressupost</string>
+
+    <!-- Feature: Client/Project Details -->
+    <string name="crm_client_detail_type">Tipus: %1$s - %2$s</string>
+    <string name="crm_client_detail_cif">CIF: %1$s</string>
+    <string name="crm_client_detail_nif">NIF: %1$s</string>
+    <string name="crm_client_detail_address">Adreça: %1$s</string>
+    <string name="crm_project_template_label">Plantilla</string>
+    <string name="crm_project_save_as_template">Guardar com a Plantilla</string>
+    <string name="crm_project_generate_quote">Generar Pressupost</string>
+    <string name="crm_task_duration_hours_label">Duració Est. (Hores)</string>
+    <string name="crm_project_save_template_desc">Es crearà una còpia d\'aquest projecte i subprojectes com a plantilla reutilitzable.</string>
+    <string name="crm_project_template_name_label">Nom de la Plantilla</string>
+    <string name="crm_project_template_category_label">Categoria (Opcional)</string>
+
+    <!-- Feature: CRM/Tasks & Reports -->
+    <string name="crm_tasks_section_title">Tasques</string>
+    <string name="crm_task_add_button">Afegir Tasca</string>
+    <string name="crm_task_new_dialog_title">Nova Tasca</string>
+    <string name="crm_task_description_label">Descripció</string>
+    <string name="crm_reports_section_title">Comunicats de Treball</string>
+    <string name="crm_report_create_button">Crear Comunicat de Treball</string>
+    <string name="crm_report_item_title">Comunicat #%1$d</string>
+    <string name="crm_report_empty">No hi ha comunicats.</string>
+
+    <!-- Feature: Add Client Dialog -->
+    <string name="dialog_add_client_title">Afegir Client</string>
+    <string name="dialog_add_client_name_label">Nom</string>
+    <string name="dialog_add_client_email_label">Email</string>
+    <string name="dialog_add_client_phone_label">Telèfon</string>
+    <string name="dialog_add_client_notes_label">Notes</string>
+
+    <!-- Feature: Import/Export -->
+    <string name="data_import_errors_title">Errors d\'Importació</string>
+    <string name="data_import_success">Importació Èxitosa</string>
+    <string name="data_export_csv">Exportar CSV</string>
+    <string name="data_import_csv">Importar CSV</string>
+    <string name="data_export_db_loading">Exportant Base de Dades...</string>
+    <string name="data_export_db_success">Base de Dades exportada correctament</string>
+    <string name="data_export_db_error">Error en exportar: %1$s</string>
+    <string name="data_import_db_loading">Important Base de Dades...</string>
+    <string name="data_import_db_success">Importació reeixida. Si us plau, torna a iniciar sessió.</string>
+    <string name="data_import_db_error">Error en importar: %1$s</string>
+
+    <!-- Feature: Field Service -->
+    <string name="field_service_title">Consola de Servei de Camp</string>
+    <string name="field_report_create_title">Nou Comunicat de Treball</string>
+    <string name="field_report_desc_label">Descripció del Treball</string>
+    <string name="field_report_attach_photo_button">Adjuntar Foto</string>
+    <string name="field_report_signature_title">Firma del Client</string>
+    <string name="field_report_clear_signature">Esborrar Firma</string>
+    <string name="field_report_finish_button">Finalitzar i Firmar</string>
+    <string name="field_report_photo_captured">Foto capturada (simulada)</string>
+    <string name="field_report_desc_required">Es requereix descripció</string>
+    <string name="field_reports_not_found">No s\'han trobat comunicats de treball.</string>
+
+    <!-- Feature: Mileage -->
+    <string name="mileage_title">Registre de Quilometratge</string>
+    <string name="mileage_price_per_km">Preu per Km (€)</string>
+    <string name="mileage_calculator_title">Calculadora de Viatge</string>
+    <string name="mileage_origin_label">Origen</string>
+    <string name="mileage_destination_label">Destinació</string>
+    <string name="mileage_start_odo_label">Odo Inicial</string>
+    <string name="mileage_end_odo_label">Odo Final</string>
+    <string name="mileage_distance_result">Distància: %1$d km</string>
+    <string name="mileage_cost_result">Cost Est.: €%1$.2f</string>
+    <string name="mileage_log_trip_button">Registrar Viatge</string>
+    <string name="mileage_recent_trips_title">Viatges Recents</string>
+    <string name="mileage_export_annual_button">Exportar CSV Anual</string>
+
+    <!-- Feature: Expenses -->
+    <string name="expenses_title">Despeses i Tiquets</string>
+    <string name="expenses_export_quarter_button">Exportar Trimestre</string>
+    <string name="expenses_review_ticket_title">Revisar Tiquet</string>
+    <string name="expenses_merchant_label">Comerç / Concepte</string>
+    <string name="expenses_amount_label">Import</string>
+    <string name="expenses_empty">No hi ha despeses registrades.</string>
+
+    <!-- Feature: Inventory -->
+    <string name="inventory_title">Control d\'Inventari</string>
+    <string name="inventory_stock_list_title">Llista d\'Estoc</string>
+    <string name="inventory_scan_label">Escanejar</string>
+    <string name="inventory_barcode_label">Codi de Barres: %1$s</string>
+
+    <!-- Feature: Quotes/Budgets -->
+    <string name="quotes_title_new">Nou Pressupost</string>
+    <string name="quotes_select_client_placeholder">Seleccionar Client</string>
+    <string name="quotes_client_label">Client</string>
+    <string name="quotes_no_clients_found">No s\'han trobat clients</string>
+    <string name="quotes_title_label">Títol del Pressupost</string>
+    <string name="quotes_total_amount_label">Import Total (€)</string>
+    <string name="quotes_description_label">Descripció / Ítems</string>
+    <string name="quotes_budget_editor_title">Editor de Pressupostos</string>
+    <string name="quotes_budget_lines_title">Línies de Pressupost</string>
+    <string name="quotes_item_desc_label">Ítem</string>
+    <string name="quotes_item_qty_label">Quant.</string>
+    <string name="quotes_item_price_label">Preu</string>
+    <string name="quotes_item_tax_label">IVA %</string>
+    <string name="quotes_add_line_button">Afegir Línia</string>
+    <string name="quotes_financial_summary_title">Resum Financer</string>
+    <string name="quotes_summary_income">Ingressos</string>
+    <string name="quotes_summary_expenses">Despeses</string>
+    <string name="quotes_summary_profit">Benefici</string>
+    <string name="quotes_summary_margin">Marge</string>
+    <string name="quotes_list_new_tab">Nou</string>
+    <string name="quotes_list_view_tab">Veure</string>
+    <string name="quotes_list_empty">No hi ha pressupostos.</string>
+    <string name="quotes_default_title">Pressupost per a %1$s</string>
+    
+    <!-- Feature: Quotations Extras & Templates -->
+    <string name="quotes_add_item_title">Afegir Partida</string>
+    <string name="quotes_item_price_eur_label">Preu (€)</string>
+    <string name="quotes_summary_subtotal_prefix">Subtotal: %1$s€</string>
+    <string name="quotes_summary_tax_prefix">IVA (21%%): %1$s€</string>
+    <string name="quotes_summary_total_prefix">TOTAL: %1$s€</string>
+    
+    <string name="crm_templates_title">Plantilles de Projecte</string>
+    <string name="crm_templates_import">Importar Plantilla</string>
+    <string name="crm_templates_created">Creada: %1$s</string>
+    <string name="crm_templates_view_edit">Veure/Editar Detalls</string>
+    <string name="crm_templates_export_json">Exportar JSON</string>
+    <string name="crm_templates_empty">No hi ha plantilles. Importa una o guarda un projecte com a plantilla.</string>
+
+    <!-- Feature: Settings -->
+    <string name="settings_title">Configuració</string>
+    <string name="settings_section_security">Seguretat</string>
+    <string name="settings_section_database">Base de Dades</string>
+    <string name="settings_section_users">Gestió d\'Usuaris</string>
+    <string name="settings_section_session">Sessió</string>
+    <string name="settings_section_general">General / Aparença</string>
+    <string name="settings_db_export_button">Exportar Base de Dades</string>
+    <string name="settings_db_import_button">Importar Base de Dades (Sobreescriure)</string>
+    <string name="settings_create_user_button">Crear Nou Usuari</string>
+    <string name="settings_logout_button">Tancar Sessió</string>
+    <string name="settings_biometric_status_enabled">✓ Autenticació biomètrica activada</string>
+    <string name="settings_backup_manage_button">Gestionar Còpies de Seguretat (Importar / Exportar)</string>
+    <string name="settings_users_list_title">Usuaris Registrats (Clic per editar)</string>
+    <string name="settings_role_admin_desc">Ambdós Perfils (Empresa + Treballador)</string>
+    <string name="settings_role_manager_title">Empresa / Autònom</string>
+    <string name="settings_role_worker_title">Particular / Treballador</string>
+    <string name="settings_role_manager_desc">Accés total i gestió</string>
+    <string name="settings_role_worker_desc">Accés operatiu limitat</string>
+    <string name="settings_company_details_title">Dades d\'Empresa (per a Informes PDF)</string>
+    <string name="settings_company_name_label">Nom Empresa / Titular</string>
+    <string name="settings_company_dni_label">DNI / CIF</string>
+    <string name="settings_company_address_label">Adreça</string>
+    <string name="settings_company_postal_code_label">CP</string>
+    <string name="settings_company_city_label">Ciutat</string>
+    <string name="settings_company_province_label">Província</string>
+    <string name="settings_company_save_button">Guardar Dades Empresa</string>
+    <string name="settings_logo_title">Logotip</string>
+    <string name="settings_logo_none">Sense Logo</string>
+    <string name="settings_logo_select_button">Seleccionar Logo</string>
+    <string name="settings_logo_delete_button">Eliminar Logo</string>
+    <string name="settings_logo_deleted">Logo eliminat</string>
+    <string name="settings_logo_updated">Logo actualitzat correctament</string>
+    <string name="settings_logo_saving">Guardant logo...</string>
+    <string name="settings_share_backup_button">Pujar al Núvol / Compartir</string>
+    <string name="settings_share_backup_loading">Preparant arxiu...</string>
+    <string name="settings_share_backup_error">Error en generar arxiu: %1$s</string>
+    <string name="settings_share_chooser_title">Guardar còpia a...</string>
+    <string name="settings_share_pdf_title">Compartir PDF</string>
+    <string name="settings_distribute_button">Distribuir (Repartiment Proporcional)</string>
+    <string name="settings_distributed_label">Distribuït</string>
+    <string name="settings_profile_active_label">Perfils Actius</string>
+    <string name="settings_role_edit_prefix">Editar Rol: %1$s</string>
+    <string name="settings_role_update_success">Rol actualitzat correctament</string>
+    <string name="settings_role_update_error">Error en actualitzar rol</string>
+    
+    <!-- Feature: Module Customization -->
+    <string name="settings_customize_modules_button">Personalitzar Mòduls</string>
+    <string name="module_customization_title">Personalitzar Mòduls</string>
+    <string name="module_customization_desc">Arrossega per reordenar, activa/desactiva per mostrar/ocultar mòduls</string>
+    <string name="module_customization_restore_button">Restaurar Predeterminats</string>
+    <string name="module_customization_restored">Mòduls restaurats a valors predeterminats</string>
+    <string name="module_id_projects">Projectes</string>
+    <string name="module_id_work_reports">Comunicats Treball</string>
+    <string name="module_id_budgets">Pressupostos</string>
+    <string name="module_id_expenses">Despeses</string>
+    <string name="module_id_inventory">Inventari</string>
+    <string name="module_id_time_control">Control Horari</string>
+    <string name="module_id_clients">Clients</string>
+    <string name="module_id_mileage">Quilometratge</string>
+    <string name="time_control_subproject_label">Subprojecte</string>
+
+    <!-- Language Definitions -->
+    <string name="language_spanish">Espanyol</string>
+    <string name="language_english">Anglès</string>
+    <string name="language_catalan">Català</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Clar</string>
+    <string name="theme_dark">Fosc</string>
+    <string name="msg_language_changed">Idioma canviat a %1$s</string>
+    <string name="msg_theme_changed">Tema canviat</string>
+
+    <!-- Content Descriptions (Accessibility) -->
+    <string name="cd_back">Enrere</string>
+    <string name="cd_save">Guardar</string>
+    <string name="cd_delete">Eliminar</string>
+    <string name="cd_share">Compartir</string>
+
+    <string name="auth_login_no_users_found">No s\'han trobat usuaris</string>
+    <string name="cd_show_pin">Mostrar PIN</string>
+    <string name="cd_hide_pin">Ocultar PIN</string>
+    <string name="language_code_es">ES</string>
+    <string name="language_code_en">EN</string>
+    <string name="language_code_ca">CA</string>
+
+    <!-- Additional UI Strings -->
+    <string name="ui_search_label">Cercar (mín 3 lletres)</string>
+    <string name="ui_clear_label">Netejar</string>
+    <string name="ui_search_hint">Cercar</string>
+    <string name="ui_filter_all">Tots</string>
+    <string name="ui_filter_individuals">Particulars</string>
+    <string name="ui_filter_companies">Empreses</string>
+    <string name="ui_search_min_chars">Escriu almenys 3 lletres per cercar</string>
+    <string name="ui_back">Enrere</string>
+    <string name="ui_export_csv">Exportar CSV</string>
+    <string name="ui_import_csv">Importar CSV</string>
+    <string name="ui_new_quote">Nou Pressupost</string>
+    <string name="ui_share_quote">Compartir Pressupost</string>
+    <string name="ui_share_pdf">Compartir PDF</string>
+    <string name="ui_move_to">Moure a:</string>
+    <string name="ui_options">Opcions</string>
+    <string name="ui_new_entry">Nova Entrada</string>
+    <string name="ui_add_report">Afegir Comunicat</string>
+    <string name="ui_scan_next">Escanejar Següent</string>
+    <string name="ui_product_found">Producte Trobat!</string>
+    <string name="ui_product_not_found">Producte No Trobat</string>
+    <string name="ui_create_product">Crear Producte</string>
+    <string name="ui_product_name">Nom del Producte</string>
+    <string name="ui_price">Preu</string>
+    <string name="ui_barcode_label">Codi de Barres: %1$s</string>
+    <string name="ui_units">%1$d unitats</string>
+    <string name="ui_low_stock">ESTOC BAIX</string>
+    <string name="ui_camera_permission_required">Es requereix permís de càmera</string>
+    <string name="ui_distance">Distància: %1$.0f km</string>
+    <string name="ui_est_cost">Cost Est.: €%1$.2f</string>
+    <string name="ui_unknown">Desconegut</string>
+    <string name="ui_date_label">Data: %1$s</string>
+
+    <!-- Quote Kanban Statuses -->
+    <string name="quote_status_draft">Esborrany</string>
+    <string name="quote_status_sent">Enviat</string>
+    <string name="quote_status_won">Guanyat</string>
+    <string name="quote_status_lost">Perdut</string>
+
+    <!-- Expense Categories -->
+    <string name="expense_category_material">Material</string>
+    <string name="expense_category_transport">Transport</string>
+    <string name="expense_category_office">Oficina</string>
+    <string name="expense_category_food">Menjar</string>
+    <string name="expense_category_other">Altres</string>
+    <string name="expense_general_no_project">General (Sense Projecte)</string>
+
+    <!-- Project Financial Labels -->
+    <string name="financial_direct_expenses">Despeses Directes</string>
+    <string name="financial_allocated_general">Despeses Generals (Imputades)</string>
+    <string name="financial_profit_per_hour">Benefici/Hora</string>
+    <string name="financial_total">Total: €%1$.2f - %2$s</string>
+
+    <!-- Feature: Time Control -->
+    <string name="time_control_title">Control Horari</string>
+    <string name="time_control_date_label">Data</string>
+    <string name="time_control_project_label">Projecte / Subprojecte</string>
+    <string name="time_control_future_plan_title">Planificació Futura</string>
+    <string name="time_control_future_plan_desc">Estàs seleccionant una data futura. Pots programar aquest treball directament al teu calendari.</string>
+    <string name="time_control_hours_label">Hores Treballades</string>
+    <string name="time_control_desc_future">Descripció del Treball a Realitzar</string>
+    <string name="time_control_desc_past">Descripció del Treball Realitzat</string>
+    <string name="time_control_save_future">Programar al Calendari</string>
+    <string name="time_control_save_past">Guardar Comunicat de Treball</string>
+    <string name="time_control_inactive_project_title">Projecte No Actiu</string>
+    <string name="time_control_inactive_project_desc">El projecte seleccionat no està actiu. Vols activar-lo per imputar hores?</string>
+    <string name="time_control_activate_save_button">Activar i Guardar</string>
+
+    <!-- Feature: Profile Config -->
+    <string name="profile_edit_title">Editar Perfil</string>
+    <string name="profile_name_label">Nom del Titular</string>
+    <string name="profile_identity_title">Identitat</string>
+    <string name="profile_identity_individual">Particular</string>
+    <string name="profile_identity_company">Empresa</string>
+    <string name="profile_identity_logo_hint">Es recomana pujar el logotip de l\'empresa.</string>
+    <string name="profile_default_role_title">Rol Predeterminat</string>
+    <string name="profile_default_role_desc">Defineix com es comportarà l\'aplicació a l\'inici.</string>
+    <string name="profile_role_freelance">Autònom</string>
+    <string name="profile_role_freelance_desc">Accés total (Gestió)</string>
+    <string name="profile_role_worker">Treballador</string>
+    <string name="profile_role_worker_desc">Només mòduls operatius</string>
+    <string name="profile_dual_mode_title">Mode Flexible (Dual)</string>
+    <string name="profile_dual_mode_desc">Permet alternar entre la vista de Gestió i Operativa des del tauler principal.</string>
+    <string name="profile_save_changes_button">Guardar Canvis</string>
+
+</resources>

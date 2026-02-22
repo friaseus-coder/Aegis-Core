@@ -11,6 +11,7 @@
     <string name="general_add">Add</string>
     <string name="general_back">Back</string>
     <string name="general_ok">OK</string>
+    <string name="general_none">None</string>
     <string name="general_error_prefix">Error: %1$s</string>
     <string name="general_success">Success</string>
     <string name="general_na">N/A</string>
@@ -92,6 +93,14 @@
     <string name="crm_client_detail_notes">Notes: %1$s</string>
     <string name="crm_client_not_found">Client not found or loading...</string>
     
+    <!-- Feature: Search and Filters -->
+    <string name="action_search_hint_min_3">Search (min 3 letters)</string>
+    <string name="action_clear_search">Clear</string>
+    <string name="action_search">Search</string>
+    <string name="filter_all">All</string>
+    <string name="filter_individuals">Individuals</string>
+    <string name="filter_companies">Companies</string>
+    
     <!-- Feature: CRM/Projects -->
     <string name="crm_projects_section_title">Projects</string>
     <string name="crm_project_add_button">Add Project</string>
@@ -99,9 +108,53 @@
     <string name="crm_project_name_label">Project Name</string>
     <string name="crm_project_not_found">Project not found...</string>
     <string name="crm_project_id_label">Project ID: %1$d</string>
+    <string name="crm_project_subprojects_title">Subprojects</string>
+    <string name="crm_subproject_price_prefix">Price: €%1$s</string>
+    <string name="crm_subproject_time_prefix">Time: %1$s %2$s</string>
+    <string name="crm_subproject_materials_prefix">Materials: %1$s</string>
+    <string name="crm_subproject_empty">No subprojects found</string>
+    <string name="crm_subproject_new_title">New Subproject</string>
+    <string name="crm_subproject_name_label">Subproject Name</string>
+    <string name="crm_subproject_materials_label">Required Materials</string>
+    <string name="crm_subproject_price_label">Price (€)</string>
+    <string name="crm_subproject_time_label">Est. Time</string>
+    <string name="crm_subproject_unit_hours">Hours</string>
+    <string name="crm_subproject_unit_days">Days</string>
+    <string name="crm_subproject_unit_weeks">Weeks</string>
+    <string name="crm_subproject_unit_label">Unit</string>
     <string name="crm_archived_projects_title">Archived Projects</string>
     <string name="crm_archived_projects_empty">No archived projects found.</string>
     <string name="crm_project_reactivate_button">Reactivate</string>
+    
+    <!-- Feature: CRM/Dashboard & Wizard -->
+    <string name="crm_dashboard_new_project">New Project</string>
+    <string name="crm_wizard_select_client">Select Client</string>
+    <string name="crm_wizard_select_category">Select Category</string>
+    <string name="crm_wizard_select_template">Select Template</string>
+    <string name="crm_wizard_project_details">Project Details</string>
+    <string name="crm_wizard_no_clients">No clients available. Create one first.</string>
+    <string name="crm_wizard_create_client">Create Client</string>
+    <string name="crm_wizard_no_category">No Category / Custom</string>
+    <string name="crm_wizard_blank_project">Blank Project (No Template)</string>
+    <string name="crm_wizard_summary_client">Client: %1$s</string>
+    <string name="crm_wizard_summary_template">Template: %1$s</string>
+
+    <!-- Feature: Quote Kanban -->
+    <string name="crm_quote_kanban_create_desc">An Active Project will automatically be created and associated with this quote.</string>
+    <string name="crm_quote_kanban_project_name_label">Project/Quote Name</string>
+
+    <!-- Feature: Client/Project Details -->
+    <string name="crm_client_detail_type">Type: %1$s - %2$s</string>
+    <string name="crm_client_detail_cif">VAT/CIF: %1$s</string>
+    <string name="crm_client_detail_nif">ID/NIF: %1$s</string>
+    <string name="crm_client_detail_address">Address: %1$s</string>
+    <string name="crm_project_template_label">Template</string>
+    <string name="crm_project_save_as_template">Save as Template</string>
+    <string name="crm_project_generate_quote">Generate Quote</string>
+    <string name="crm_task_duration_hours_label">Est. Duration (Hours)</string>
+    <string name="crm_project_save_template_desc">A copy of this project and its subprojects will be saved as a reusable template.</string>
+    <string name="crm_project_template_name_label">Template Name</string>
+    <string name="crm_project_template_category_label">Category (Optional)</string>
 
     <!-- Feature: CRM/Tasks & Reports -->
     <string name="crm_tasks_section_title">Tasks</string>
@@ -197,6 +250,20 @@
     <string name="quotes_list_empty">No budgets.</string>
     <string name="quotes_default_title">Budget for %1$s</string>
     
+    <!-- Feature: Quotations Extras & Templates -->
+    <string name="quotes_add_item_title">Add Line Item</string>
+    <string name="quotes_item_price_eur_label">Price (€)</string>
+    <string name="quotes_summary_subtotal_prefix">Subtotal: %1$s€</string>
+    <string name="quotes_summary_tax_prefix">VAT (21%%): %1$s€</string>
+    <string name="quotes_summary_total_prefix">TOTAL: %1$s€</string>
+    
+    <string name="crm_templates_title">Project Templates</string>
+    <string name="crm_templates_import">Import Template</string>
+    <string name="crm_templates_created">Created: %1$s</string>
+    <string name="crm_templates_view_edit">View/Edit Details</string>
+    <string name="crm_templates_export_json">Export JSON</string>
+    <string name="crm_templates_empty">No templates. Import one or save a project as template.</string>
+
     <!-- Feature: Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_security">Security</string>
@@ -257,10 +324,12 @@
     <string name="module_id_time_control">Time Control</string>
     <string name="module_id_clients">Clients</string>
     <string name="module_id_mileage">Mileage</string>
+    <string name="time_control_subproject_label">Subproject</string>
 
     <!-- Language Definitions -->
     <string name="language_spanish">Español</string>
     <string name="language_english">English</string>
+    <string name="language_catalan">Català</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
@@ -278,6 +347,7 @@
     <string name="cd_hide_pin">Hide PIN</string>
     <string name="language_code_es">ES</string>
     <string name="language_code_en">EN</string>
+    <string name="language_code_ca">CA</string>
 
     <!-- Additional UI Strings -->
     <string name="ui_search_label">Search (min 3 letters)</string>
@@ -307,6 +377,7 @@
     <string name="ui_units">%1$d units</string>
     <string name="ui_low_stock">LOW STOCK</string>
     <string name="ui_camera_permission_required">Camera permission required</string>
+    <string name="ui_product_price_stock">€%1$s - Stock: %2$s</string>
     <string name="ui_distance">Distance: %1$.0f km</string>
     <string name="ui_est_cost">Est. Cost: €%1$.2f</string>
     <string name="ui_unknown">Unknown</string>
@@ -331,5 +402,37 @@
     <string name="financial_allocated_general">Allocated General Expenses</string>
     <string name="financial_profit_per_hour">Profit/Hour</string>
     <string name="financial_total">Total: €%1$.2f - %2$s</string>
+
+    <!-- Feature: Time Control -->
+    <string name="time_control_title">Time Control</string>
+    <string name="time_control_date_label">Date</string>
+    <string name="time_control_project_label">Project / Subproject</string>
+    <string name="time_control_future_plan_title">Future Planning</string>
+    <string name="time_control_future_plan_desc">You are selecting a future date. You can schedule this work directly in your calendar.</string>
+    <string name="time_control_hours_label">Hours Worked</string>
+    <string name="time_control_desc_future">Description of Work to be Done</string>
+    <string name="time_control_desc_past">Description of Work Done</string>
+    <string name="time_control_save_future">Schedule in Calendar</string>
+    <string name="time_control_save_past">Save Work Report</string>
+    <string name="time_control_inactive_project_title">Inactive Project</string>
+    <string name="time_control_inactive_project_desc">The selected project is not Active. Do you want to activate it to log hours?</string>
+    <string name="time_control_activate_save_button">Activate &amp; Save</string>
+
+    <!-- Feature: Profile Config -->
+    <string name="profile_edit_title">Edit Profile</string>
+    <string name="profile_name_label">Holder Name</string>
+    <string name="profile_identity_title">Identity</string>
+    <string name="profile_identity_individual">Individual</string>
+    <string name="profile_identity_company">Company</string>
+    <string name="profile_identity_logo_hint">It is recommended to upload the company Logo.</string>
+    <string name="profile_default_role_title">Default Role</string>
+    <string name="profile_default_role_desc">Defines how the app will behave on startup.</string>
+    <string name="profile_role_freelance">Freelance</string>
+    <string name="profile_role_freelance_desc">Full access (Management)</string>
+    <string name="profile_role_worker">Worker</string>
+    <string name="profile_role_worker_desc">Operational modules only</string>
+    <string name="profile_dual_mode_title">Flexible Mode (Dual)</string>
+    <string name="profile_dual_mode_desc">Allows toggling between Management and Operational views from the Dashboard.</string>
+    <string name="profile_save_changes_button">Save Changes</string>
 
 </resources>

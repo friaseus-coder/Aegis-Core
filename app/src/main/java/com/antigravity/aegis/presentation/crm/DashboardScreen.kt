@@ -40,7 +40,7 @@ fun DashboardScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showCreateDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Nuevo Proyecto")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.crm_dashboard_new_project))
             }
         }
     ) { padding ->
@@ -150,10 +150,10 @@ fun CreateProjectWizard(
             Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
                 Text(
                     text = when(step) {
-                        1 -> "Seleccionar Cliente"
-                        2 -> "Seleccionar Categoría"
-                        3 -> "Seleccionar Plantilla"
-                        4 -> "Detalles del Proyecto"
+                        1 -> stringResource(R.string.crm_wizard_select_client)
+                        2 -> stringResource(R.string.crm_wizard_select_category)
+                        3 -> stringResource(R.string.crm_wizard_select_template)
+                        4 -> stringResource(R.string.crm_wizard_project_details)
                         else -> ""
                     },
                     style = MaterialTheme.typography.titleLarge
@@ -164,8 +164,8 @@ fun CreateProjectWizard(
                     1 -> {
                         // Client Search/Select
                          if (clients.isEmpty()) {
-                             Text("No hay clientes. Crea uno primero.")
-                             Button(onClick = onCreateClient) { Text("Crear Cliente") }
+                             Text(stringResource(R.string.crm_wizard_no_clients))
+                             Button(onClick = onCreateClient) { Text(stringResource(R.string.crm_wizard_create_client)) }
                          } else {
                              LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                                  items(clients) { client ->
@@ -186,7 +186,7 @@ fun CreateProjectWizard(
                         LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                             item {
                                 ListItem(
-                                    headlineContent = { Text("Sin Categoría / Personalizado") },
+                                    headlineContent = { Text(stringResource(R.string.crm_wizard_no_category)) },
                                     modifier = Modifier.clickable {
                                         selectedCategory = null
                                         step = 3
@@ -217,7 +217,7 @@ fun CreateProjectWizard(
                         LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                             item {
                                 ListItem(
-                                    headlineContent = { Text("Proyecto en Blanco (Sin Plantilla)") },
+                                    headlineContent = { Text(stringResource(R.string.crm_wizard_blank_project)) },
                                     modifier = Modifier.clickable {
                                         selectedTemplate = null
                                         projectName = ""
@@ -245,16 +245,16 @@ fun CreateProjectWizard(
                         OutlinedTextField(
                             value = projectName,
                             onValueChange = { projectName = it },
-                            label = { Text("Nombre del Proyecto") },
+                            label = { Text(stringResource(R.string.crm_project_name_label)) },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Cliente: ${selectedClient?.firstName} ${selectedClient?.lastName}")
-                        Text("Plantilla: ${selectedTemplate?.name ?: "Ninguna"}")
+                        Text(stringResource(R.string.crm_wizard_summary_client, "${selectedClient?.firstName} ${selectedClient?.lastName}"))
+                        Text(stringResource(R.string.crm_wizard_summary_template, selectedTemplate?.name ?: stringResource(R.string.general_none)))
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                            TextButton(onClick = onDismiss) { Text("Cancelar") }
+                            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
                             Button(
                                 onClick = { 
                                     if (projectName.isNotBlank() && selectedClient != null) {
@@ -262,7 +262,7 @@ fun CreateProjectWizard(
                                     }
                                 },
                                 enabled = projectName.isNotBlank()
-                            ) { Text("Crear") }
+                            ) { Text(stringResource(R.string.general_create)) }
                         }
                     }
                 }

@@ -64,7 +64,7 @@ fun TimeControlScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Control Horario",
+                text = stringResource(R.string.time_control_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -77,7 +77,7 @@ fun TimeControlScreen(
                     value = android.text.format.DateFormat.getMediumDateFormat(context).format(Date(selectedDate)),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Fecha") },
+                    label = { Text(stringResource(R.string.time_control_date_label)) },
                     trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = false, // Clickable modifier handles click
@@ -112,7 +112,7 @@ fun TimeControlScreen(
                     readOnly = true,
                     value = selectedProject?.name ?: "",
                     onValueChange = {},
-                    label = { Text("Proyecto / Subproyecto") },
+                    label = { Text(stringResource(R.string.time_control_project_label)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                 )
@@ -126,7 +126,7 @@ fun TimeControlScreen(
                                 Column {
                                     Text(project.name, style = MaterialTheme.typography.bodyLarge)
                                     if (project.parentProjectId != null) {
-                                        Text("Subproyecto", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                                        Text(androidx.compose.ui.res.stringResource(R.string.time_control_subproject_label), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
                                     }
                                 }
                             },
@@ -150,9 +150,9 @@ fun TimeControlScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Planificación Futura", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.time_control_future_plan_title), style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Estás seleccionando una fecha futura. Puedes agendar este trabajo directamente en tu calendario.")
+                        Text(stringResource(R.string.time_control_future_plan_desc))
                     }
                 }
             } else {
@@ -160,7 +160,7 @@ fun TimeControlScreen(
                 OutlinedTextField(
                     value = hours,
                     onValueChange = { viewModel.onHoursChanged(it) },
-                    label = { Text("Horas Trabajadas") },
+                    label = { Text(stringResource(R.string.time_control_hours_label)) },
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -171,7 +171,7 @@ fun TimeControlScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = { viewModel.onDescriptionChanged(it) },
-                label = { Text(if (isFuture) "Descripción del Trabajo a Realizar" else "Descripción del Trabajo Realizado") },
+                label = { Text(if (isFuture) stringResource(R.string.time_control_desc_future) else stringResource(R.string.time_control_desc_past)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
@@ -185,23 +185,23 @@ fun TimeControlScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = selectedProject != null && (isFuture || hours.isNotBlank())
             ) {
-                Text(if (isFuture) "Agendar en Calendario" else "Guardar Parte de Trabajo")
+                Text(if (isFuture) stringResource(R.string.time_control_save_future) else stringResource(R.string.time_control_save_past))
             }
         }
         
         if (showStatusDialog) {
             AlertDialog(
                 onDismissRequest = { viewModel.onDismissStatusDialog() },
-                title = { Text("Proyecto No Activo") },
-                text = { Text("El proyecto seleccionado no está Activo. ¿Deseas activarlo para imputar horas?") },
+                title = { Text(stringResource(R.string.time_control_inactive_project_title)) },
+                text = { Text(stringResource(R.string.time_control_inactive_project_desc)) },
                 confirmButton = {
                     Button(onClick = { viewModel.onConfirmStatusChange() }) {
-                        Text("Activar y Guardar")
+                        Text(stringResource(R.string.time_control_activate_save_button))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { viewModel.onDismissStatusDialog() }) {
-                        Text("Cancelar")
+                        Text(stringResource(R.string.general_cancel))
                     }
                 }
             )

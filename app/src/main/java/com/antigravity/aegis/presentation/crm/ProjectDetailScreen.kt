@@ -56,7 +56,7 @@ fun ProjectDetailScreen(
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Guardar como Plantilla") },
+                            text = { Text(stringResource(R.string.crm_project_save_as_template)) },
                             onClick = { 
                                 expanded = false
                                 showSaveTemplateDialog = true
@@ -102,7 +102,7 @@ fun ProjectDetailScreen(
                              }
                          )
                      }) {
-                         Text("Generar Presupuesto")
+                         Text(stringResource(R.string.crm_project_generate_quote))
                      }
                  }
             }
@@ -114,7 +114,7 @@ fun ProjectDetailScreen(
             // -- SUBPROJECTS SECTION --
             if (project!!.parentProjectId == null) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Subproyectos", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.crm_project_subprojects_title), style = MaterialTheme.typography.titleLarge)
                     TextButton(onClick = { showAddSubProjectDialog = true }) {
                         Text(stringResource(R.string.general_add))
                     }
@@ -128,13 +128,13 @@ fun ProjectDetailScreen(
                                 Column {
                                     Text(sub.status.name)
                                     if (sub.price != null) {
-                                        Text("Precio: €${"%.2f".format(sub.price)}")
+                                        Text(stringResource(R.string.crm_subproject_price_prefix, "%.2f".format(sub.price)))
                                     }
                                     if (sub.estimatedTime != null && sub.estimatedTimeUnit != null) {
-                                        Text("Tiempo: ${sub.estimatedTime} ${sub.estimatedTimeUnit}")
+                                        Text(stringResource(R.string.crm_subproject_time_prefix, sub.estimatedTime.toString(), sub.estimatedTimeUnit))
                                     }
                                     if (!sub.materials.isNullOrBlank()) {
-                                        Text("Materiales: ${sub.materials}", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                                        Text(stringResource(R.string.crm_subproject_materials_prefix, sub.materials), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                                     }
                                 }
                             }
@@ -142,7 +142,7 @@ fun ProjectDetailScreen(
                         HorizontalDivider()
                     }
                      if (subProjects.isEmpty()) {
-                         item { Text("No hay subproyectos", style = MaterialTheme.typography.bodyMedium) }
+                         item { Text(stringResource(R.string.crm_subproject_empty), style = MaterialTheme.typography.bodyMedium) }
                      }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -342,25 +342,30 @@ fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String?, Doub
     var estimatedTimeStr by remember { mutableStateOf("") }
     
     var expandedUnitList by remember { mutableStateOf(false) }
-    var selectedTimeUnit by remember { mutableStateOf("Horas") }
-    val timeUnits = listOf("Horas", "Días", "Semanas")
+    
+    val timeUnits = listOf(
+        stringResource(R.string.crm_subproject_unit_hours), 
+        stringResource(R.string.crm_subproject_unit_days), 
+        stringResource(R.string.crm_subproject_unit_weeks)
+    )
+    var selectedTimeUnit by remember { mutableStateOf(timeUnits[0]) }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo Subproyecto") },
+        title = { Text(stringResource(R.string.crm_subproject_new_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
                 OutlinedTextField(
                     value = name, 
                     onValueChange = { name = it }, 
-                    label = { Text("Nombre del Subproyecto") },
+                    label = { Text(stringResource(R.string.crm_subproject_name_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = materials,
                     onValueChange = { materials = it },
-                    label = { Text("Materiales Necesarios") },
+                    label = { Text(stringResource(R.string.crm_subproject_materials_label)) },
                     minLines = 3,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -368,7 +373,7 @@ fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String?, Doub
                 OutlinedTextField(
                     value = priceStr,
                     onValueChange = { priceStr = it.filter { c -> c.isDigit() || c == '.' || c == ',' }.replace(',', '.') },
-                    label = { Text("Precio (€)") },
+                    label = { Text(stringResource(R.string.crm_subproject_price_label)) },
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -377,7 +382,7 @@ fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String?, Doub
                     OutlinedTextField(
                         value = estimatedTimeStr,
                         onValueChange = { estimatedTimeStr = it.filter { c -> c.isDigit() || c == '.' || c == ',' }.replace(',', '.') },
-                        label = { Text("Tiempo Est.") },
+                        label = { Text(stringResource(R.string.crm_subproject_time_label)) },
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                         modifier = Modifier.weight(1f)
                     )
@@ -391,7 +396,7 @@ fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String?, Doub
                             value = selectedTimeUnit,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Unidad") },
+                            label = { Text(stringResource(R.string.crm_subproject_unit_label)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedUnitList) },
                             modifier = Modifier.menuAnchor()
                         )
@@ -449,7 +454,7 @@ fun AddTaskDialog(onDismiss: () -> Unit, onConfirm: (String, Long?) -> Unit) {
                 OutlinedTextField(
                     value = durationHours, 
                     onValueChange = { durationHours = it.filter { c -> c.isDigit() } }, 
-                    label = { Text("Duración Estimada (Horas)") },
+                    label = { Text(stringResource(R.string.crm_task_duration_hours_label)) },
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
                 )
             }
@@ -476,22 +481,22 @@ fun SaveTemplateDialog(currentName: String, onDismiss: () -> Unit, onConfirm: (S
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Guardar como Plantilla") },
+        title = { Text(stringResource(R.string.crm_project_save_as_template)) },
         text = {
             Column {
-                Text("Se creará una copia de este proyecto y sus subproyectos como una plantilla reutilizable.")
+                Text(stringResource(R.string.crm_project_save_template_desc))
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = name, 
                     onValueChange = { name = it }, 
-                    label = { Text("Nombre de la Plantilla") }
+                    label = { Text(stringResource(R.string.crm_project_template_name_label)) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 // Simple text field for category for now, or dropdown if we have list
                 OutlinedTextField(
                     value = category, 
                     onValueChange = { category = it }, 
-                    label = { Text("Categoría (Opcional)") }
+                    label = { Text(stringResource(R.string.crm_project_template_category_label)) }
                 )
             }
         },

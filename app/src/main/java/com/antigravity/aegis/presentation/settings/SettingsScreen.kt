@@ -156,6 +156,11 @@ fun SettingsScreen(
                         label = { Text(stringResource(R.string.language_spanish)) }
                     )
                     FilterChip(
+                        selected = config?.language == "ca",
+                        onClick = { viewModel.updateLanguage("ca") },
+                        label = { Text(stringResource(R.string.language_catalan)) }
+                    )
+                    FilterChip(
                         selected = config?.language == "en",
                         onClick = { viewModel.updateLanguage("en") },
                         label = { Text(stringResource(R.string.language_english)) }

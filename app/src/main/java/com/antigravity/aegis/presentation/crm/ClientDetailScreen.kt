@@ -75,16 +75,16 @@ fun ClientDetailScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     val address = listOfNotNull(client!!.calle, client!!.numero, client!!.piso, client!!.codigoPostal, client!!.poblacion).joinToString(", ")
                     
-                    Text("Tipo: ${client!!.tipoCliente} - ${client!!.categoria}")
+                    Text(stringResource(R.string.crm_client_detail_type, client!!.tipoCliente, client!!.categoria))
                     if (!client!!.nifCif.isNullOrEmpty()) {
-                         Text("${if (client!!.tipoCliente == "Empresa") "CIF" else "NIF"}: ${client!!.nifCif}")
+                         Text(stringResource(if (client!!.tipoCliente == "Empresa") R.string.crm_client_detail_cif else R.string.crm_client_detail_nif, client!!.nifCif!!))
                     }
                     if (address.isNotBlank()) {
-                         Text("Dirección: $address")
+                         Text(stringResource(R.string.crm_client_detail_address, address))
                     }
                     Text(stringResource(R.string.crm_client_detail_email, client!!.email ?: stringResource(R.string.general_na)))
                     Text(stringResource(R.string.crm_client_detail_phone, client!!.phone ?: stringResource(R.string.general_na)))
-                    Text("Notas: ${client!!.notas ?: stringResource(R.string.general_na)}")
+                    Text(stringResource(R.string.crm_client_detail_notes, client!!.notas ?: stringResource(R.string.general_na)))
                 }
             }
 
@@ -145,10 +145,10 @@ fun AddProjectDialog(
                     onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
-                        value = selectedTemplate?.name ?: "Sin Plantilla (Proyecto en Blanco)",
+                        value = selectedTemplate?.name ?: stringResource(R.string.crm_wizard_blank_project),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Plantilla") },
+                        label = { Text(stringResource(R.string.crm_project_template_label)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                         modifier = Modifier.menuAnchor().fillMaxWidth()
@@ -158,7 +158,7 @@ fun AddProjectDialog(
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Sin Plantilla (Proyecto en Blanco)") },
+                            text = { Text(stringResource(R.string.crm_wizard_blank_project)) },
                             onClick = { 
                                 selectedTemplate = null
                                 expanded = false

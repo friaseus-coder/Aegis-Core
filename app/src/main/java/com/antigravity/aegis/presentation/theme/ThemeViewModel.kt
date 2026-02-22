@@ -24,7 +24,7 @@ class ThemeViewModel @Inject constructor(
     }
 
     val language = settingsRepository.getUserConfig().map { 
-        it?.language ?: "es" // Default to Spanish
+        it?.language ?: com.antigravity.aegis.presentation.util.LanguageUtils.getDefaultPlatformLanguage() // Default to Platform Language
     }
     
     val companyLogoUri = settingsRepository.getUserConfig().map {

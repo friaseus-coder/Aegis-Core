@@ -24,9 +24,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.antigravity.aegis.R
 import com.antigravity.aegis.data.local.entity.ActiveRole
 import com.antigravity.aegis.data.local.entity.EntityType
 import com.antigravity.aegis.presentation.MainViewModel
@@ -70,10 +72,10 @@ fun ProfileConfigScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Editar Perfil") },
+                title = { Text(stringResource(R.string.profile_edit_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -155,7 +157,7 @@ fun ProfileConfigScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nombre del Titular") },
+                label = { Text(stringResource(R.string.profile_name_label)) },
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -163,23 +165,23 @@ fun ProfileConfigScreen(
             
             // Identity Type
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Identidad", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.profile_identity_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = entityType == EntityType.PARTICULAR,
                         onClick = { entityType = EntityType.PARTICULAR }
                     )
-                    Text("Particular")
+                    Text(stringResource(R.string.profile_identity_individual))
                     Spacer(modifier = Modifier.width(16.dp))
                     RadioButton(
                         selected = entityType == EntityType.EMPRESA,
                         onClick = { entityType = EntityType.EMPRESA }
                     )
-                    Text("Empresa")
+                    Text(stringResource(R.string.profile_identity_company))
                 }
                 if (entityType == EntityType.EMPRESA) {
                     Text(
-                        "Se recomienda subir el Logo de la empresa.",
+                        stringResource(R.string.profile_identity_logo_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -190,9 +192,9 @@ fun ProfileConfigScreen(
             
             // Role Configuration
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Rol Predeterminado", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.profile_default_role_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    "Define cómo se comportará la app al iniciar.",
+                    stringResource(R.string.profile_default_role_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -203,8 +205,8 @@ fun ProfileConfigScreen(
                         onClick = { activeRole = ActiveRole.AUTONOMO }
                     )
                     Column {
-                        Text("Autónomo")
-                        Text("Acceso total (Gestión)", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.profile_role_freelance))
+                        Text(stringResource(R.string.profile_role_freelance_desc), style = MaterialTheme.typography.bodySmall)
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -213,8 +215,8 @@ fun ProfileConfigScreen(
                         onClick = { activeRole = ActiveRole.TRABAJADOR }
                     )
                      Column {
-                        Text("Trabajador")
-                        Text("Solo módulos operativos", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.profile_role_worker))
+                        Text(stringResource(R.string.profile_role_worker_desc), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -228,9 +230,9 @@ fun ProfileConfigScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                  Column(modifier = Modifier.weight(1f)) {
-                    Text("Modo Flexible (Dual)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.profile_dual_mode_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
-                        "Permite alternar entre vista Gestión y Operativa desde el Dashboard.",
+                        stringResource(R.string.profile_dual_mode_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -256,7 +258,7 @@ fun ProfileConfigScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Guardar Cambios")
+                Text(stringResource(R.string.profile_save_changes_button))
             }
         }
     }

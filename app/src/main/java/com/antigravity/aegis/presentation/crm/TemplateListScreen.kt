@@ -90,12 +90,12 @@ fun TemplateListScreen(
     Scaffold(
         topBar = {
             AegisTopAppBar(
-                title = "Plantillas de Proyecto"
+                title = stringResource(R.string.crm_templates_title)
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { importLauncher.launch(arrayOf("application/json")) }) {
-                Icon(Icons.Default.FileDownload, contentDescription = "Importar Plantilla") // Icon Download for Import? Or Upload? Download from file... Arrow Down?
+                Icon(Icons.Default.FileDownload, contentDescription = stringResource(R.string.crm_templates_import))
                 // Material Icons: FileUpload (Arrow Up), FileDownload (Arrow Down).
                 // Import = Into App = FileOpen? or Download if from cloud?
                 // Let's use FileUpload usually for "Import" (Load up to app) and Download for "Export" (Save down to disk)? 
@@ -148,7 +148,7 @@ fun TemplateListScreen(
                             Tab(
                                 selected = selectedCategory == null,
                                 onClick = { selectedCategory = null },
-                                text = { Text("Todos") }
+                                text = { Text(stringResource(R.string.filter_all)) }
                             )
                             categories.forEach { category ->
                                 Tab(
@@ -164,7 +164,7 @@ fun TemplateListScreen(
                 items(filteredTemplates) { template ->
                     ListItem(
                         headlineContent = { Text(template.name) },
-                        supportingContent = { Text("Creada: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(template.startDate))}") },
+                        supportingContent = { Text(stringResource(R.string.crm_templates_created, SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(template.startDate)))) },
                         trailingContent = {
                             var expanded by remember { mutableStateOf(false) }
                             Box {
@@ -176,14 +176,14 @@ fun TemplateListScreen(
                                     onDismissRequest = { expanded = false }
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text("Ver/Editar Detalles") },
+                                        text = { Text(stringResource(R.string.crm_templates_view_edit)) },
                                         onClick = { 
                                             expanded = false
                                             onNavigateToDetail(template.id)
                                         }
                                     )
                                     DropdownMenuItem(
-                                        text = { Text("Exportar JSON") },
+                                        text = { Text(stringResource(R.string.crm_templates_export_json)) },
                                         onClick = {
                                             expanded = false
                                             pendingExportTemplateId = template.id
@@ -202,7 +202,7 @@ fun TemplateListScreen(
                 if (filteredTemplates.isEmpty()) {
                     item {
                         Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                            Text("No hay plantillas. Importa una o guarda un proyecto como plantilla.")
+                            Text(stringResource(R.string.crm_templates_empty))
                         }
                     }
                 }

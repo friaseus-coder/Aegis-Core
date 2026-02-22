@@ -296,7 +296,7 @@ fun ScannerView(
                                     Text(stringResource(R.string.ui_product_found), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(product.name, style = MaterialTheme.typography.headlineSmall)
-                                    Text("$${product.price} - Stock: ${product.quantity}")
+                                    Text(stringResource(R.string.ui_product_price_stock, product.price.toString(), product.quantity.toString()))
                                     
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Row(

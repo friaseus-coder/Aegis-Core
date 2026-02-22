@@ -11,6 +11,7 @@
     <string name="general_add">Añadir</string>
     <string name="general_back">Atrás</string>
     <string name="general_ok">OK</string>
+    <string name="general_none">Ninguna</string>
     <string name="general_error_prefix">Error: %1$s</string>
     <string name="general_success">Éxito</string>
     <string name="general_na">N/A</string>
@@ -99,9 +100,53 @@
     <string name="crm_project_name_label">Nombre del Proyecto</string>
     <string name="crm_project_not_found">Proyecto no encontrado...</string>
     <string name="crm_project_id_label">ID Proyecto: %1$d</string>
+    <string name="crm_project_subprojects_title">Subproyectos</string>
+    <string name="crm_subproject_price_prefix">Precio: €%1$s</string>
+    <string name="crm_subproject_time_prefix">Tiempo: %1$s %2$s</string>
+    <string name="crm_subproject_materials_prefix">Materiales: %1$s</string>
+    <string name="crm_subproject_empty">No hay subproyectos</string>
+    <string name="crm_subproject_new_title">Nuevo Subproyecto</string>
+    <string name="crm_subproject_name_label">Nombre del Subproyecto</string>
+    <string name="crm_subproject_materials_label">Materiales Necesarios</string>
+    <string name="crm_subproject_price_label">Precio (€)</string>
+    <string name="crm_subproject_time_label">Tiempo Est.</string>
+    <string name="crm_subproject_unit_hours">Horas</string>
+    <string name="crm_subproject_unit_days">Días</string>
+    <string name="crm_subproject_unit_weeks">Semanas</string>
+    <string name="crm_subproject_unit_label">Unidad</string>
     <string name="crm_archived_projects_title">Proyectos Archivados</string>
     <string name="crm_archived_projects_empty">No hay proyectos archivados.</string>
     <string name="crm_project_reactivate_button">Reactivar</string>
+    
+    <!-- Feature: CRM/Dashboard & Wizard -->
+    <string name="crm_dashboard_new_project">Nuevo Proyecto</string>
+    <string name="crm_wizard_select_client">Seleccionar Cliente</string>
+    <string name="crm_wizard_select_category">Seleccionar Categoría</string>
+    <string name="crm_wizard_select_template">Seleccionar Plantilla</string>
+    <string name="crm_wizard_project_details">Detalles del Proyecto</string>
+    <string name="crm_wizard_no_clients">No hay clientes. Crea uno primero.</string>
+    <string name="crm_wizard_create_client">Crear Cliente</string>
+    <string name="crm_wizard_no_category">Sin Categoría / Personalizado</string>
+    <string name="crm_wizard_blank_project">Proyecto en Blanco (Sin Plantilla)</string>
+    <string name="crm_wizard_summary_client">Cliente: %1$s</string>
+    <string name="crm_wizard_summary_template">Plantilla: %1$s</string>
+
+    <!-- Feature: Quote Kanban -->
+    <string name="crm_quote_kanban_create_desc">Se creará automáticamente un Proyecto Activo asociado a este presupuesto.</string>
+    <string name="crm_quote_kanban_project_name_label">Nombre del Proyecto/Presupuesto</string>
+
+    <!-- Feature: Client/Project Details -->
+    <string name="crm_client_detail_type">Tipo: %1$s - %2$s</string>
+    <string name="crm_client_detail_cif">CIF: %1$s</string>
+    <string name="crm_client_detail_nif">NIF: %1$s</string>
+    <string name="crm_client_detail_address">Dirección: %1$s</string>
+    <string name="crm_project_template_label">Plantilla</string>
+    <string name="crm_project_save_as_template">Guardar como Plantilla</string>
+    <string name="crm_project_generate_quote">Generar Presupuesto</string>
+    <string name="crm_task_duration_hours_label">Duración Estimada (Horas)</string>
+    <string name="crm_project_save_template_desc">Se creará una copia de este proyecto y sus subproyectos como una plantilla reutilizable.</string>
+    <string name="crm_project_template_name_label">Nombre de la Plantilla</string>
+    <string name="crm_project_template_category_label">Categoría (Opcional)</string>
 
     <!-- Feature: CRM/Tasks & Reports -->
     <string name="crm_tasks_section_title">Tareas</string>
@@ -171,6 +216,7 @@
     <string name="inventory_stock_list_title">Lista de Stock</string>
     <string name="inventory_scan_label">Escanear</string>
     <string name="inventory_barcode_label">Código de Barras: %1$s</string>
+    <string name="ui_product_price_stock">€%1$s - Stock: %2$s</string>
 
     <!-- Feature: Quotes/Budgets -->
     <string name="quotes_title_new">Nuevo Presupuesto</string>
@@ -197,6 +243,20 @@
     <string name="quotes_list_empty">No hay presupuestos.</string>
     <string name="quotes_default_title">Presupuesto para %1$s</string>
     
+    <!-- Feature: Quotations Extras & Templates -->
+    <string name="quotes_add_item_title">Añadir Partida</string>
+    <string name="quotes_item_price_eur_label">Precio (€)</string>
+    <string name="quotes_summary_subtotal_prefix">Subtotal: %1$s€</string>
+    <string name="quotes_summary_tax_prefix">IVA (21%%): %1$s€</string>
+    <string name="quotes_summary_total_prefix">TOTAL: %1$s€</string>
+    
+    <string name="crm_templates_title">Plantillas de Proyecto</string>
+    <string name="crm_templates_import">Importar Plantilla</string>
+    <string name="crm_templates_created">Creada: %1$s</string>
+    <string name="crm_templates_view_edit">Ver/Editar Detalles</string>
+    <string name="crm_templates_export_json">Exportar JSON</string>
+    <string name="crm_templates_empty">No hay plantillas. Importa una o guarda un proyecto como plantilla.</string>
+
     <!-- Feature: Settings -->
     <string name="settings_title">Ajustes</string>
     <string name="settings_section_security">Seguridad</string>
@@ -257,10 +317,12 @@
     <string name="module_id_time_control">Control Horario</string>
     <string name="module_id_clients">Clientes</string>
     <string name="module_id_mileage">Kilometraje</string>
+    <string name="time_control_subproject_label">Subproyecto</string>
 
     <!-- Language Definitions -->
     <string name="language_spanish">Español</string>
     <string name="language_english">English</string>
+    <string name="language_catalan">Català</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Oscuro</string>
@@ -278,6 +340,7 @@
     <string name="cd_hide_pin">Ocultar PIN</string>
     <string name="language_code_es">ES</string>
     <string name="language_code_en">EN</string>
+    <string name="language_code_ca">CA</string>
 
     <!-- Additional UI Strings -->
     <string name="ui_search_label">Buscar (mín 3 letras)</string>
@@ -331,5 +394,37 @@
     <string name="financial_allocated_general">Gastos Generales (Imputados)</string>
     <string name="financial_profit_per_hour">Beneficio/Hora</string>
     <string name="financial_total">Total: €%1$.2f - %2$s</string>
+
+    <!-- Feature: Time Control -->
+    <string name="time_control_title">Control Horario</string>
+    <string name="time_control_date_label">Fecha</string>
+    <string name="time_control_project_label">Proyecto / Subproyecto</string>
+    <string name="time_control_future_plan_title">Planificación Futura</string>
+    <string name="time_control_future_plan_desc">Estás seleccionando una fecha futura. Puedes agendar este trabajo directamente en tu calendario.</string>
+    <string name="time_control_hours_label">Horas Trabajadas</string>
+    <string name="time_control_desc_future">Descripción del Trabajo a Realizar</string>
+    <string name="time_control_desc_past">Descripción del Trabajo Realizado</string>
+    <string name="time_control_save_future">Agendar en Calendario</string>
+    <string name="time_control_save_past">Guardar Parte de Trabajo</string>
+    <string name="time_control_inactive_project_title">Proyecto No Activo</string>
+    <string name="time_control_inactive_project_desc">El proyecto seleccionado no está Activo. ¿Deseas activarlo para imputar horas?</string>
+    <string name="time_control_activate_save_button">Activar y Guardar</string>
+
+    <!-- Feature: Profile Config -->
+    <string name="profile_edit_title">Editar Perfil</string>
+    <string name="profile_name_label">Nombre del Titular</string>
+    <string name="profile_identity_title">Identidad</string>
+    <string name="profile_identity_individual">Particular</string>
+    <string name="profile_identity_company">Empresa</string>
+    <string name="profile_identity_logo_hint">Se recomienda subir el Logo de la empresa.</string>
+    <string name="profile_default_role_title">Rol Predeterminado</string>
+    <string name="profile_default_role_desc">Define cómo se comportará la app al iniciar.</string>
+    <string name="profile_role_freelance">Autónomo</string>
+    <string name="profile_role_freelance_desc">Acceso total (Gestión)</string>
+    <string name="profile_role_worker">Trabajador</string>
+    <string name="profile_role_worker_desc">Solo módulos operativos</string>
+    <string name="profile_dual_mode_title">Modo Flexible (Dual)</string>
+    <string name="profile_dual_mode_desc">Permite alternar entre vista Gestión y Operativa desde el Dashboard.</string>
+    <string name="profile_save_changes_button">Guardar Cambios</string>
 
 </resources>

@@ -102,29 +102,29 @@ class DashboardViewModel @Inject constructor(
     val configuredModules: Flow<List<ModuleData>> = 
         settingsRepository.getUserConfig().map { config ->
             val defaultModules = listOf(
-                ModuleData("Proyectos", Icons.Filled.Work, Screen.Projects.route),
-                ModuleData("Presupuestos", Icons.Filled.Money, Screen.Budgets.route),
-                ModuleData("Gastos", Icons.Filled.Money, Screen.Expenses.route),
-                ModuleData("Inventario", Icons.Filled.Inventory, Screen.Inventory.route),
-                ModuleData("Control Horario", Icons.Filled.Schedule, Screen.TimeControl.route),
-                ModuleData("Clientes", Icons.Filled.Person, Screen.Clients.route),
-                ModuleData("Kilometraje", Icons.Filled.Map, Screen.Mileage.route)
+                ModuleData(com.antigravity.aegis.R.string.module_id_projects, Icons.Filled.Work, Screen.Projects.route),
+                ModuleData(com.antigravity.aegis.R.string.module_id_budgets, Icons.Filled.Money, Screen.Budgets.route),
+                ModuleData(com.antigravity.aegis.R.string.module_id_expenses, Icons.Filled.Money, Screen.Expenses.route),
+                ModuleData(com.antigravity.aegis.R.string.module_id_inventory, Icons.Filled.Inventory, Screen.Inventory.route),
+                ModuleData(com.antigravity.aegis.R.string.module_id_time_control, Icons.Filled.Schedule, Screen.TimeControl.route),
+                ModuleData(com.antigravity.aegis.R.string.module_id_clients, Icons.Filled.Person, Screen.Clients.route),
+                ModuleData(com.antigravity.aegis.R.string.module_id_mileage, Icons.Filled.Map, Screen.Mileage.route)
             )
 
             // Map default modules to their string IDs used in config
             val moduleIdMap = mapOf(
-                "projects" to "Proyectos",
-                "budgets" to "Presupuestos",
-                "expenses" to "Gastos",
-                "inventory" to "Inventario",
-                "time_control" to "Control Horario",
-                "clients" to "Clientes",
-                "mileage" to "Kilometraje"
+                "projects" to com.antigravity.aegis.R.string.module_id_projects,
+                "budgets" to com.antigravity.aegis.R.string.module_id_budgets,
+                "expenses" to com.antigravity.aegis.R.string.module_id_expenses,
+                "inventory" to com.antigravity.aegis.R.string.module_id_inventory,
+                "time_control" to com.antigravity.aegis.R.string.module_id_time_control,
+                "clients" to com.antigravity.aegis.R.string.module_id_clients,
+                "mileage" to com.antigravity.aegis.R.string.module_id_mileage
             )
 
             // Reverse map to get module by ID easily
             val defaultModulesById = defaultModules.associateBy { module ->
-                moduleIdMap.entries.firstOrNull { it.value == module.name }?.key ?: ""
+                moduleIdMap.entries.firstOrNull { it.value == module.titleResId }?.key ?: ""
             }
 
             val hiddenList = try {
@@ -142,7 +142,7 @@ class DashboardViewModel @Inject constructor(
             if (config == null || config.moduleOrder.isBlank()) {
                 // Return default order, but filter out hidden
                 defaultModules.filter { module ->
-                    val id = moduleIdMap.entries.firstOrNull { it.value == module.name }?.key ?: ""
+                    val id = moduleIdMap.entries.firstOrNull { it.value == module.titleResId }?.key ?: ""
                     id !in hiddenList
                 }
             } else {
@@ -165,7 +165,7 @@ class DashboardViewModel @Inject constructor(
                 }
 
                 remainingMap.values.forEach { module ->
-                    val id = moduleIdMap.entries.firstOrNull { it.value == module.name }?.key ?: ""
+                    val id = moduleIdMap.entries.firstOrNull { it.value == module.titleResId }?.key ?: ""
                     if (id !in hiddenList) orderedModules.add(module)
                 }
 

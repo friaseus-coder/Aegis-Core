@@ -55,7 +55,7 @@ import com.antigravity.aegis.presentation.components.BovedaLogo
 import com.antigravity.aegis.presentation.navigation.Screen
 
 data class ModuleData(
-    val name: String,
+    val titleResId: Int,
     val icon: ImageVector,
     val route: String
 )
@@ -134,13 +134,13 @@ fun ModuleCard(module: ModuleData, onClick: () -> Unit) {
         ) {
             Icon(
                 imageVector = module.icon,
-                contentDescription = module.name,
+                contentDescription = androidx.compose.ui.res.stringResource(id = module.titleResId),
                 modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = module.name,
+                text = androidx.compose.ui.res.stringResource(id = module.titleResId),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )

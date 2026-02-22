@@ -50,7 +50,7 @@ class AuthViewModel @Inject constructor(
     private val _selectedUser = MutableStateFlow<UserEntity?>(null)
     val selectedUser = _selectedUser.asStateFlow()
 
-    private val _language = MutableStateFlow("es")
+    private val _language = MutableStateFlow(com.antigravity.aegis.presentation.util.LanguageUtils.getDefaultPlatformLanguage())
     val language = _language.asStateFlow()
 
     private val _isBiometricAvailable = MutableStateFlow(false)

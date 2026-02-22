@@ -135,25 +135,25 @@ fun CreateQuoteScreen(
             Divider()
             
             // Add Item Section
-            Text("Añadir Partida", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.quotes_add_item_title), style = MaterialTheme.typography.titleMedium)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = newItemDesc,
                     onValueChange = { newItemDesc = it },
-                    label = { Text("Descripción") },
+                    label = { Text(stringResource(R.string.quotes_item_desc_label)) },
                     modifier = Modifier.weight(2f)
                 )
                 OutlinedTextField(
                     value = newItemQty,
                     onValueChange = { if(it.all { c -> c.isDigit() || c == '.'}) newItemQty = it },
-                    label = { Text("Cant.") },
+                    label = { Text(stringResource(R.string.quotes_item_qty_label)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
                  OutlinedTextField(
                     value = newItemPrice,
                     onValueChange = { if(it.all { c -> c.isDigit() || c == '.'}) newItemPrice = it },
-                    label = { Text("Precio (€)") },
+                    label = { Text(stringResource(R.string.quotes_item_price_eur_label)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -180,7 +180,7 @@ fun CreateQuoteScreen(
                 modifier = Modifier.align(Alignment.End),
                 enabled = newItemDesc.isNotBlank() && newItemQty.isNotBlank() && newItemPrice.isNotBlank()
             ) {
-                Text("Añadir")
+                Text(stringResource(R.string.general_add))
             }
             
             // List of Items
@@ -197,7 +197,7 @@ fun CreateQuoteScreen(
                         Text("${line.quantity} x ${line.unitPrice}€", modifier = Modifier.weight(1f))
                         Text("${"%.2f".format(line.quantity * line.unitPrice)}€", modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.primary)
                         IconButton(onClick = { budgetLines.removeAt(index) }, modifier = Modifier.size(24.dp)) {
-                             Icon(Icons.Default.Delete, contentDescription = "Remove")
+                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.general_delete))
                         }
                     }
                     Divider()
@@ -214,9 +214,9 @@ fun CreateQuoteScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Subtotal: ${"%.2f".format(subtotal)}€")
-                    Text("IVA (21%): ${"%.2f".format(totalTax)}€")
-                    Text("TOTAL: ${"%.2f".format(total)}€", style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text(stringResource(R.string.quotes_summary_subtotal_prefix, "%.2f".format(subtotal)))
+                    Text(stringResource(R.string.quotes_summary_tax_prefix, "%.2f".format(totalTax)))
+                    Text(stringResource(R.string.quotes_summary_total_prefix, "%.2f".format(total)), style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 }
             }
         }

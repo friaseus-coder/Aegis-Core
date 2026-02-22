@@ -57,7 +57,7 @@ fun ClientListScreen(
             crmViewModel.resetTransferState()
         }
         is CrmViewModel.TransferState.Error -> {
-            Toast.makeText(context, "Error: ${state.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, stringResource(R.string.general_error_prefix, state.message), Toast.LENGTH_LONG).show()
              crmViewModel.resetTransferState()
         }
         is CrmViewModel.TransferState.ValidationError -> {
@@ -65,7 +65,7 @@ fun ClientListScreen(
                 onDismissRequest = { crmViewModel.resetTransferState() },
                 title = { Text(stringResource(R.string.data_import_errors_title)) },
                 text = { Text(state.errors.joinToString("\n")) },
-                confirmButton = { TextButton(onClick = { crmViewModel.resetTransferState() }) { Text("OK") } }
+                confirmButton = { TextButton(onClick = { crmViewModel.resetTransferState() }) { Text(stringResource(R.string.general_ok)) } }
             )
         }
         is CrmViewModel.TransferState.ValidationSuccess -> {
@@ -86,10 +86,10 @@ fun ClientListScreen(
                 title = stringResource(R.string.crm_clients_title), // Changed title to be correct
                 actions = {
                     IconButton(onClick = { crmViewModel.exportClients() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = "Exportar CSV")
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.data_export_csv))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = "Importar CSV")
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.data_import_csv))
                     }
                 }
             )
@@ -106,7 +106,7 @@ fun ClientListScreen(
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { viewModel.onSearchQueryChanged(it) },
-                label = { Text("Buscar (min 3 letras)") },
+                label = { Text(stringResource(R.string.action_search_hint_min_3)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -114,10 +114,10 @@ fun ClientListScreen(
                 trailingIcon = {
                      if (uiState.searchQuery.isNotEmpty()) {
                          IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                             Icon(Icons.Default.Clear, "Limpiar")
+                             Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.action_clear_search))
                          }
                      } else {
-                         Icon(Icons.Default.Search, "Buscar")
+                         Icon(Icons.Default.Search, contentDescription = stringResource(R.string.action_search))
                      }
                 }
             )
@@ -132,7 +132,7 @@ fun ClientListScreen(
                  FilterChip(
                      selected = uiState.filterType == null,
                      onClick = { viewModel.onFilterSelected(null) },
-                     label = { Text("Todos") }
+                     label = { Text(stringResource(R.string.filter_all)) }
                  )
                  Spacer(modifier = Modifier.width(8.dp))
                  FilterChip(
@@ -140,7 +140,7 @@ fun ClientListScreen(
                      onClick = { 
                          viewModel.onFilterSelected(if (uiState.filterType == ClientType.PARTICULAR) null else ClientType.PARTICULAR) 
                      }, 
-                     label = { Text("Particulares") }
+                     label = { Text(stringResource(R.string.filter_individuals)) }
                  )
                  Spacer(modifier = Modifier.width(8.dp))
                  FilterChip(
@@ -148,7 +148,7 @@ fun ClientListScreen(
                      onClick = { 
                          viewModel.onFilterSelected(if (uiState.filterType == ClientType.EMPRESA) null else ClientType.EMPRESA) 
                      }, 
-                     label = { Text("Empresas") }
+                     label = { Text(stringResource(R.string.filter_companies)) }
                  )
             }
             

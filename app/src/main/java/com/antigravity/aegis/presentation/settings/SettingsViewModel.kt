@@ -151,7 +151,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun createNewUser(name: String, language: String = "es", pin: String, role: UserRole = UserRole.USER) {
+    fun createNewUser(name: String, language: String = com.antigravity.aegis.presentation.util.LanguageUtils.getDefaultPlatformLanguage(), pin: String, role: UserRole = UserRole.USER) {
         val masterKey = encryptionKeyManager.getKey()
         if (masterKey == null) {
              _uiState.value = SettingsUiState.Error(UiText.StringResource(R.string.auth_error_session_locked))
