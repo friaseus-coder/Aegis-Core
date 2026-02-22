@@ -34,6 +34,7 @@
     <string name="ui_currency_symbol">€</string>
 
     <!-- Feature: Auth - Login -->
+    <string name="auth_login_enter_button">Entrar</string>
     <string name="auth_login_title">Bloquejat</string>
     <string name="auth_login_pin_label">Introdueix PIN</string>
     <string name="auth_login_pin_hint">PIN</string>
@@ -50,6 +51,9 @@
     <string name="auth_login_biometric_enable_desc">Autentica\'t per activar el login biomètric</string>
 
     <!-- Feature: Auth - Create User/Setup -->
+    <string name="auth_setup_select_language">Selecciona el teu idioma / Select your language</string>
+    <string name="auth_setup_language_warning">*(L\'idioma seleccionat s\'aplicarà a l\'entrar)*</string>
+    <string name="auth_setup_enter_securely">Entrar de forma segura</string>
     <string name="auth_setup_welcome_title">Benvingut a Aegis Core</string>
     <string name="auth_setup_recovery_kit_title">El teu Kit de Recuperació (Frase Llavor)</string>
     <string name="auth_setup_recovery_kit_desc">Escriu aquestes paraules en ordre. Són l\'ÚNICA manera de recuperar les teves dades si oblides el PIN.</string>
@@ -253,8 +257,8 @@
     <string name="data_backup_permissions_error">Error guardando permisos: %1$s</string>
     <string name="backup_dialog_title">Còpia de Seguretat</string>
     <string name="backup_dialog_desc_main">Abans de començar a treballar, és important configurar una ubicació per a les teves còpies de seguretat automàtiques.</string>
-    <string name="backup_dialog_desc_recommend">Et recomanem utilitzar Google Drive per a més seguretat, però també pots utilitzar una carpeta local.</string>
-    <string name="backup_dialog_select_button">Seleccionar Carpeta (Drive / Local)</string>
+    <string name="backup_dialog_desc_recommend">Selecciona una carpeta del teu dispositiu per a la còpia local diària. Usa \'Pujar al Núvol / Compartir\' a Configuració per enviar a Google Drive.</string>
+    <string name="backup_dialog_select_button">Seleccionar Carpeta Local</string>
 
     <!-- Feature: Field Service -->
     <string name="field_service_title">Consola de Servei de Camp</string>

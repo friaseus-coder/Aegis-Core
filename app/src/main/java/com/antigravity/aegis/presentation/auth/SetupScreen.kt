@@ -14,43 +14,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.font.FontWeight
-import com.antigravity.aegis.data.security.BiometricPromptManager
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun SetupScreen(
     state: SetupUiState,
-    onConfirm: (String) -> Unit // Pasamos solo el idioma como configuración básica, el resto lo hace el ViewModel
+    onConfirm: (String) -> Unit
 ) {
-    val context = LocalContext.current
-    val activity = context as? androidx.fragment.app.FragmentActivity
-    val biometricPromptManager = remember(activity) {
-        if (activity != null) BiometricPromptManager(activity) else null
-    }
-    
-    val viewModel: AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
-    val biometricPromptState by viewModel.biometricPromptState.collectAsState()
-    val loginErrorUi by viewModel.loginError.collectAsState()
-    val loginError = loginErrorUi?.asString(context)
-
-    LaunchedEffect(biometricPromptState) {
-        biometricPromptState?.let { config ->
-            biometricPromptManager?.showBiometricPrompt(
-                title = context.getString(config.titleResId),
-                description = context.getString(config.descriptionResId),
-                cryptoObject = config.cryptoObject
-            )
-            viewModel.onBiometricPromptShown()
-        }
-    }
-
-    LaunchedEffect(biometricPromptManager) {
-        biometricPromptManager?.promptResults?.collect { result ->
-            viewModel.onBiometricResult(result)
-        }
-    }
-
+    val viewModel: AuthViewModel = hiltViewModel()
     var language by remember { mutableStateOf("es") }
     
     Column(
@@ -79,7 +51,7 @@ fun SetupScreen(
         
 
         
-        Text("Idioma Base de la App", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.auth_setup_select_language), style = MaterialTheme.typography.labelMedium)
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -107,14 +79,16 @@ fun SetupScreen(
 
         Spacer(modifier = Modifier.height(48.dp))
         
+        Spacer(modifier = Modifier.height(48.dp))
+        
         Text(
-            text = "Al inicializar, la Bóveda se vinculará a la seguridad de este dispositivo (PIN, Huella o Reconocimiento Facial).",
+            text = stringResource(R.string.auth_setup_language_warning),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = { onConfirm(language) },
@@ -122,9 +96,7 @@ fun SetupScreen(
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Icon(Icons.Default.Lock, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.auth_setup_init_vault_button), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.auth_setup_enter_securely), style = MaterialTheme.typography.titleMedium)
         }
     }
 }

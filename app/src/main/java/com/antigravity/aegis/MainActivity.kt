@@ -21,18 +21,36 @@ import com.antigravity.aegis.presentation.theme.ThemeViewModel
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import com.antigravity.aegis.data.worker.CloudSyncWorker
+import com.antigravity.aegis.data.worker.BackupReminderWorker
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     
     private val themeViewModel: ThemeViewModel by viewModels()
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        // Si el usuario deniega, no mandamos notificaciones locales.
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Enqueue Cloud Sync Worker
-        CloudSyncWorker.enqueue(this)
+        // Solicitar permisos de Notificación para Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        
+        // Enqueue Backup Reminder Worker
+        BackupReminderWorker.enqueue(this)
         
         // Collect Theme Mode
         setContent {

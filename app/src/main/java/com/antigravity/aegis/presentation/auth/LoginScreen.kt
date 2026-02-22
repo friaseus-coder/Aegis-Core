@@ -14,7 +14,6 @@ import com.antigravity.aegis.R
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
-import com.antigravity.aegis.data.security.BiometricPromptManager
 import androidx.compose.material.icons.filled.Download
 
 @Composable
@@ -25,32 +24,8 @@ fun LoginScreen(
 ) {
     val viewModel: AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val authState by viewModel.authState.collectAsState()
-    val biometricPromptState by viewModel.biometricPromptState.collectAsState()
     val loginErrorUi by viewModel.loginError.collectAsState()
     val loginError = loginErrorUi?.asString(LocalContext.current)
-    
-    val context = LocalContext.current
-    val activity = context as? androidx.fragment.app.FragmentActivity
-    val biometricPromptManager = remember(activity) {
-        if (activity != null) BiometricPromptManager(activity) else null
-    }
-
-    LaunchedEffect(biometricPromptState) {
-        biometricPromptState?.let { config ->
-            biometricPromptManager?.showBiometricPrompt(
-                title = context.getString(config.titleResId),
-                description = context.getString(config.descriptionResId),
-                cryptoObject = config.cryptoObject
-            )
-            viewModel.onBiometricPromptShown()
-        }
-    }
-
-    LaunchedEffect(biometricPromptManager) {
-        biometricPromptManager?.promptResults?.collect { result ->
-            viewModel.onBiometricResult(result)
-        }
-    }
     
     var hasNavigated by remember { mutableStateOf(false) }
     LaunchedEffect(authState) {
@@ -107,14 +82,14 @@ fun LoginScreen(
                     }
                     
                     Button(
-                        onClick = { viewModel.triggerOsLock() },
+                        onClick = { viewModel.login() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
                     ) {
                         Icon(Icons.Default.Lock, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Desbloquear Cripto Bóveda", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.auth_login_enter_button), style = MaterialTheme.typography.titleMedium)
                     }
                     
                     Spacer(modifier = Modifier.height(32.dp))

@@ -333,17 +333,6 @@ fun SettingsScreen(
                     Text(stringResource(R.string.settings_privacy_policy_button))
                 }
             }
-
-            // Session Section
-            SettingsSection(title = stringResource(R.string.settings_section_session)) {
-                OutlinedButton(
-                    onClick = { viewModel.logout() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text(stringResource(R.string.settings_logout_button))
-                }
-            }
         }
     }
     
