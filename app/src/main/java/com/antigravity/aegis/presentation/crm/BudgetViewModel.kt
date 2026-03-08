@@ -18,13 +18,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.antigravity.aegis.domain.model.CrmStatus
 import com.antigravity.aegis.domain.util.getOrNull
+import com.antigravity.aegis.domain.util.onSuccess
+import com.antigravity.aegis.domain.util.onError
 
 @HiltViewModel
 class BudgetViewModel @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val projectRepository: ProjectRepository,
     private val clientRepository: com.antigravity.aegis.domain.repository.ClientRepository,
-    private val pdfGenerator: com.antigravity.aegis.domain.services.PdfGeneratorService
+    private val generateQuotePdfUseCase: com.antigravity.aegis.domain.usecase.crm.GenerateQuotePdfUseCase
 ) : ViewModel() {
 
     private val _budgetState = MutableStateFlow<BudgetState>(BudgetState.Loading)
@@ -162,22 +164,21 @@ class BudgetViewModel @Inject constructor(
                  return@launch
             }
             
-            val client = clientRepository.getClientById(quote.clientId).firstOrNull()
-            
-            val file = pdfGenerator.generateQuotePdf(quote, _lines.value, client)
-
-            
-            // Log Event
-            budgetRepository.insertBudgetLog(
-                com.antigravity.aegis.data.local.entity.BudgetLogEntity(
-                    quoteId = quote.id,
-                    timestamp = System.currentTimeMillis(),
-                    action = "PDF Generated",
-                    messageTemplateUsed = "PDF shared/viewed by user."
+            generateQuotePdfUseCase(quote.id).onSuccess { file ->
+                // Log Event
+                budgetRepository.insertBudgetLog(
+                    com.antigravity.aegis.data.local.entity.BudgetLogEntity(
+                        quoteId = quote.id,
+                        timestamp = System.currentTimeMillis(),
+                        action = "PDF Generated",
+                        messageTemplateUsed = "PDF shared/viewed by user."
+                    )
                 )
-            )
-            
-            _pdfFile.value = file
+                
+                _pdfFile.value = file
+            }.onError { e ->
+                _budgetState.value = BudgetState.Error("Error generando PDF: ${e.message}")
+            }
         }
     }
     

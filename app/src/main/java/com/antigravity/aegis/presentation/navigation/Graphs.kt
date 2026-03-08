@@ -148,7 +148,8 @@ fun NavGraphBuilder.crmGraph(
                 viewModel = crmViewModel,
                 onNavigateToEditBudget = { pId, quoteId ->
                     navController.navigate(Screen.EditBudget.createRoute(pId, quoteId))
-                }
+                },
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -171,8 +172,11 @@ fun NavGraphBuilder.crmGraph(
         composable(Screen.Budgets.route) {
             QuoteKanbanScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToCreateQuote = { projectId -> 
-                    navController.navigate(Screen.EditBudget.createRoute(projectId, 0)) 
+                onNavigateToProject = { projectId ->
+                    navController.navigate(Screen.ProjectDetail.createRoute(projectId))
+                },
+                onNavigateToEditBudget = { quoteId ->
+                    navController.navigate(Screen.EditBudget.createRoute(0, quoteId))
                 }
             )
         }

@@ -20,14 +20,18 @@ import com.antigravity.aegis.domain.repository.ExpenseRepository
 import com.antigravity.aegis.domain.reports.PdfGenerator
 import com.antigravity.aegis.domain.util.onError
 import com.antigravity.aegis.domain.util.onSuccess
+import com.antigravity.aegis.domain.util.getOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.antigravity.aegis.domain.transfer.DataTransferManager
 import com.antigravity.aegis.data.repository.AttachmentRepository
 import com.antigravity.aegis.data.local.entity.DocumentEntity
 import android.provider.OpenableColumns
 import android.net.Uri
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -49,7 +53,6 @@ class CrmViewModel @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val expenseRepository: ExpenseRepository,
     private val getProjectRealProfitUseCase: com.antigravity.aegis.domain.usecase.GetProjectRealProfitUseCase,
-
     private val pdfGenerator: PdfGenerator,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val transferManager: DataTransferManager,
@@ -59,7 +62,11 @@ class CrmViewModel @Inject constructor(
     private val saveProjectAsTemplateUseCase: com.antigravity.aegis.domain.usecase.project.SaveProjectAsTemplateUseCase,
     private val createProjectFromTemplateUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectFromTemplateUseCase,
     private val exportTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ExportTemplateUseCase,
-    private val importTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ImportTemplateUseCase
+    private val importTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ImportTemplateUseCase,
+    // Nuevos casos de uso: sincronización Proyectos ↔ CRM
+    private val createProjectWithDraftQuoteUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectWithDraftQuoteUseCase,
+    private val generateQuotePdfUseCase: com.antigravity.aegis.domain.usecase.crm.GenerateQuotePdfUseCase,
+    private val deleteProjectWithQuotesUseCase: com.antigravity.aegis.domain.usecase.project.DeleteProjectWithQuotesUseCase
 ) : ViewModel() {
 
 
@@ -317,9 +324,23 @@ class CrmViewModel @Inject constructor(
     fun createProject(clientId: Int, name: String, status: String, startDate: Long, endDate: Long?, category: String? = null) {
         viewModelScope.launch {
             val validStatus = if (CrmStatus.isValid(status)) status else CrmStatus.DRAFT
-            val project = ProjectEntity(clientId = clientId, name = name, status = validStatus, startDate = startDate, endDate = endDate, category = category)
-            projectRepository.insertProject(project)
-                .onError { android.util.Log.e("CrmViewModel", "Error al crear proyecto: ${it.message}") }
+            
+            createProjectWithDraftQuoteUseCase(
+                name = name,
+                description = null,
+                clientId = clientId,
+                category = category,
+                startDate = startDate,
+                endDate = endDate,
+                subProjects = emptyList()
+            ).onSuccess { projectId ->
+                // Ensure the status matches what was requested if it's not ACTIVE
+                if (validStatus != CrmStatus.ACTIVE) {
+                    projectRepository.updateProjectStatus(projectId.toInt(), validStatus)
+                }
+            }.onError { e -> 
+                android.util.Log.e("CrmViewModel", "Error al crear proyecto: ${e.message}") 
+            }
         }
     }
 
@@ -488,6 +509,36 @@ class CrmViewModel @Inject constructor(
                 estimatedTimeUnit = estimatedTimeUnit
             )
             projectRepository.insertProject(subProject)
+                .onSuccess {
+                    // Sincronizar subproyecto como nueva línea en el presupuesto DRAFT
+                    val quote = budgetRepository.getQuoteByProjectId(parentProjectId)
+                    if (quote != null && quote.status == CrmStatus.DRAFT) {
+                        val linePrice = price ?: 0.0
+                        val tax = 0.21
+                        val totalLineWithTax = linePrice * (1 + tax)
+                        val newTotal = quote.totalAmount + totalLineWithTax
+                        
+                        budgetRepository.updateQuote(quote.copy(
+                            totalAmount = newTotal,
+                            calculatedTotal = (newTotal * 100).toLong()
+                        ))
+                        
+                        val line = com.antigravity.aegis.data.local.entity.BudgetLineEntity(
+                            quoteId = quote.id,
+                            description = buildString {
+                                append(name)
+                                if (!materials.isNullOrBlank()) append(" | Mat: $materials")
+                                if (estimatedTime != null && estimatedTimeUnit != null) {
+                                    append(" | $estimatedTime $estimatedTimeUnit")
+                                }
+                            },
+                            quantity = 1.0,
+                            unitPrice = linePrice,
+                            taxRate = tax
+                        )
+                        budgetRepository.insertBudgetLine(line)
+                    }
+                }
                 .onError { android.util.Log.e("CrmViewModel", "Error al crear subproyecto: ${it.message}") }
         }
     }
@@ -501,6 +552,82 @@ class CrmViewModel @Inject constructor(
                 android.util.Log.e("CrmViewModel", "Error creating quote from project", e)
                 onError(e.message ?: "Error desconocido")
             }
+        }
+    }
+
+    // ─── Nuevas funciones: Sincronización Proyectos ↔ CRM ─────────────────────
+
+    /** SharedFlow que emite el URI del PDF generado para que la UI lo comparta */
+    private val _pdfShareEvent = MutableSharedFlow<Uri>()
+    val pdfShareEvent = _pdfShareEvent.asSharedFlow()
+
+    /**
+     * Crea un proyecto padre, inserta sus subproyectos y genera automáticamente
+     * un Presupuesto DRAFT en el CRM vinculado al proyecto.
+     */
+    fun createProjectWithDraftQuote(
+        name: String,
+        description: String?,
+        clientId: Int?,
+        category: String?,
+        startDate: Long,
+        endDate: Long?,
+        subProjects: List<com.antigravity.aegis.domain.usecase.project.SubProjectInput>,
+        onResult: (Long) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = createProjectWithDraftQuoteUseCase(
+                name = name,
+                description = description,
+                clientId = clientId,
+                category = category,
+                startDate = startDate,
+                endDate = endDate,
+                subProjects = subProjects
+            )
+            result.onSuccess { projectId -> onResult(projectId) }
+                  .onError { e -> onError(e.message ?: "Error al crear proyecto") }
+        }
+    }
+
+    /**
+     * Genera el PDF de un presupuesto y emite el URI a través de [pdfShareEvent]
+     * para que la UI lo comparta con Intent.ACTION_SEND.
+     */
+    fun generateAndShareQuotePdf(quoteId: Int) {
+        viewModelScope.launch {
+            val result = generateQuotePdfUseCase(quoteId)
+            result.onSuccess { file ->
+                try {
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.provider",
+                        file
+                    )
+                    _pdfShareEvent.emit(uri)
+                } catch (e: Exception) {
+                    android.util.Log.e("CrmViewModel", "Error obteniendo URI del PDF", e)
+                }
+            }.onError { err ->
+                android.util.Log.e("CrmViewModel", "Error generando PDF", err.exception)
+            }
+        }
+    }
+
+    /**
+     * Borra un proyecto y todas sus entidades CRM asociadas:
+     * quotes, budget lines, subproyectos y el proyecto padre.
+     */
+    fun deleteProjectWithQuotes(
+        projectId: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = deleteProjectWithQuotesUseCase(projectId)
+            result.onSuccess { onSuccess() }
+                  .onError { e -> onError(e.message ?: "Error al borrar el proyecto") }
         }
     }
 

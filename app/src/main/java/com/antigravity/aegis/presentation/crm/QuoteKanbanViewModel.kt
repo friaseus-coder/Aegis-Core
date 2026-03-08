@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -23,6 +24,8 @@ import javax.inject.Inject
 
 import com.antigravity.aegis.domain.transfer.DataTransferManager
 import com.antigravity.aegis.domain.util.getOrNull
+import com.antigravity.aegis.domain.util.onSuccess
+import com.antigravity.aegis.domain.util.onError
 import kotlinx.coroutines.flow.firstOrNull
 import android.net.Uri
 import com.antigravity.aegis.domain.model.CrmStatus
@@ -35,8 +38,13 @@ class QuoteKanbanViewModel @Inject constructor(
     private val pdfGenerator: PdfGenerator,
     @ApplicationContext private val context: Context,
     private val transferManager: DataTransferManager,
-    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
+    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository,
+    private val createProjectWithDraftQuoteUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectWithDraftQuoteUseCase,
+    private val generateQuotePdfUseCase: com.antigravity.aegis.domain.usecase.crm.GenerateQuotePdfUseCase
 ) : ViewModel() {
+
+    private val _pdfShareEvent = kotlinx.coroutines.flow.MutableSharedFlow<Uri>()
+    val pdfShareEvent = _pdfShareEvent.asSharedFlow()
 
 
     // Transfer Logic
@@ -127,14 +135,19 @@ class QuoteKanbanViewModel @Inject constructor(
 
     fun createProjectForQuote(clientId: Int, name: String, onProjectCreated: (Int) -> Unit) {
         viewModelScope.launch {
-            val project = com.antigravity.aegis.data.local.entity.ProjectEntity(
-                clientId = clientId,
+            createProjectWithDraftQuoteUseCase(
                 name = name,
-                status = CrmStatus.ACTIVE,
-                startDate = System.currentTimeMillis()
-            )
-            val projectId = projectRepository.insertProject(project).getOrNull() ?: return@launch
-            onProjectCreated(projectId.toInt())
+                description = null,
+                clientId = clientId,
+                category = null,
+                startDate = System.currentTimeMillis(),
+                endDate = null,
+                subProjects = emptyList()
+            ).onSuccess { projectId ->
+                onProjectCreated(projectId.toInt())
+            }.onError { e ->
+                android.util.Log.e("QuoteKanbanViewModel", "Error al crear proyecto para quote: ${e.message}")
+            }
         }
     }
 
@@ -172,32 +185,22 @@ class QuoteKanbanViewModel @Inject constructor(
         }
     }
 
-    fun generateAndSharePdf(quote: QuoteEntity, client: Client) {
-
+    fun generateAndSharePdf(quoteId: Int) {
         viewModelScope.launch {
-            try {
-                val config = settingsRepository.getUserConfig().firstOrNull()
-                val pdfFile = pdfGenerator.generateQuotePdf(context, quote, client, config)
-                val uri = FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.provider",
-                    pdfFile
-                )
-
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    type = "application/pdf"
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    // Ensure the intent is handled by an activity that can handle the file
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) 
+            val result = generateQuotePdfUseCase(quoteId)
+            result.onSuccess { file ->
+                try {
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.provider",
+                        file
+                    )
+                    _pdfShareEvent.emit(uri)
+                } catch (e: Exception) {
+                    android.util.Log.e("QuoteKanbanViewModel", "Error obteniendo URI", e)
                 }
-                
-                // We cannot start activity from ViewModel directly without activity context usually not rec'd, 
-                // but here we might need to expose an Event to the UI.
-                // For simplicity in this agentic flow, we'll assume the UI triggers the intent, 
-                // but since the file generation is async, we should probably expose a "ShareEvent"
-            } catch (e: Exception) {
-                e.printStackTrace()
+            }.onError { e ->
+                android.util.Log.e("QuoteKanbanViewModel", "Error generando PDF", e.exception)
             }
         }
     }

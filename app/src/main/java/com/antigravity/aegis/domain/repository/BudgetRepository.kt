@@ -14,12 +14,14 @@ interface BudgetRepository {
     fun getAllQuotes(): Flow<List<QuoteEntity>>
     fun getQuotesByProject(projectId: Int): Flow<List<QuoteEntity>>
     suspend fun getQuotesByProjectSuspend(projectId: Int): List<QuoteEntity>
+    suspend fun getQuoteByProjectId(projectId: Int): QuoteEntity?
     suspend fun updateQuoteStatus(quoteId: Int, status: String): Result<Unit>
 
     // Lines
     suspend fun insertBudgetLine(line: BudgetLineEntity): Result<Long>
     suspend fun insertBudgetLines(lines: List<BudgetLineEntity>): Result<Unit>
     fun getBudgetLines(quoteId: Int): Flow<List<BudgetLineEntity>>
+    suspend fun getBudgetLinesSync(quoteId: Int): List<BudgetLineEntity>
     suspend fun deleteBudgetLines(quoteId: Int): Result<Unit>
 
     // Logs

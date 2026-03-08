@@ -1,5 +1,6 @@
 package com.antigravity.aegis.presentation.crm
 
+import android.net.Uri
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import com.antigravity.aegis.presentation.components.BovedaLogo
@@ -61,7 +62,8 @@ import com.antigravity.aegis.presentation.components.AegisTopAppBar
 fun QuoteKanbanScreen(
     viewModel: QuoteKanbanViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    onNavigateToCreateQuote: (Int) -> Unit
+    onNavigateToProject: (Int) -> Unit,
+    onNavigateToEditBudget: (Int) -> Unit
 ) {
     val kanbanState by viewModel.kanbanState.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
@@ -70,6 +72,18 @@ fun QuoteKanbanScreen(
     val userConfig by viewModel.userConfig.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val shareTitle = stringResource(R.string.ui_share_quote)
+
+    LaunchedEffect(Unit) {
+        viewModel.pdfShareEvent.collect { uri ->
+            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "application/pdf"
+                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(android.content.Intent.createChooser(intent, shareTitle))
+        }
+    }
     
     // Import Picker
     val importLauncher = rememberLauncherForActivityResult(
@@ -156,22 +170,13 @@ fun QuoteKanbanScreen(
                         viewModel.updateQuoteStatus(quoteId, newStatus)
                     },
                     onShareQuote = { quote, client ->
-                        // Generate and Share
-                        val pdfGenerator = PdfGenerator()
-                        val shareTitle = context.getString(R.string.ui_share_quote)
-                        scope.launch {
-                             val pdfFile = pdfGenerator.generateQuotePdf(context, quote, client, userConfig)
-                             val uri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.provider",
-                                pdfFile
-                            )
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "application/pdf"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            context.startActivity(Intent.createChooser(intent, shareTitle))
+                        viewModel.generateAndSharePdf(quote.id)
+                    },
+                    onQuoteClick = { quote ->
+                        if (quote.projectId != null) {
+                            onNavigateToProject(quote.projectId)
+                        } else {
+                            onNavigateToEditBudget(quote.id)
                         }
                     }
                 )
@@ -234,7 +239,7 @@ fun QuoteKanbanScreen(
                         onClick = {
                             if (selectedClient != null && projectName.isNotBlank()) {
                                 viewModel.createProjectForQuote(selectedClient!!.id, projectName) { projectId ->
-                                    onNavigateToCreateQuote(projectId)
+                                    onNavigateToProject(projectId)
                                 }
                                 showCreateDialog = false
                             }
@@ -257,7 +262,8 @@ fun KanbanColumn(
     status: String,
     quotes: List<QuoteKanbanViewModel.QuoteWithClient>,
     onMoveQuote: (Int, String) -> Unit,
-    onShareQuote: (QuoteEntity, Client) -> Unit
+    onShareQuote: (QuoteEntity, Client) -> Unit,
+    onQuoteClick: (QuoteEntity) -> Unit
 ) {
 
     Column(
@@ -301,7 +307,8 @@ fun KanbanColumn(
                         if (item.client != null) {
                             onShareQuote(item.quote, item.client) 
                         }
-                    }
+                    },
+                    onClick = { onQuoteClick(item.quote) }
                 )
             }
         }
@@ -314,7 +321,8 @@ fun QuoteCard(
     client: Client?,
     currentStatus: String,
     onMoveTo: (String) -> Unit,
-    onShare: () -> Unit
+    onShare: () -> Unit,
+    onClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -323,7 +331,7 @@ fun QuoteCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }
     ) {
         Column(
             modifier = Modifier.padding(12.dp)

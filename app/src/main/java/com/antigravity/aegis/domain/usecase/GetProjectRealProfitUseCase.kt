@@ -25,9 +25,20 @@ class GetProjectRealProfitUseCase @Inject constructor(
     suspend operator fun invoke(projectId: Int): ProjectProfitability? {
         val project = projectRepository.getProjectById(projectId) ?: return null
 
-        // 1. Calculate Income (Accepted Quotes)
+        // 1. Calcular Ingresos:
+        //    a) Quotes confirmadas (Accepted/WON): ingresos reales
+        //    b) Si no hay, usar suma de precios de subproyectos (presupuesto potencial DRAFT)
         val quotes = budgetRepository.getQuotesByProjectSuspend(projectId)
-        val totalIncome = quotes.filter { it.status == "Accepted" }.sumOf { it.totalAmount }
+        val confirmedIncome = quotes
+            .filter { it.status == "Accepted" || it.status == "WON" || it.status == "Won" }
+            .sumOf { it.totalAmount }
+
+        // Suma de precios de subproyectos (valor presupuestado)
+        val subProjects = projectRepository.getSubProjectsSync(projectId)
+        val subProjectsTotal = subProjects.sumOf { it.price ?: 0.0 }
+
+        // Si hay quotes aceptadas → ingresos reales. Si no → ingresos potenciales de subproyectos.
+        val totalIncome = if (confirmedIncome > 0) confirmedIncome else subProjectsTotal
 
         // 2. Direct Expenses for this project
         val directExpensesList = expenseRepository.getExpensesByProject(projectId).first()

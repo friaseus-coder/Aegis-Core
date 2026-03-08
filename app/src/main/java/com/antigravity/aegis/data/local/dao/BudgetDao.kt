@@ -24,6 +24,9 @@ interface BudgetDao {
     @Query("SELECT * FROM quotes WHERE projectId = :projectId ORDER BY date DESC")
     fun getQuotesByProject(projectId: Int): Flow<List<QuoteEntity>>
 
+    @Query("SELECT * FROM quotes WHERE projectId = :projectId ORDER BY date DESC LIMIT 1")
+    suspend fun getQuoteByProjectId(projectId: Int): QuoteEntity?
+
     @Query("SELECT * FROM quotes WHERE projectId = :projectId ORDER BY date DESC")
     suspend fun getQuotesByProjectSync(projectId: Int): List<QuoteEntity>
 
@@ -39,6 +42,9 @@ interface BudgetDao {
 
     @Query("SELECT * FROM budget_lines WHERE quoteId = :quoteId")
     fun getBudgetLines(quoteId: Int): Flow<List<BudgetLineEntity>>
+
+    @Query("SELECT * FROM budget_lines WHERE quoteId = :quoteId")
+    suspend fun getBudgetLinesSync(quoteId: Int): List<BudgetLineEntity>
 
     @Query("DELETE FROM budget_lines WHERE quoteId = :quoteId")
     suspend fun deleteBudgetLines(quoteId: Int)

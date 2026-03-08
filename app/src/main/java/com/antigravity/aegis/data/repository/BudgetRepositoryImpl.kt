@@ -29,6 +29,7 @@ class BudgetRepositoryImpl @Inject constructor(
     override fun getAllQuotes(): Flow<List<QuoteEntity>> = dao.getAllQuotes()
     override fun getQuotesByProject(projectId: Int): Flow<List<QuoteEntity>> = dao.getQuotesByProject(projectId)
     override suspend fun getQuotesByProjectSuspend(projectId: Int): List<QuoteEntity> = dao.getQuotesByProjectSync(projectId)
+    override suspend fun getQuoteByProjectId(projectId: Int): QuoteEntity? = dao.getQuoteByProjectId(projectId)
 
     override suspend fun updateQuoteStatus(quoteId: Int, status: String): Result<Unit> = try {
         Result.Success(dao.updateQuoteStatus(quoteId, status))
@@ -49,6 +50,7 @@ class BudgetRepositoryImpl @Inject constructor(
     }
 
     override fun getBudgetLines(quoteId: Int): Flow<List<BudgetLineEntity>> = dao.getBudgetLines(quoteId)
+    override suspend fun getBudgetLinesSync(quoteId: Int): List<BudgetLineEntity> = dao.getBudgetLinesSync(quoteId)
 
     override suspend fun deleteBudgetLines(quoteId: Int): Result<Unit> = try {
         Result.Success(dao.deleteBudgetLines(quoteId))
