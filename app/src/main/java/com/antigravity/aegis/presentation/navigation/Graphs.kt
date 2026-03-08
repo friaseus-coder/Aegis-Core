@@ -147,6 +147,7 @@ fun NavGraphBuilder.crmGraph(
 
             ProjectDetailScreen(
                 viewModel = crmViewModel,
+                onNavigateToKanban = { navController.navigate(Screen.Budgets.route) },
                 onNavigateToEditBudget = { pId, quoteId ->
                     navController.navigate(Screen.EditBudget.createRoute(pId, quoteId))
                 },

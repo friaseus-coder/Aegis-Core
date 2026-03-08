@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun ProjectDetailScreen(
     viewModel: CrmViewModel,
+    onNavigateToKanban: () -> Unit,
     onNavigateToEditBudget: (Int, Int) -> Unit, // projectId, quoteId
     onNavigateBack: () -> Unit = {}
 ) {
@@ -293,8 +294,8 @@ fun ProjectDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(stringResource(R.string.home_module_budgets_title), style = MaterialTheme.typography.titleLarge)
-                        TextButton(onClick = { onNavigateToEditBudget(project!!.id, 0) }) {
-                            Text(stringResource(R.string.quotes_list_new_tab))
+                        TextButton(onClick = { onNavigateToKanban() }) {
+                            Text(stringResource(R.string.quotes_list_view_tab))
                         }
                     }
                     if (budgets.isEmpty()) {

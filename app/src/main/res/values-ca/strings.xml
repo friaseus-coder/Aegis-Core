@@ -171,7 +171,7 @@
     <string name="crm_project_not_found">Projecte no trobat...</string>
     <string name="crm_project_id_label">ID Projecte: %1$d</string>
     <string name="crm_project_subprojects_title">Subprojectes</string>
-    <string name="crm_subproject_price_prefix">Preu: €%1$s</string>
+    <string name="crm_subproject_price_prefix">Preu: %1$s</string>
     <string name="crm_subproject_time_prefix">Temps: %1$s %2$s</string>
     <string name="crm_subproject_materials_prefix">Materiales: %1$s</string>
     <string name="crm_subproject_empty">No hi ha subprojectes</string>

@@ -159,24 +159,31 @@ class QuoteKanbanViewModel @Inject constructor(
         description: String
     ) {
         viewModelScope.launch {
-             val calculatedTotal = lines.sumOf { it.quantity * it.unitPrice }
-             val totalWithTax = calculatedTotal * 1.21 // Simplified
-             
-            val newQuote = QuoteEntity(
-                clientId = clientId,
-                date = System.currentTimeMillis(),
-                totalAmount = totalWithTax,
-                status = CrmStatus.DRAFT,
+            // Mapear BudgetLineEntity a SubProjectInput para que el usecase cree tanto subproyectos como líneas
+            val subProjectsInput = lines.map { line ->
+                com.antigravity.aegis.domain.usecase.project.SubProjectInput(
+                    name = line.description,
+                    materials = null, // Extraer si estuviese parseado, por ahora null
+                    price = line.unitPrice,
+                    estimatedTime = null,
+                    estimatedTimeUnit = null
+                )
+            }
+
+            createProjectWithDraftQuoteUseCase(
+                name = title,
                 description = description,
-                title = title,
-                calculatedTotal = (totalWithTax * 100).toLong(),
-                version = 1
-            )
-            val quoteId = budgetRepository.insertQuote(newQuote).getOrNull() ?: return@launch
-            
-            // Insert Lines
-            val linesWithQuoteId = lines.map { it.copy(quoteId = quoteId.toInt()) }
-            budgetRepository.insertBudgetLines(linesWithQuoteId)
+                clientId = clientId,
+                category = null,
+                startDate = System.currentTimeMillis(),
+                endDate = null,
+                subProjects = subProjectsInput
+            ).onSuccess { projectId ->
+                // Éxito: Se ha creado el Proyecto, los subproyectos y el Presupuesto borrador sincronizado.
+                android.util.Log.d("QuoteKanbanViewModel", "Proyecto/Presupuesto creado con el ID de proyecto: $projectId")
+            }.onError { e ->
+                android.util.Log.e("QuoteKanbanViewModel", "Error al crear proyecto desde Kanban: ${e.message}")
+            }
         }
     }
 
