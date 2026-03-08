@@ -63,6 +63,12 @@ class SettingsRepositoryImpl @Inject constructor(
         database.userConfigDao().updateLanguage(language)
     }
 
+    override suspend fun updateCurrency(currency: String) {
+        ensureConfigExists()
+        val current = database.userConfigDao().getUserConfigOneShot() ?: com.antigravity.aegis.data.local.entity.UserConfig()
+        database.userConfigDao().insertOrUpdate(current.copy(id = 1, currency = currency))
+    }
+
     override suspend fun updateThemeMode(mode: String) {
         ensureConfigExists()
         database.userConfigDao().updateThemeMode(mode)

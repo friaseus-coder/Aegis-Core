@@ -33,6 +33,9 @@ interface BudgetDao {
     @Query("UPDATE quotes SET status = :status WHERE id = :quoteId")
     suspend fun updateQuoteStatus(quoteId: Int, status: String)
 
+    @Query("DELETE FROM quotes WHERE id = :quoteId")
+    suspend fun deleteQuote(quoteId: Int)
+
     // Budget Lines
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBudgetLine(line: BudgetLineEntity): Long

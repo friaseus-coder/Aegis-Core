@@ -37,7 +37,7 @@ import com.antigravity.aegis.data.local.entity.PasswordEntity
         BudgetLogEntity::class,
         PasswordEntity::class
     ],
-    version = 30,
+    version = 31,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -52,6 +52,12 @@ abstract class AegisDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun passwordDao(): com.antigravity.aegis.data.local.dao.PasswordDao
     companion object {
+        val MIGRATION_30_31 = object : androidx.room.migration.Migration(30, 31) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE user_config ADD COLUMN currency TEXT NOT NULL DEFAULT 'EUR'")
+            }
+        }
+
         val MIGRATION_29_30 = object : androidx.room.migration.Migration(29, 30) {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
                 // Drop users table as we migrated to OS-Level authentication

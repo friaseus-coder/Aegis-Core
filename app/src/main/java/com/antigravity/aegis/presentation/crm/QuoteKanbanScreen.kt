@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -69,6 +70,8 @@ fun QuoteKanbanScreen(
     val transferState by viewModel.transferState.collectAsState()
     val allClients by viewModel.allClients.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var quoteToDelete by remember { mutableStateOf<QuoteEntity?>(null) }
     val userConfig by viewModel.userConfig.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -172,6 +175,10 @@ fun QuoteKanbanScreen(
                     onShareQuote = { quote, client ->
                         viewModel.generateAndSharePdf(quote.id)
                     },
+                    onDeleteQuote = { quote ->
+                        quoteToDelete = quote
+                        showDeleteConfirmDialog = true
+                    },
                     onQuoteClick = { quote ->
                         if (quote.projectId != null) {
                             onNavigateToProject(quote.projectId)
@@ -183,6 +190,36 @@ fun QuoteKanbanScreen(
             }
         }
     } // Column
+        
+        if (showDeleteConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { 
+                    showDeleteConfirmDialog = false 
+                    quoteToDelete = null
+                },
+                title = { Text(stringResource(R.string.general_delete)) },
+                text = { Text("Se borrará el presupuesto y su proyecto asociado (si lo hay) del CRM. Esta acción no se puede deshacer.") }, // Texto directo
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            quoteToDelete?.let { viewModel.deleteQuoteAndProject(it) }
+                            showDeleteConfirmDialog = false
+                            quoteToDelete = null
+                        }
+                    ) {
+                        Text(stringResource(R.string.general_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { 
+                        showDeleteConfirmDialog = false 
+                        quoteToDelete = null
+                    }) { 
+                        Text(stringResource(R.string.general_cancel)) 
+                    }
+                }
+            )
+        }
         
         if (showCreateDialog) {
             var projectName by remember { mutableStateOf("") }
@@ -263,6 +300,7 @@ fun KanbanColumn(
     quotes: List<QuoteKanbanViewModel.QuoteWithClient>,
     onMoveQuote: (Int, String) -> Unit,
     onShareQuote: (QuoteEntity, Client) -> Unit,
+    onDeleteQuote: (QuoteEntity) -> Unit,
     onQuoteClick: (QuoteEntity) -> Unit
 ) {
 
@@ -308,6 +346,7 @@ fun KanbanColumn(
                             onShareQuote(item.quote, item.client) 
                         }
                     },
+                    onDelete = { onDeleteQuote(item.quote) },
                     onClick = { onQuoteClick(item.quote) }
                 )
             }
@@ -322,6 +361,7 @@ fun QuoteCard(
     currentStatus: String,
     onMoveTo: (String) -> Unit,
     onShare: () -> Unit,
+    onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -384,6 +424,15 @@ fun QuoteCard(
                                 }
                             )
                         }
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.general_delete), color = MaterialTheme.colorScheme.error) },
+                            onClick = {
+                                showMenu = false
+                                onDelete()
+                            },
+                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) }
+                        )
                     }
                 }
             }

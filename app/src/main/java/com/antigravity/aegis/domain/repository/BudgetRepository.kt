@@ -16,6 +16,7 @@ interface BudgetRepository {
     suspend fun getQuotesByProjectSuspend(projectId: Int): List<QuoteEntity>
     suspend fun getQuoteByProjectId(projectId: Int): QuoteEntity?
     suspend fun updateQuoteStatus(quoteId: Int, status: String): Result<Unit>
+    suspend fun deleteQuote(quoteId: Int): Result<Unit>
 
     // Lines
     suspend fun insertBudgetLine(line: BudgetLineEntity): Result<Long>

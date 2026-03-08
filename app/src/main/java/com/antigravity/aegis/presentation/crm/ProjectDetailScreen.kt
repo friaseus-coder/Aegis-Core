@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
@@ -39,6 +40,8 @@ fun ProjectDetailScreen(
     var showAddSubProjectDialog by remember { mutableStateOf(false) }
     var showSaveTemplateDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var subProjectToDelete by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
+    var subProjectToEdit by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
     val context = LocalContext.current
 
     // Observar el evento de compartir PDF
@@ -168,10 +171,14 @@ fun ProjectDetailScreen(
                 } else {
                     items(subProjects, key = { it.id }) { sub ->
                         Card(modifier = Modifier.fillMaxWidth()) {
-                            ListItem(
-                                headlineContent = { Text(sub.name, style = MaterialTheme.typography.bodyLarge) },
-                                supportingContent = {
-                                    Column {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(sub.name, style = MaterialTheme.typography.bodyLarge)
                                         if (sub.price != null) {
                                             Text(
                                                 stringResource(R.string.crm_subproject_price_prefix, stringResource(R.string.ui_currency_symbol) + "%.2f".format(sub.price)),
@@ -186,8 +193,16 @@ fun ProjectDetailScreen(
                                             Text(stringResource(R.string.crm_subproject_materials_prefix, sub.materials), style = MaterialTheme.typography.bodySmall, maxLines = 2)
                                         }
                                     }
+                                    Row {
+                                        IconButton(onClick = { subProjectToEdit = sub }) {
+                                            Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.general_edit), tint = MaterialTheme.colorScheme.primary)
+                                        }
+                                        IconButton(onClick = { subProjectToDelete = sub }) {
+                                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.general_delete), tint = MaterialTheme.colorScheme.error)
+                                        }
+                                    }
                                 }
-                            )
+                            }
                         }
                     }
                 }
@@ -364,6 +379,47 @@ fun ProjectDetailScreen(
              )
         }
 
+        // Diálogo de confirmación de borrado de SUBPROYECTO
+        if (subProjectToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { subProjectToDelete = null },
+                icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+                title = { Text(stringResource(R.string.crm_subproject_delete_title)) },
+                text = { Text(stringResource(R.string.crm_subproject_delete_confirm, subProjectToDelete!!.name)) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteSubProject(subProjectToDelete!!.id)
+                            subProjectToDelete = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) { Text(stringResource(R.string.general_delete), color = MaterialTheme.colorScheme.onError) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { subProjectToDelete = null }) { Text(stringResource(R.string.general_cancel)) }
+                }
+            )
+        }
+
+        // Diálogo de edición de SUBPROYECTO
+        if (subProjectToEdit != null) {
+            AddSubProjectDialog(
+                existing = subProjectToEdit,
+                onDismiss = { subProjectToEdit = null },
+                onConfirm = { name, materials, price, estTime, estUnit ->
+                    viewModel.updateSubProject(
+                        subProjectId = subProjectToEdit!!.id,
+                        name = name,
+                        materials = materials,
+                        price = price,
+                        estimatedTime = estTime,
+                        estimatedTimeUnit = estUnit
+                    )
+                    subProjectToEdit = null
+                }
+            )
+        }
+
 
         if (showSaveTemplateDialog) {
              SaveTemplateDialog(
@@ -427,11 +483,15 @@ fun ProjectDetailScreen(
  
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String?, Double?, Double?, String?) -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var materials by remember { mutableStateOf("") }
-    var priceStr by remember { mutableStateOf("") }
-    var estimatedTimeStr by remember { mutableStateOf("") }
+fun AddSubProjectDialog(
+    existing: com.antigravity.aegis.data.local.entity.ProjectEntity? = null,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String?, Double?, Double?, String?) -> Unit
+) {
+    var name by remember { mutableStateOf(existing?.name ?: "") }
+    var materials by remember { mutableStateOf(existing?.materials ?: "") }
+    var priceStr by remember { mutableStateOf(existing?.price?.let { "%.2f".format(it) } ?: "") }
+    var estimatedTimeStr by remember { mutableStateOf(existing?.estimatedTime?.let { "%.1f".format(it) } ?: "") }
     
     var expandedUnitList by remember { mutableStateOf(false) }
     
@@ -440,11 +500,12 @@ fun AddSubProjectDialog(onDismiss: () -> Unit, onConfirm: (String, String?, Doub
         stringResource(R.string.crm_subproject_unit_days), 
         stringResource(R.string.crm_subproject_unit_weeks)
     )
-    var selectedTimeUnit by remember { mutableStateOf(timeUnits[0]) }
+    var selectedTimeUnit by remember { mutableStateOf(existing?.estimatedTimeUnit ?: timeUnits[0]) }
+    val dialogTitle = if (existing != null) stringResource(R.string.crm_subproject_edit_title) else stringResource(R.string.crm_subproject_new_title)
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.crm_subproject_new_title)) },
+        title = { Text(dialogTitle) },
         text = {
             Column(modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
                 OutlinedTextField(

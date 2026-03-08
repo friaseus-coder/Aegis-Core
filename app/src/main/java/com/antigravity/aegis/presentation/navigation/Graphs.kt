@@ -89,6 +89,7 @@ fun NavGraphBuilder.crmGraph(
             com.antigravity.aegis.presentation.crm.DashboardScreen(
                 viewModel = crmViewModel,
                 onNavigateToClients = { navController.navigate(Screen.Clients.route) },
+                onNavigateToKanban = { navController.navigate(Screen.Budgets.route) },
                 onNavigateToProject = { projectId ->
                     navController.navigate(Screen.ProjectDetail.createRoute(projectId))
                 }

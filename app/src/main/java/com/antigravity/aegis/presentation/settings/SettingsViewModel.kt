@@ -43,6 +43,13 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCurrency(currency: String) {
+        viewModelScope.launch {
+            settingsRepository.updateCurrency(currency)
+            _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.general_success))
+        }
+    }
+
     fun updateThemeMode(mode: String) {
         viewModelScope.launch {
             settingsRepository.updateThemeMode(mode)

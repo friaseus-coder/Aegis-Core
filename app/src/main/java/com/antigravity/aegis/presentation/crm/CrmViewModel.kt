@@ -543,6 +543,34 @@ class CrmViewModel @Inject constructor(
         }
     }
 
+    fun deleteSubProject(subProjectId: Int) {
+        viewModelScope.launch {
+            val entity = projectRepository.getProjectById(subProjectId) ?: return@launch
+            projectRepository.deleteProject(entity)
+        }
+    }
+
+    fun updateSubProject(
+        subProjectId: Int,
+        name: String,
+        materials: String? = null,
+        price: Double? = null,
+        estimatedTime: Double? = null,
+        estimatedTimeUnit: String? = null
+    ) {
+        viewModelScope.launch {
+            val existing = projectRepository.getProjectById(subProjectId) ?: return@launch
+            val updated = existing.copy(
+                name = name,
+                materials = materials,
+                price = price,
+                estimatedTime = estimatedTime,
+                estimatedTimeUnit = estimatedTimeUnit
+            )
+            projectRepository.updateProject(updated)
+        }
+    }
+
     fun createQuoteFromProject(projectId: Int, onResult: (Long) -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {

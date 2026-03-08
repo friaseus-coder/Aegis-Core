@@ -12,6 +12,7 @@ interface SettingsRepository {
 
     fun getUserConfig(): Flow<UserConfig?>
     suspend fun updateLanguage(language: String)
+    suspend fun updateCurrency(currency: String)
     suspend fun updateThemeMode(mode: String)
     suspend fun insertOrUpdateConfig(config: UserConfig)
 

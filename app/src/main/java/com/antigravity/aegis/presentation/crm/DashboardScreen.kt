@@ -19,9 +19,11 @@ import com.antigravity.aegis.domain.model.ClientType
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.window.Dialog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +31,7 @@ import androidx.compose.ui.window.Dialog
 fun DashboardScreen(
     viewModel: CrmViewModel,
     onNavigateToClients: () -> Unit,
+    onNavigateToKanban: () -> Unit,
     onNavigateToProject: (Int) -> Unit
 ) {
     val activeProjects by viewModel.activeRootProjects.collectAsState()
@@ -38,6 +41,8 @@ fun DashboardScreen(
     val selectedStatuses by viewModel.selectedProjectStatuses.collectAsState()
 
     var showCreateDialog by remember { mutableStateOf(false) }
+    var projectToDelete by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         topBar = {
@@ -64,11 +69,22 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Quick Actions
-            Button(
-                onClick = onNavigateToClients,
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(stringResource(R.string.dashboard_manage_clients))
+                Button(
+                    onClick = onNavigateToKanban,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(R.string.crm_kanban_title))
+                }
+                OutlinedButton(
+                    onClick = onNavigateToClients,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(R.string.dashboard_manage_clients))
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -107,11 +123,20 @@ fun DashboardScreen(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(project.name, style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.dashboard_status_label, project.status), style = MaterialTheme.typography.bodyMedium)
-                            project.endDate?.let {
-                                Text(stringResource(R.string.dashboard_deadline_label, it), style = MaterialTheme.typography.bodySmall)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(project.name, style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.dashboard_status_label, project.status), style = MaterialTheme.typography.bodyMedium)
+                                project.endDate?.let {
+                                    Text(stringResource(R.string.dashboard_deadline_label, it), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            IconButton(onClick = { projectToDelete = project }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Borrar proyecto", tint = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
@@ -140,6 +165,51 @@ fun DashboardScreen(
                     showCreateDialog = false
                 },
                 onCreateClient = onNavigateToClients
+            )
+        }
+
+        if (projectToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { projectToDelete = null },
+                icon = {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                },
+                title = { Text("Borrar proyecto") },
+                text = {
+                    Text("Se borrará el proyecto \"${projectToDelete!!.name}\" y todos sus presupuestos asociados en el CRM. Esta acción no se puede deshacer.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteProjectWithQuotes(
+                                projectId = projectToDelete!!.id,
+                                onSuccess = {
+                                    projectToDelete = null
+                                },
+                                onError = { errorMsg ->
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Error al borrar: $errorMsg",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                    projectToDelete = null
+                                }
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Borrar", color = MaterialTheme.colorScheme.onError)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { projectToDelete = null }) {
+                        Text("Cancelar")
+                    }
+                }
             )
         }
     }

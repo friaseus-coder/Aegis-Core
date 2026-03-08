@@ -160,6 +160,54 @@ fun SettingsScreen(
                     )
                 }
                 
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Currency Selector
+                val currencies = listOf(
+                    "USD" to stringResource(R.string.currency_usd),
+                    "EUR" to stringResource(R.string.currency_eur),
+                    "JPY" to stringResource(R.string.currency_jpy),
+                    "GBP" to stringResource(R.string.currency_gbp),
+                    "CNY" to stringResource(R.string.currency_cny),
+                    "AUD" to stringResource(R.string.currency_aud),
+                    "OTHER" to stringResource(R.string.currency_other)
+                )
+
+                Text(stringResource(R.string.settings_currency_title), style = MaterialTheme.typography.bodyMedium)
+                var currencyExpanded by remember { mutableStateOf(false) }
+                val selectedCurrencyLabel = currencies.firstOrNull { it.first == (config?.currency ?: "EUR") }?.second
+                    ?: stringResource(R.string.currency_eur)
+
+                ExposedDropdownMenuBox(
+                    expanded = currencyExpanded,
+                    onExpandedChange = { currencyExpanded = !currencyExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedCurrencyLabel,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.settings_currency_title)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyExpanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = currencyExpanded,
+                        onDismissRequest = { currencyExpanded = false }
+                    ) {
+                        currencies.forEach { (code, label) ->
+                            DropdownMenuItem(
+                                text = { Text(label) },
+                                onClick = {
+                                    viewModel.updateCurrency(code)
+                                    currencyExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Module Customization Button

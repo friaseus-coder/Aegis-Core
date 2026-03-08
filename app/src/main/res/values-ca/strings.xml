@@ -543,4 +543,16 @@
     <string name="vault_label_notes">Notes (Opcional)</string>
     <string name="vault_auth_failed">Fallada d\'autenticació</string>
 
+    <string name="settings_currency_title">Moneda</string>
+    <string name="currency_usd">Dòlar dels Estats Units (USD \$)</string>
+    <string name="currency_eur">Euro (EUR €)</string>
+    <string name="currency_jpy">Ien japonès (JPY ¥)</string>
+    <string name="currency_gbp">Lliura esterlina (GBP £)</string>
+    <string name="currency_cny">Iuan xinès (CNY ¥)</string>
+    <string name="currency_aud">Dòlar australià (AUD A\$)</string>
+    <string name="currency_other">Altres</string>
+    <string name="crm_subproject_edit_title">Editar partida</string>
+    <string name="crm_subproject_delete_title">Eliminar subprojecte</string>
+    <string name="crm_subproject_delete_confirm">S\'eliminarà la partida &quot;%1$s&quot;. Aquesta acció no es pot desfer.</string>
+    <string name="crm_kanban_title">Vista CRM</string>
 </resources>

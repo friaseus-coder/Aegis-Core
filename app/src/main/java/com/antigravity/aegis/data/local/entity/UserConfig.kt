@@ -10,6 +10,7 @@ data class UserConfig(
     val biometricsEnabled: Boolean = false,
     val pricePerKm: Double = 0.35, // Default mileage price
     val language: String = "es", // "es", "en"
+    val currency: String = "EUR", // EUR, USD, etc.
     val themeMode: String = "dark", // "system", "light", "dark"
     // New Profile Fields
     val titularName: String = "Usuario",

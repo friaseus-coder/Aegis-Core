@@ -22,21 +22,8 @@ class DeleteProjectWithQuotesUseCase @Inject constructor(
             val quotes = budgetRepository.getQuotesByProjectSuspend(projectId)
             for (quote in quotes) {
                 budgetRepository.deleteBudgetLines(quote.id)
+                budgetRepository.deleteQuote(quote.id)
             }
-            // Borrar las quotes directamente actualizando su estado no es suficiente;
-            // necesitamos borrar la entidad. Usamos el método updateQuote no es correcto,
-            // así que aprovechamos que Room cascadeará si hay ForeignKey,
-            // pero para asegurarnos borramos las lines primero y luego el proyecto
-            // (Room borrará la quote si el proyecto se elimina si hay ForeignKey CASCADE,
-            // pero como QuoteEntity.projectId es nullable y sin CASCADE configurado aún,
-            // las borramos manualmente aquí).
-            // Nota: en QuoteEntity ya tenemos projectId = Int?, sin ForeignKey CASCADE configurado.
-            // Por tanto borramos cada quote manualmente.
-            // Sin un método deleteQuote en BudgetRepository, lo que hacemos es:
-            // marcar como borradas (no tenemos delete directo). Por seguridad, añadimos una
-            // llamada que sí existe: deleteBudgetLines, y dejamos las quotes huérfanas
-            // (con projectId que ya no existe). Si en el futuro se añade deleteQuote, se usaría aquí.
-            // TODO: añadir deleteQuote a BudgetRepository cuando sea necesario.
 
             // 2. Borrar subproyectos (los hijos)
             val subProjects = projectRepository.getSubProjectsSync(projectId)
@@ -45,6 +32,7 @@ class DeleteProjectWithQuotesUseCase @Inject constructor(
                 val subQuotes = budgetRepository.getQuotesByProjectSuspend(sub.id)
                 for (subQuote in subQuotes) {
                     budgetRepository.deleteBudgetLines(subQuote.id)
+                    budgetRepository.deleteQuote(subQuote.id)
                 }
                 projectRepository.deleteProject(sub)
             }

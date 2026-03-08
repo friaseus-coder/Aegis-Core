@@ -59,7 +59,8 @@ object DatabaseModule {
                 AegisDatabase.MIGRATION_26_27,
                 AegisDatabase.MIGRATION_27_28,
                 AegisDatabase.MIGRATION_28_29,
-                AegisDatabase.MIGRATION_29_30
+                AegisDatabase.MIGRATION_29_30,
+                AegisDatabase.MIGRATION_30_31
             )
             .build()
     }

@@ -40,7 +40,8 @@ class QuoteKanbanViewModel @Inject constructor(
     private val transferManager: DataTransferManager,
     private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository,
     private val createProjectWithDraftQuoteUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectWithDraftQuoteUseCase,
-    private val generateQuotePdfUseCase: com.antigravity.aegis.domain.usecase.crm.GenerateQuotePdfUseCase
+    private val generateQuotePdfUseCase: com.antigravity.aegis.domain.usecase.crm.GenerateQuotePdfUseCase,
+    private val deleteProjectWithQuotesUseCase: com.antigravity.aegis.domain.usecase.project.DeleteProjectWithQuotesUseCase
 ) : ViewModel() {
 
     private val _pdfShareEvent = kotlinx.coroutines.flow.MutableSharedFlow<Uri>()
@@ -208,4 +209,15 @@ class QuoteKanbanViewModel @Inject constructor(
     // Instead of launching intent from VM, let's just generate the URI and pass it back
     // Or better, launch a coroutine that returns the URI?
     // For MVVM, best is to expose a SharedFlow of "Effect".
+
+    fun deleteQuoteAndProject(quote: QuoteEntity) {
+        viewModelScope.launch {
+            if (quote.projectId != null) {
+                deleteProjectWithQuotesUseCase(quote.projectId)
+            } else {
+                budgetRepository.deleteBudgetLines(quote.id)
+                budgetRepository.deleteQuote(quote.id)
+            }
+        }
+    }
 }

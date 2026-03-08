@@ -37,6 +37,12 @@ class BudgetRepositoryImpl @Inject constructor(
         Result.Error(e)
     }
 
+    override suspend fun deleteQuote(quoteId: Int): Result<Unit> = try {
+        Result.Success(dao.deleteQuote(quoteId))
+    } catch (e: Exception) {
+        Result.Error(e)
+    }
+
     override suspend fun insertBudgetLine(line: BudgetLineEntity): Result<Long> = try {
         Result.Success(dao.insertBudgetLine(line))
     } catch (e: Exception) {
