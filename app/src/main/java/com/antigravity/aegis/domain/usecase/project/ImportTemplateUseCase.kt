@@ -30,9 +30,16 @@ class ImportTemplateUseCase @Inject constructor(
                 }
             } ?: return Result.Error(Exception("Could not read file"))
 
+            invokeFromJson(json)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun invokeFromJson(json: String): Result<Long> {
+        return try {
             val dto = Gson().fromJson(json, ProjectTemplateDto::class.java)
             val templateId = saveTemplate(dto, null)
-
             Result.Success(templateId)
         } catch (e: Exception) {
             Result.Error(e)

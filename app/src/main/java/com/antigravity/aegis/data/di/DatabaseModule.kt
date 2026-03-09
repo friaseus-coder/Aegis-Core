@@ -22,7 +22,8 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
-        keyManager: EncryptionKeyManager
+        keyManager: EncryptionKeyManager,
+        importTemplateUseCaseProvider: javax.inject.Provider<com.antigravity.aegis.domain.usecase.project.ImportTemplateUseCase>
     ): AegisDatabase {
         // NOTE: The key must be set in EncryptionKeyManager BEFORE this method is called.
         // In a real app, you might defer this or use a custom factory that fetches the key on open.
@@ -62,6 +63,7 @@ object DatabaseModule {
                 AegisDatabase.MIGRATION_29_30,
                 AegisDatabase.MIGRATION_30_31
             )
+            .addCallback(com.antigravity.aegis.data.local.AegisDatabaseCallback(context, importTemplateUseCaseProvider))
             .build()
     }
 
