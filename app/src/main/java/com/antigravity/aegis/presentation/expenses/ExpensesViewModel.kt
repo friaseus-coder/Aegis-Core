@@ -31,8 +31,15 @@ class ExpensesViewModel @Inject constructor(
     private val ocrManager: OcrManager,
     private val exportManager: ExportManager,
     @ApplicationContext private val context: Context,
-    private val transferManager: DataTransferManager
+    private val transferManager: DataTransferManager,
+    private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository
 ) : ViewModel() {
+
+    val currencySymbol = settingsRepository.getUserConfig()
+        .kotlinx.coroutines.flow.map { config ->
+            com.antigravity.aegis.domain.util.CurrencyUtils.getCurrencySymbol(config?.currency ?: "EUR")
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "€")
 
     // ... Transfer Logic (unchanged) ...
     private val _transferState = MutableStateFlow<TransferState>(TransferState.Idle)

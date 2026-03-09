@@ -49,6 +49,7 @@ fun ExpensesScreen(
     val scannedData by viewModel.scannedData.collectAsState()
     val exportStatus by viewModel.exportStatus.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
@@ -192,9 +193,13 @@ fun ExpensesScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(expenses, key = { it.id }) { expense ->
-                    ExpenseCard(expense, onDistribute = {
-                         viewModel.distributeExpense(expense, projects.map { it.id })
-                    })
+                    ExpenseCard(
+                        expense = expense,
+                        currencySymbol = currencySymbol,
+                        onDistribute = {
+                            viewModel.distributeExpense(expense, projects.map { it.id })
+                        }
+                    )
                 }
             }
         }
@@ -302,6 +307,7 @@ fun AddExpenseDialog(
 @Composable
 fun ExpenseCard(
     expense: com.antigravity.aegis.data.local.entity.ExpenseEntity, 
+    currencySymbol: String,
     onDistribute: () -> Unit = {}
 ) {
     Card(
@@ -326,7 +332,7 @@ fun ExpenseCard(
                     )
                 }
                 Text(
-                    text = stringResource(R.string.ui_currency_symbol) + String.format("%.2f", expense.totalAmount),
+                    text = currencySymbol + String.format("%.2f", expense.totalAmount),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

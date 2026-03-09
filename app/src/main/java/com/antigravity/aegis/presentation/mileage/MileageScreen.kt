@@ -42,6 +42,7 @@ fun MileageScreen(
     val logs by viewModel.logs.collectAsState()
     val exportStatus by viewModel.exportStatus.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     val context = LocalContext.current
 
     // Import Picker
@@ -252,7 +253,7 @@ fun MileageScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(logs) { log ->
-                    MileageItem(log)
+                    MileageItem(log, currencySymbol)
                 }
             }
         }
@@ -260,7 +261,7 @@ fun MileageScreen(
 }
 
 @Composable
-fun MileageItem(log: com.antigravity.aegis.data.local.entity.MileageLogEntity) {
+fun MileageItem(log: com.antigravity.aegis.data.local.entity.MileageLogEntity, currencySymbol: String) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Row(
             modifier = Modifier.padding(12.dp).fillMaxWidth(),
@@ -279,7 +280,7 @@ fun MileageItem(log: com.antigravity.aegis.data.local.entity.MileageLogEntity) {
             Column(horizontalAlignment = Alignment.End) {
                 Text("${log.distanceKm} ${stringResource(R.string.mileage_unit_km)}")
                 Text(
-                    text = stringResource(R.string.ui_currency_symbol) + String.format("%.2f", log.calculatedCost),
+                    text = currencySymbol + String.format("%.2f", log.calculatedCost),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )

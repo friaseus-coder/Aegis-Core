@@ -145,6 +145,12 @@ class CrmViewModel @Inject constructor(
     private val _selectedProject = MutableStateFlow<ProjectEntity?>(null)
     val selectedProject: StateFlow<ProjectEntity?> = _selectedProject
 
+    val currencySymbol = settingsRepository.getUserConfig()
+        .map { config ->
+            com.antigravity.aegis.domain.util.CurrencyUtils.getCurrencySymbol(config?.currency ?: "EUR")
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "€")
+
     // --- Derived State for Selected Client's Projects ---
     private val _clientProjects = MutableStateFlow<List<ProjectEntity>>(emptyList())
     val clientProjects: StateFlow<List<ProjectEntity>> = _clientProjects

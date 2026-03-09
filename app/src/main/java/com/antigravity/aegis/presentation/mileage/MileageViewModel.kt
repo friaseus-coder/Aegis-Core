@@ -88,6 +88,12 @@ class MileageViewModel @Inject constructor(
     val userConfig = userConfigDao.getUserConfig()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val currencySymbol = userConfig
+        .kotlinx.coroutines.flow.map { config ->
+            com.antigravity.aegis.domain.util.CurrencyUtils.getCurrencySymbol(config?.currency ?: "EUR")
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "€")
+
     val logs = crmDao.getAllMileageLogs()
          .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

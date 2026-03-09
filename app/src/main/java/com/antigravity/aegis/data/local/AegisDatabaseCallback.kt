@@ -23,11 +23,19 @@ class AegisDatabaseCallback(
         // Lanzamos una corutina en segundo plano para leer los JSON y precargarlos
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Buscamos los archivos en la carpeta de templates
-                val templatesDir = "templates"
-                val files = context.assets.list(templatesDir)
+                // Buscamos los archivos en la carpeta de templates del idioma actual
+                val lang = java.util.Locale.getDefault().language
+                val templatesDir = "templates/$lang"
+                var files: Array<String>? = null
                 
-                if (files != null) {
+                try {
+                    files = context.assets.list(templatesDir)
+                } catch (e: Exception) {
+                    // Si la carpeta del idioma no existe, no hacemos fallback y omitimos la carga
+                    android.util.Log.i("AegisDatabase", "No se encontró carpeta de plantillas base para el idioma: $lang")
+                }
+                
+                if (!files.isNullOrEmpty()) {
                     val importUseCase = importTemplateUseCaseProvider.get()
                     
                     for (fileName in files) {

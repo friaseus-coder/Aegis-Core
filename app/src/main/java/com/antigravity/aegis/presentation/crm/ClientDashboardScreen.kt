@@ -37,6 +37,7 @@ fun ClientDashboardScreen(
     val client by viewModel.selectedClient.collectAsState()
     val projects by viewModel.clientProjects.collectAsState()
     val documents by viewModel.clientDocuments.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     val context = LocalContext.current
     
     // Launchers
@@ -94,7 +95,7 @@ fun ClientDashboardScreen(
             item {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     MetricCard(stringResource(R.string.crm_metric_active_projects), "${projects.filter { it.status == CrmStatus.ACTIVE }.size}")
-                    MetricCard(stringResource(R.string.crm_metric_budgets), stringResource(R.string.ui_currency_symbol) + " 0.00") // Placeholder
+                    MetricCard(stringResource(R.string.crm_metric_budgets), "$currencySymbol 0.00") // Placeholder
                     MetricCard(stringResource(R.string.crm_metric_hours_month), "0h") // Placeholder
                 }
                 Spacer(modifier = Modifier.height(16.dp))

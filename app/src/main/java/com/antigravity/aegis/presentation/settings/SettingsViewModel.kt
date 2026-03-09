@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.data.security.EncryptionKeyManager
 import com.antigravity.aegis.domain.repository.SettingsRepository
-import com.antigravity.aegis.data.local.seeder.TemplateSeeder
 import com.antigravity.aegis.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val encryptionKeyManager: EncryptionKeyManager,
-    private val templateSeeder: TemplateSeeder
+    private val encryptionKeyManager: EncryptionKeyManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Idle)
@@ -324,16 +322,6 @@ class SettingsViewModel @Inject constructor(
         )
     }
 
-    fun loadDefaultTemplates() {
-        viewModelScope.launch {
-            _uiState.value = SettingsUiState.Loading(UiText.StringResource(R.string.general_loading))
-            try {
-                templateSeeder.seedTemplates()
-                _uiState.value = SettingsUiState.Success(UiText.DynamicString("Plantillas predefinidas cargadas correctamente."))
-            } catch (e: Exception) {
-                _uiState.value = SettingsUiState.Error(UiText.DynamicString("Error al cargar plantillas: ${e.message}"))
-            }
-        }
     }
 }
 

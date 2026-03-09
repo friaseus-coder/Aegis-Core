@@ -38,6 +38,7 @@ fun ProjectDetailScreen(
 ) {
     val project by viewModel.selectedProject.collectAsState()
     val subProjects by viewModel.subProjects.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     var showAddSubProjectDialog by remember { mutableStateOf(false) }
     var showSaveTemplateDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
@@ -182,7 +183,7 @@ fun ProjectDetailScreen(
                                         Text(sub.name, style = MaterialTheme.typography.bodyLarge)
                                         if (sub.price != null) {
                                             Text(
-                                                stringResource(R.string.crm_subproject_price_prefix, stringResource(R.string.ui_currency_symbol) + "%.2f".format(sub.price)),
+                                                stringResource(R.string.crm_subproject_price_prefix, currencySymbol + "%.2f".format(sub.price)),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.primary
                                             )
@@ -217,7 +218,7 @@ fun ProjectDetailScreen(
                             horizontalArrangement = Arrangement.End
                         ) {
                             Text(
-                                "Total presupuestado: ${stringResource(R.string.ui_currency_symbol)}%.2f".format(totalSubs),
+                                "Total presupuestado: $currencySymbol%.2f".format(totalSubs),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -240,7 +241,7 @@ fun ProjectDetailScreen(
                             Column {
                                 Text(stringResource(R.string.quotes_summary_income), style = MaterialTheme.typography.bodySmall)
                                 Text(
-                                    stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.totalIncome),
+                                    currencySymbol + "%.2f".format(financialSummary.totalIncome),
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -248,7 +249,7 @@ fun ProjectDetailScreen(
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(stringResource(R.string.home_module_expenses_title), style = MaterialTheme.typography.bodySmall)
                                 Text(
-                                    stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.totalExpenses),
+                                    currencySymbol + "%.2f".format(financialSummary.totalExpenses),
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.error
                                 )
@@ -258,11 +259,11 @@ fun ProjectDetailScreen(
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Column {
                                 Text(stringResource(R.string.financial_direct_expenses), style = MaterialTheme.typography.bodySmall)
-                                Text(stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.directExpenses), style = MaterialTheme.typography.bodyMedium)
+                                Text(currencySymbol + "%.2f".format(financialSummary.directExpenses), style = MaterialTheme.typography.bodyMedium)
                             }
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(stringResource(R.string.financial_allocated_general), style = MaterialTheme.typography.bodySmall)
-                                Text(stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.allocatedGeneralExpenses), style = MaterialTheme.typography.bodyMedium)
+                                Text(currencySymbol + "%.2f".format(financialSummary.allocatedGeneralExpenses), style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -270,7 +271,7 @@ fun ProjectDetailScreen(
                             Column {
                                 Text(stringResource(R.string.quotes_summary_profit), style = MaterialTheme.typography.bodySmall)
                                 Text(
-                                    stringResource(R.string.ui_currency_symbol) + "%.2f".format(financialSummary.netProfit),
+                                    currencySymbol + "%.2f".format(financialSummary.netProfit),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = if (financialSummary.netProfit >= 0) androidx.compose.ui.graphics.Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
                                 )
@@ -349,7 +350,7 @@ fun ProjectDetailScreen(
                                 },
                                 trailingContent = {
                                     Text(
-                                        "-" + stringResource(R.string.ui_currency_symbol) + "%.2f".format(expense.totalAmount),
+                                        "-" + currencySymbol + "%.2f".format(expense.totalAmount),
                                         color = MaterialTheme.colorScheme.error
                                     )
                                 }
