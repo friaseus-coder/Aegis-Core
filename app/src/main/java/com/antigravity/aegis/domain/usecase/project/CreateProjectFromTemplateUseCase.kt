@@ -39,40 +39,54 @@ class CreateProjectFromTemplateUseCase @Inject constructor(
             ?: throw IllegalStateException("Error al crear el proyecto desde la plantilla")
 
         // 3. Copy Content (Tasks and Subprojects)
-        copyContent(templateId, newProjectId.toInt())
-        copyBudgets(templateId, newProjectId.toInt())
-
+        val copiedSubProjects = copyContent(templateId, newProjectId.toInt())
+        
+        // 4. Create Draft Quote for new project
+        createDraftQuoteForTemplate(newProjectId.toInt(), newClientId, newProjectName, copiedSubProjects)
+        
         return newProjectId
     }
 
-    private suspend fun copyBudgets(sourceProjectId: Int, targetProjectId: Int) {
-        val quotes = budgetRepository.getQuotesByProjectSuspend(sourceProjectId)
-        val targetProject = projectRepository.getProjectById(targetProjectId)
+    private suspend fun createDraftQuoteForTemplate(projectId: Int, clientId: Int, projectName: String, subProjects: List<ProjectEntity>) {
+        val estimatedTotal = subProjects.sumOf { it.price ?: 0.0 }
+        val totalWithTax = estimatedTotal * 1.21
 
-        quotes.forEach { quote ->
-            val newQuote = quote.copy(
-                id = 0,
-                projectId = targetProjectId,
-                clientId = targetProject?.clientId ?: 0,
-                status = CrmStatus.DRAFT,
-                date = System.currentTimeMillis()
-            )
-            val newQuoteId = budgetRepository.insertQuote(newQuote).getOrNull() ?: return@forEach
+        val quote = com.antigravity.aegis.data.local.entity.QuoteEntity(
+            clientId = clientId,
+            projectId = projectId,
+            date = System.currentTimeMillis(),
+            totalAmount = totalWithTax,
+            status = CrmStatus.DRAFT,
+            description = "Presupuesto desde plantilla: $projectName",
+            title = projectName,
+            calculatedTotal = (totalWithTax * 100).toLong(),
+            version = 1
+        )
+        val quoteId = budgetRepository.insertQuote(quote).getOrNull() ?: return
 
-            // Get lines from Flow
-            val lines = budgetRepository.getBudgetLines(quote.id).firstOrNull() ?: emptyList()
-            lines.forEach { line ->
-                budgetRepository.insertBudgetLine(
-                    line.copy(
-                        id = 0,
-                        quoteId = newQuoteId.toInt()
-                    )
+        if (subProjects.isNotEmpty()) {
+            val lines = subProjects.map { sub ->
+                com.antigravity.aegis.data.local.entity.BudgetLineEntity(
+                    quoteId = quoteId.toInt(),
+                    description = buildString {
+                        append(sub.name)
+                        if (!sub.materials.isNullOrBlank()) append(" | Mat: ${sub.materials}")
+                        if (sub.estimatedTime != null && sub.estimatedTimeUnit != null) {
+                            append(" | ${sub.estimatedTime} ${sub.estimatedTimeUnit}")
+                        }
+                    },
+                    quantity = 1.0,
+                    unitPrice = sub.price ?: 0.0,
+                    taxRate = 0.21
                 )
             }
+            budgetRepository.insertBudgetLines(lines)
         }
     }
 
-    private suspend fun copyContent(sourceProjectId: Int, targetProjectId: Int) {
+    private suspend fun copyContent(sourceProjectId: Int, targetProjectId: Int): List<ProjectEntity> {
+        val copiedSubProjects = mutableListOf<ProjectEntity>()
+
         // Copy Tasks
         val tasks = taskRepository.getTasksByProject(sourceProjectId).firstOrNull() ?: emptyList()
         tasks.forEach { task ->
@@ -102,11 +116,14 @@ class CreateProjectFromTemplateUseCase @Inject constructor(
             )
 
             val newSubId = projectRepository.insertProject(finalSub).getOrNull() ?: return@forEach
+            copiedSubProjects.add(finalSub)
 
             // Recursive copy
-            copyContent(sub.id, newSubId.toInt())
-            copyBudgets(sub.id, newSubId.toInt())
+            val nested = copyContent(sub.id, newSubId.toInt())
+            copiedSubProjects.addAll(nested)
         }
+
+        return copiedSubProjects
     }
 }
 
