@@ -72,6 +72,8 @@ fun QuoteKanbanScreen(
     var showCreateDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var quoteToDelete by remember { mutableStateOf<QuoteEntity?>(null) }
+    var quoteToRemind by remember { mutableStateOf<QuoteEntity?>(null) }
+    var quoteToCancelReminder by remember { mutableStateOf<QuoteEntity?>(null) }
     val userConfig by viewModel.userConfig.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -171,6 +173,14 @@ fun QuoteKanbanScreen(
                     quotes = kanbanState[status] ?: emptyList(),
                     onMoveQuote = { quoteId, newStatus ->
                         viewModel.updateQuoteStatus(quoteId, newStatus)
+                        val quote = kanbanState[status]?.find { it.quote.id == quoteId }?.quote
+                        if (quote != null) {
+                            if (newStatus == CrmStatus.SENT) {
+                                quoteToRemind = quote
+                            } else if (status == CrmStatus.SENT) {
+                                quoteToCancelReminder = quote
+                            }
+                        }
                     },
                     onShareQuote = { quote, client ->
                         viewModel.generateAndSharePdf(quote.id)
@@ -288,6 +298,65 @@ fun QuoteKanbanScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showCreateDialog = false }) { Text(stringResource(R.string.general_cancel)) }
+                }
+            )
+        }
+
+        if (quoteToRemind != null) {
+            var days by remember { mutableStateOf("7") }
+            var times by remember { mutableStateOf("3") }
+            
+            AlertDialog(
+                onDismissRequest = { quoteToRemind = null },
+                title = { Text(stringResource(R.string.reminder_dialog_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.reminder_dialog_desc))
+                        OutlinedTextField(
+                            value = days,
+                            onValueChange = { if (it.all { char -> char.isDigit() }) days = it },
+                            label = { Text(stringResource(R.string.reminder_dialog_days)) },
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                        )
+                        OutlinedTextField(
+                            value = times,
+                            onValueChange = { if (it.all { char -> char.isDigit() }) times = it },
+                            label = { Text(stringResource(R.string.reminder_dialog_times)) },
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        val d = days.toIntOrNull() ?: 7
+                        val t = times.toIntOrNull() ?: 3
+                        viewModel.scheduleQuoteReminder(quoteToRemind!!.id, quoteToRemind!!.title, d, t)
+                        quoteToRemind = null
+                    }) {
+                        Text(stringResource(R.string.reminder_dialog_schedule))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { quoteToRemind = null }) { Text(stringResource(R.string.general_cancel)) }
+                }
+            )
+        }
+
+        if (quoteToCancelReminder != null) {
+            AlertDialog(
+                onDismissRequest = { quoteToCancelReminder = null },
+                title = { Text(stringResource(R.string.reminder_cancel_title)) },
+                text = { Text(stringResource(R.string.reminder_cancel_desc)) },
+                confirmButton = {
+                    Button(onClick = {
+                        viewModel.cancelQuoteReminder(quoteToCancelReminder!!.id)
+                        quoteToCancelReminder = null
+                    }) {
+                        Text(stringResource(R.string.reminder_cancel_yes))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { quoteToCancelReminder = null }) { Text(stringResource(R.string.general_cancel)) }
                 }
             )
         }

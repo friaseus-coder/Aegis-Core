@@ -102,7 +102,7 @@ class DashboardViewModel @Inject constructor(
         settingsRepository.getUserConfig().map { config ->
             val defaultModules = listOf(
                 ModuleData(com.antigravity.aegis.R.string.module_id_projects, Icons.Filled.Work, Screen.Projects.route),
-                ModuleData(com.antigravity.aegis.R.string.module_id_budgets, Icons.Filled.Money, Screen.Budgets.route),
+                ModuleData(com.antigravity.aegis.R.string.module_id_budgets, Icons.Filled.Contacts, Screen.Budgets.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_expenses, Icons.Filled.Money, Screen.Expenses.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_inventory, Icons.Filled.Inventory, Screen.Inventory.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_time_control, Icons.Filled.Schedule, Screen.TimeControl.route),

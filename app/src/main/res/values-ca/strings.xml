@@ -555,4 +555,12 @@
     <string name="crm_subproject_delete_title">Eliminar subprojecte</string>
     <string name="crm_subproject_delete_confirm">S\'eliminarà la partida &quot;%1$s&quot;. Aquesta acció no es pot desfer.</string>
     <string name="crm_kanban_title">Vista CRM</string>
+    <string name="reminder_dialog_title">Programar Recordatori</string>
+    <string name="reminder_dialog_desc">Vols programar un avís de seguiment recurrent per a aquest pressupost?</string>
+    <string name="reminder_dialog_days">Freqüència (en dies)</string>
+    <string name="reminder_dialog_times">Nombre d\'avisos (Repeticions)</string>
+    <string name="reminder_dialog_schedule">Programar</string>
+    <string name="reminder_cancel_title">Cancel·lar Recordatori</string>
+    <string name="reminder_cancel_desc">En moure el pressupost fora d\'"Enviat", vols cancel·lar el seu recordatori actiu si n\'hi ha?</string>
+    <string name="reminder_cancel_yes">Sí, Cancel·la</string>
 </resources>

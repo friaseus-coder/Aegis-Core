@@ -566,4 +566,12 @@
     <string name="crm_subproject_delete_title">Delete subproject</string>
     <string name="crm_subproject_delete_confirm">The line item &quot;%1$s&quot; will be deleted. This action cannot be undone.</string>
     <string name="crm_kanban_title">CRM View</string>
+    <string name="reminder_dialog_title">Schedule Reminder</string>
+    <string name="reminder_dialog_desc">Do you want to schedule a recurring reminder to follow up on this quote?</string>
+    <string name="reminder_dialog_days">Frequency (in days)</string>
+    <string name="reminder_dialog_times">Number of reminders (Repeat)</string>
+    <string name="reminder_dialog_schedule">Schedule</string>
+    <string name="reminder_cancel_title">Cancel Reminder</string>
+    <string name="reminder_cancel_desc">When moving the quote out of "Sent", do you want to cancel its active reminder if any?</string>
+    <string name="reminder_cancel_yes">Yes, Cancel</string>
 </resources>

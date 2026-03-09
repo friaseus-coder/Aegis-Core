@@ -227,4 +227,12 @@ class QuoteKanbanViewModel @Inject constructor(
             }
         }
     }
+
+    fun scheduleQuoteReminder(quoteId: Int, title: String, days: Int, times: Int) {
+        com.antigravity.aegis.data.worker.QuoteFollowUpWorker.scheduleNextReminder(context, quoteId, title, days, times)
+    }
+
+    fun cancelQuoteReminder(quoteId: Int) {
+        androidx.work.WorkManager.getInstance(context).cancelUniqueWork("quote_reminder_$quoteId")
+    }
 }

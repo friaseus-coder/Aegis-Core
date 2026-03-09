@@ -160,7 +160,7 @@ fun DashboardScreen(
                     if (templateId != null) {
                          viewModel.createProjectFromTemplate(templateId, clientId, name, startDate, endDate)
                     } else {
-                         viewModel.createProject(clientId, name, "ACTIVE", startDate, endDate, category)
+                         viewModel.createProject(clientId, name, com.antigravity.aegis.domain.model.CrmStatus.ACTIVE, startDate, endDate, category)
                     }
                     showCreateDialog = false
                 },

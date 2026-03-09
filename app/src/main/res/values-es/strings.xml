@@ -553,4 +553,12 @@
     <string name="crm_subproject_delete_title">Eliminar subproyecto</string>
     <string name="crm_subproject_delete_confirm">Se eliminará la partida &quot;%1$s&quot;. Esta acción no se puede deshacer.</string>
     <string name="crm_kanban_title">Vista CRM</string>
+    <string name="reminder_dialog_title">Programar Recordatorio</string>
+    <string name="reminder_dialog_desc">¿Deseas programar un aviso recurrente para hacer seguimiento de este presupuesto?</string>
+    <string name="reminder_dialog_days">Frecuencia (en días)</string>
+    <string name="reminder_dialog_times">Número de avisos (Repeticiones)</string>
+    <string name="reminder_dialog_schedule">Programar</string>
+    <string name="reminder_cancel_title">Cancelar Recordatorio</string>
+    <string name="reminder_cancel_desc">Al mover el presupuesto fuera de "Enviado", ¿deseas cancelar su recordatorio activo si lo hubiera?</string>
+    <string name="reminder_cancel_yes">Sí, Cancelar</string>
 </resources>
