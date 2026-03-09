@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
@@ -89,7 +90,7 @@ class MileageViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val currencySymbol = userConfig
-        .kotlinx.coroutines.flow.map { config ->
+        .map { config ->
             com.antigravity.aegis.domain.util.CurrencyUtils.getCurrencySymbol(config?.currency ?: "EUR")
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "€")

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
@@ -36,7 +37,7 @@ class ExpensesViewModel @Inject constructor(
 ) : ViewModel() {
 
     val currencySymbol = settingsRepository.getUserConfig()
-        .kotlinx.coroutines.flow.map { config ->
+        .map { config ->
             com.antigravity.aegis.domain.util.CurrencyUtils.getCurrencySymbol(config?.currency ?: "EUR")
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "€")

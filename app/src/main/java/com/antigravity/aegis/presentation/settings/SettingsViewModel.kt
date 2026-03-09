@@ -321,8 +321,6 @@ class SettingsViewModel @Inject constructor(
             com.antigravity.aegis.domain.model.ModuleConfig("mileage", R.string.module_id_mileage, true, 7)
         )
     }
-
-    }
 }
 
 
