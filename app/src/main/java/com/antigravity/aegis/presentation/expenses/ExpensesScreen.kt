@@ -102,6 +102,19 @@ fun ExpensesScreen(
         }
     }
     
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val storageDir = context.cacheDir
+            val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
+            tempImageUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
+            tempImageUri?.let { cameraLauncher.launch(it) }
+        } else {
+            Toast.makeText(context, "Se requiere permiso de cámara para escanear tickets", Toast.LENGTH_SHORT).show()
+        }
+    }
+
      // Export Effect
     LaunchedEffect(exportStatus) {
         if (exportStatus != null) {
@@ -172,11 +185,19 @@ fun ExpensesScreen(
                 
                 Button(
                     onClick = { 
-                        // Launch Camera
-                        val storageDir = context.cacheDir
-                        val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
-                        tempImageUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
-                        cameraLauncher.launch(tempImageUri)
+                        // Launch Camera with permission check
+                        val permissionCheck = androidx.core.content.ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.CAMERA
+                        )
+                        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            val storageDir = context.cacheDir
+                            val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
+                            tempImageUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
+                            tempImageUri?.let { cameraLauncher.launch(it) }
+                        } else {
+                            permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                        }
                     },
                     modifier = Modifier.weight(1f),
                      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
