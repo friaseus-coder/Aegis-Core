@@ -75,6 +75,7 @@ fun QuoteKanbanScreen(
     var quoteToRemind by remember { mutableStateOf<QuoteEntity?>(null) }
     var quoteToCancelReminder by remember { mutableStateOf<QuoteEntity?>(null) }
     val userConfig by viewModel.userConfig.collectAsState()
+    val currencySymbol = com.antigravity.aegis.domain.util.CurrencyUtils.getCurrencySymbol(userConfig?.currency ?: "EUR")
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val shareTitle = stringResource(R.string.ui_share_quote)
@@ -171,6 +172,7 @@ fun QuoteKanbanScreen(
                 KanbanColumn(
                     status = status,
                     quotes = kanbanState[status] ?: emptyList(),
+                    currencySymbol = currencySymbol,
                     onMoveQuote = { quoteId, newStatus ->
                         viewModel.updateQuoteStatus(quoteId, newStatus)
                         val quote = kanbanState[status]?.find { it.quote.id == quoteId }?.quote
@@ -370,7 +372,8 @@ fun KanbanColumn(
     onMoveQuote: (Int, String) -> Unit,
     onShareQuote: (QuoteEntity, Client) -> Unit,
     onDeleteQuote: (QuoteEntity) -> Unit,
-    onQuoteClick: (QuoteEntity) -> Unit
+    onQuoteClick: (QuoteEntity) -> Unit,
+    currencySymbol: String
 ) {
 
     Column(
@@ -409,6 +412,7 @@ fun KanbanColumn(
                     quote = item.quote,
                     client = item.client,
                     currentStatus = status,
+                    currencySymbol = currencySymbol,
                     onMoveTo = { newStatus -> onMoveQuote(item.quote.id, newStatus) },
                     onShare = { 
                         if (item.client != null) {
@@ -431,7 +435,8 @@ fun QuoteCard(
     onMoveTo: (String) -> Unit,
     onShare: () -> Unit,
     onDelete: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    currencySymbol: String
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -508,9 +513,8 @@ fun QuoteCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            val formatter = NumberFormat.getCurrencyInstance(Locale.US) // Or default
             Text(
-                text = formatter.format(quote.totalAmount),
+                text = currencySymbol + "%.2f".format(quote.totalAmount),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary

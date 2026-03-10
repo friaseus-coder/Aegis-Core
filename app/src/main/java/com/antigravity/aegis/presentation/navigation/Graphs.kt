@@ -12,7 +12,6 @@ import com.antigravity.aegis.presentation.crm.*
 import com.antigravity.aegis.presentation.screens.PasswordVaultScreen
 import com.antigravity.aegis.presentation.dashboard.DashboardScreen
 import com.antigravity.aegis.presentation.expenses.ExpensesScreen
-import com.antigravity.aegis.presentation.inventory.InventoryScreen
 import com.antigravity.aegis.presentation.mileage.MileageScreen
 import com.antigravity.aegis.presentation.settings.*
 import com.antigravity.aegis.presentation.feature.clients.ClientListScreen
@@ -245,10 +244,6 @@ fun NavGraphBuilder.featuresGraph(
     ) {
         composable(Screen.Expenses.route) {
             ExpensesScreen(onNavigateBack = { navController.popBackStack() })
-        }
-
-        composable(Screen.Inventory.route) {
-            InventoryScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable(Screen.Mileage.route) {

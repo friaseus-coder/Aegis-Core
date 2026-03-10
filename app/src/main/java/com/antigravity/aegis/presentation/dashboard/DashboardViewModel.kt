@@ -104,7 +104,6 @@ class DashboardViewModel @Inject constructor(
                 ModuleData(com.antigravity.aegis.R.string.module_id_projects, Icons.Filled.Work, Screen.Projects.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_budgets, Icons.Filled.Contacts, Screen.Budgets.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_expenses, Icons.Filled.Money, Screen.Expenses.route),
-                ModuleData(com.antigravity.aegis.R.string.module_id_inventory, Icons.Filled.Inventory, Screen.Inventory.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_time_control, Icons.Filled.Schedule, Screen.TimeControl.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_clients, Icons.Filled.Person, Screen.Clients.route),
                 ModuleData(com.antigravity.aegis.R.string.module_id_mileage, Icons.Filled.Map, Screen.Mileage.route)
@@ -115,7 +114,6 @@ class DashboardViewModel @Inject constructor(
                 "projects" to com.antigravity.aegis.R.string.module_id_projects,
                 "budgets" to com.antigravity.aegis.R.string.module_id_budgets,
                 "expenses" to com.antigravity.aegis.R.string.module_id_expenses,
-                "inventory" to com.antigravity.aegis.R.string.module_id_inventory,
                 "time_control" to com.antigravity.aegis.R.string.module_id_time_control,
                 "clients" to com.antigravity.aegis.R.string.module_id_clients,
                 "mileage" to com.antigravity.aegis.R.string.module_id_mileage

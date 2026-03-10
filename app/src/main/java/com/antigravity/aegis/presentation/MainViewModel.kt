@@ -49,7 +49,6 @@ class MainViewModel @Inject constructor(
             AppModule.FIELD_SERVICE,
             AppModule.BUDGETS,
             AppModule.EXPENSES,
-            AppModule.INVENTORY,
             AppModule.MILEAGE
         )
 
@@ -125,5 +124,5 @@ class MainViewModel @Inject constructor(
 }
 
 enum class AppModule {
-    CRM, FIELD_SERVICE, BUDGETS, EXPENSES, INVENTORY, MILEAGE
+    CRM, FIELD_SERVICE, BUDGETS, EXPENSES, MILEAGE
 }

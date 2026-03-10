@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,7 +33,6 @@ fun MainMenuScreen(
     onNavigateToFieldService: () -> Unit,
     onNavigateToBudgets: () -> Unit,
     onNavigateToExpenses: () -> Unit,
-    onNavigateToInventory: () -> Unit,
     onNavigateToMileage: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToProfile: () -> Unit
@@ -114,12 +112,6 @@ fun MainMenuScreen(
                             subtitle = stringResource(R.string.home_module_expenses_subtitle),
                             icon = Icons.Default.Receipt,
                             onClick = onNavigateToExpenses
-                        )
-                        AppModule.INVENTORY -> ModuleCard(
-                            title = stringResource(R.string.home_module_inventory_title),
-                            subtitle = stringResource(R.string.home_module_inventory_subtitle),
-                            icon = Icons.Default.ShoppingBag,
-                            onClick = onNavigateToInventory
                         )
                         AppModule.MILEAGE -> ModuleCard(
                             title = stringResource(R.string.home_module_mileage_title),
