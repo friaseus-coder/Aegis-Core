@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.aegis.data.local.entity.ProductEntity
 import com.antigravity.aegis.domain.repository.InventoryRepository
-import com.antigravity.aegis.domain.util.Result as DomainResult
+import com.antigravity.aegis.domain.util.Result
+import com.antigravity.aegis.domain.util.onSuccess
+import com.antigravity.aegis.domain.util.onError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +35,7 @@ class InventoryViewModel @Inject constructor(
             val result = transferManager.exportData(DataTransferManager.EntityType.INVENTORY)
             result.onSuccess { file ->
                  _transferState.value = TransferState.Success(resId = com.antigravity.aegis.R.string.data_export_success_path, arg = file.absolutePath)
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(message = it.message, resId = com.antigravity.aegis.R.string.data_export_failed)
             }
         }
@@ -57,7 +59,7 @@ class InventoryViewModel @Inject constructor(
             val result = transferManager.importData(DataTransferManager.EntityType.INVENTORY, uri, wipe)
             result.onSuccess {
                  _transferState.value = TransferState.Success(resId = com.antigravity.aegis.R.string.data_import_success)
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(message = it.message, resId = com.antigravity.aegis.R.string.data_import_db_error)
             }
         }

@@ -1,0 +1,37 @@
+
+{
+  "name": "Reforma Integral de Cocina",
+  "description": "Renovación completa de cocina: demolición, instalaciones, alicatado y mobiliario.",
+  "tasks": [
+    {
+      "title": "Protección de zonas comunes",
+      "description": "Cubrir pasillos y ascensor con cartón y plástico."
+    }
+  ],
+  "subProjects": [
+    {
+      "name": "Fase 1: Demolición e Instalaciones",
+      "description": "Retirada de elementos antiguos y nuevas tomas de agua y luz.",
+      "materials": "Sacos de escombros, tuberías de cobre/PVC, cableado.",
+      "tasks": [
+        {
+          "title": "Picar revestimientos",
+          "description": "Retirar azulejos y baldosas actuales."
+        }
+      ],
+      "subProjects": []
+    },
+    {
+      "name": "Fase 2: Revestimiento y Montaje",
+      "description": "Alicatado y montaje de muebles.",
+      "materials": "Azulejos, cemento cola, muebles, encimera.",
+      "tasks": [
+        {
+          "title": "Instalar muebles",
+          "description": "Fijación, nivelación y ajuste de encimera."
+        }
+      ],
+      "subProjects": []
+    }
+  ]
+}

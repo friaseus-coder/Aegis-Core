@@ -152,5 +152,45 @@ class BackupRepositoryImpl @Inject constructor(
             Result.Error(e)
         }
     }
+
+    override suspend fun createSafetyBackup(customName: String): Result<File> = withContext(Dispatchers.IO) {
+        // Implementation that reuses createFullBackupZip logic but with custom name
+        try {
+            val jsonResult = createBackupJson()
+            if (jsonResult is Result.Error) return@withContext Result.Error(jsonResult.exception)
+            val json = (jsonResult as Result.Success).data
+            
+            val tempDir = File(context.cacheDir, "safety_backup_temp")
+            if (tempDir.exists()) tempDir.deleteRecursively()
+            tempDir.mkdirs()
+
+            val jsonFile = File(tempDir, "data.json")
+            jsonFile.writeText(json)
+
+            val filesToZip = mutableListOf<File>()
+            filesToZip.add(jsonFile)
+            
+            context.filesDir.listFiles()?.forEach { file ->
+                if (file.name != "datastore" && file.name != "no_backup") {
+                    filesToZip.add(file)
+                }
+            }
+
+            val unencryptedZip = File(context.cacheDir, "safety_unencrypted.zip")
+            zipManager.zipFiles(filesToZip, unencryptedZip)
+
+            // For now, save in the same place as FullBackup but with the requested name
+            val finalFile = File(context.filesDir, "$customName.zip.enc")
+            val outputStream = FileOutputStream(finalFile)
+            fileCryptoManager.encrypt(outputStream, unencryptedZip.readBytes(), "aegis_cloud_sync_v1")
+
+            tempDir.deleteRecursively()
+            unencryptedZip.delete()
+
+            Result.Success(finalFile)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
 }
 

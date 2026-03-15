@@ -23,6 +23,9 @@ import java.util.Calendar
 import javax.inject.Inject
 
 import com.antigravity.aegis.domain.transfer.DataTransferManager
+import com.antigravity.aegis.domain.util.Result
+import com.antigravity.aegis.domain.util.onSuccess
+import com.antigravity.aegis.domain.util.onError
 
 @HiltViewModel
 class ExpensesViewModel @Inject constructor(
@@ -52,7 +55,7 @@ class ExpensesViewModel @Inject constructor(
             val result = transferManager.exportData(DataTransferManager.EntityType.EXPENSES)
             result.onSuccess { file ->
                  _transferState.value = TransferState.Success(resId = com.antigravity.aegis.R.string.data_export_success_path, arg = file.absolutePath)
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(message = it.message, resId = com.antigravity.aegis.R.string.data_export_failed)
             }
         }
@@ -76,7 +79,7 @@ class ExpensesViewModel @Inject constructor(
             val result = transferManager.importData(DataTransferManager.EntityType.EXPENSES, uri, wipe)
             result.onSuccess {
                  _transferState.value = TransferState.Success(resId = com.antigravity.aegis.R.string.data_import_success)
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(message = it.message, resId = com.antigravity.aegis.R.string.data_import_db_error)
             }
         }

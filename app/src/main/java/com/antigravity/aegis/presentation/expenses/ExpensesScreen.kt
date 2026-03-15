@@ -101,17 +101,14 @@ fun ExpensesScreen(
             viewModel.processImage(tempImageUri!!)
         }
     }
-    
-    val permissionLauncher = rememberLauncherForActivityResult(
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            val storageDir = context.cacheDir
-            val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
-            tempImageUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
-            tempImageUri?.let { cameraLauncher.launch(it) }
+            launchCamera(context, { tempImageUri = it }, { cameraLauncher.launch(it) })
         } else {
-            Toast.makeText(context, "Se requiere permiso de cámara para escanear tickets", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.inventory_scan_label), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -185,18 +182,14 @@ fun ExpensesScreen(
                 
                 Button(
                     onClick = { 
-                        // Launch Camera with permission check
                         val permissionCheck = androidx.core.content.ContextCompat.checkSelfPermission(
                             context,
                             android.Manifest.permission.CAMERA
                         )
                         if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                            val storageDir = context.cacheDir
-                            val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
-                            tempImageUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
-                            tempImageUri?.let { cameraLauncher.launch(it) }
+                            launchCamera(context, { tempImageUri = it }, { cameraLauncher.launch(it) })
                         } else {
-                            permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                         }
                     },
                     modifier = Modifier.weight(1f),
@@ -373,5 +366,22 @@ fun ExpenseCard(
                  Text(stringResource(R.string.settings_distributed_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.align(Alignment.End))
             }
         }
+    }
+}
+
+private fun launchCamera(context: android.content.Context, onUriCreated: (Uri) -> Unit, onLaunch: (Uri) -> Unit) {
+    try {
+        val storageDir = context.cacheDir
+        val imageFile = File.createTempFile("scan_${System.currentTimeMillis()}", ".jpg", storageDir)
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            imageFile
+        )
+        onUriCreated(uri)
+        onLaunch(uri)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        Toast.makeText(context, context.getString(R.string.general_error_prefix, e.message ?: "Camera Error"), Toast.LENGTH_SHORT).show()
     }
 }

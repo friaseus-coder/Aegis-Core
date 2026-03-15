@@ -6,12 +6,16 @@ import com.antigravity.aegis.data.local.dao.CrmDao
 import com.antigravity.aegis.data.local.entity.*
 import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.domain.repository.BackupRepository
+import com.antigravity.aegis.domain.util.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileWriter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class DataTransferManager @Inject constructor(
@@ -32,8 +36,7 @@ class DataTransferManager @Inject constructor(
                 if (rows.isEmpty()) return@withContext listOf("File is empty")
 
                 // Validation Logic
-                val header = rows[0].keys.toList() // Approximation, actually parse returns maps with same keys
-                // We should validate header structure
+                val header = if (rows.isNotEmpty()) rows[0].keys.toList() else emptyList()
                 
                 when (type) {
                     EntityType.CLIENTS -> {
@@ -59,11 +62,22 @@ class DataTransferManager @Inject constructor(
         errors
     }
 
-    suspend fun importData(type: EntityType, uri: Uri, wipeExisting: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun importData(
+        type: EntityType, 
+        uri: Uri, 
+        wipeExisting: Boolean,
+        backupName: String? = null
+    ): Result<String?> = withContext(Dispatchers.IO) {
+        var safetyBackupName: String? = null
         try {
                 if (wipeExisting) {
-                    // val backupResult = backupRepository.createAutoBackup("pre_import_${type.name.lowercase()}")
-                    // if (backupResult.isFailure) throw Exception("Safety backup failed: ${backupResult.exceptionOrNull()?.message}")
+                    if (backupName != null) {
+                        val backupResult = backupRepository.createSafetyBackup(backupName)
+                        if (backupResult is Result.Error) {
+                            return@withContext Result.Error(backupResult.exception, "Safety backup failed")
+                        }
+                        safetyBackupName = (backupResult as Result.Success).data.name
+                    }
                     
                     // Wipe Table
                      when (type) {
@@ -155,12 +169,34 @@ class DataTransferManager @Inject constructor(
                         else -> {}
                     }
                 }
-                Result.success(Unit)
+                Result.Success(safetyBackupName)
             } catch (e: Exception) {
-                Result.failure(e)
+                Result.Error(e)
             }
     }
     
+    suspend fun generateTemplate(type: EntityType): Result<File> = withContext(Dispatchers.IO) {
+        try {
+            val exportDir = File(context.cacheDir, "templates")
+            if (!exportDir.exists()) exportDir.mkdirs()
+            val file = File(exportDir, "${type.name.lowercase()}_template.csv")
+
+            FileWriter(file).use { writer ->
+                when (type) {
+                    EntityType.CLIENTS -> {
+                        writer.append("firstName,lastName,type,companyName,nif,email,phone,address,notes\n")
+                    }
+                    EntityType.INVENTORY -> {
+                        writer.append("barcode,name,price,quantity,minQuantity,description\n")
+                    }
+                    else -> writer.append("header1,header2\n") // Generic
+                }
+            }
+            Result.Success(file)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
     suspend fun exportData(type: EntityType): Result<File> = withContext(Dispatchers.IO) {
         try {
             val exportDir = File(context.cacheDir, "exports")
@@ -209,9 +245,9 @@ class DataTransferManager @Inject constructor(
                     else -> {}
                 }
             }
-            Result.success(file)
+            Result.Success(file)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.Error(e)
         }
     }
 }

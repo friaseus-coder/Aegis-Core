@@ -8,5 +8,6 @@ interface BackupRepository {
     suspend fun createBackupJson(): Result<String>
     suspend fun restoreBackupJson(json: String): Result<Unit>
     suspend fun createFullBackupZip(): Result<File>
+    suspend fun createSafetyBackup(customName: String): Result<File>
 }
 

@@ -22,6 +22,9 @@ import com.antigravity.aegis.R
 import javax.inject.Inject
 
 import com.antigravity.aegis.domain.transfer.DataTransferManager
+import com.antigravity.aegis.domain.util.Result
+import com.antigravity.aegis.domain.util.onSuccess
+import com.antigravity.aegis.domain.util.onError
 import android.net.Uri
 
 @HiltViewModel
@@ -42,7 +45,7 @@ class MileageViewModel @Inject constructor(
             val result = transferManager.exportData(DataTransferManager.EntityType.MILEAGE)
             result.onSuccess { file ->
                  _transferState.value = TransferState.Success(resId = R.string.mileage_export_client_success, arg = file.absolutePath)
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
@@ -66,7 +69,7 @@ class MileageViewModel @Inject constructor(
             val result = transferManager.importData(DataTransferManager.EntityType.MILEAGE, uri, wipe)
             result.onSuccess {
                  _transferState.value = TransferState.Success(resId = R.string.mileage_import_client_success)
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }

@@ -158,6 +158,16 @@
     <string name="crm_import_client_success">Clients importats amb èxit</string>
     <string name="crm_template_export_success">Plantilla exportada amb èxit</string>
     <string name="crm_template_import_success">Plantilla importada amb èxit</string>
+    <string name="crm_clients_mass_export_btn">Exportar Clients (CSV)</string>
+    <string name="crm_clients_mass_import_btn">Pujada de Clients</string>
+    <string name="crm_clients_import_option_template">Baixar plantilla</string>
+    <string name="crm_clients_import_option_upload">Pujada de clients</string>
+    <string name="crm_clients_import_dialog_title">Importar Clients</string>
+    <string name="crm_clients_import_mode_add">Afegir els nous</string>
+    <string name="crm_clients_import_mode_replace">Esborrar base de dades i canviar</string>
+    <string name="crm_clients_import_warning_replace">ADVERTÈNCIA: S\'esborraran tots els clients actuals. Es generarà una còpia de seguretat automàticament.</string>
+    <string name="crm_clients_backup_name_prefix">clients_</string>
+    <string name="crm_clients_import_success_with_backup">Importació amb èxit. Còpia de seguretat creada: %1$s</string>
     <string name="crm_client_email_placeholder">Sense email</string>
     <string name="crm_client_detail_email">Email: %1$s</string>
     <string name="crm_client_detail_phone">Tel: %1$s</string>

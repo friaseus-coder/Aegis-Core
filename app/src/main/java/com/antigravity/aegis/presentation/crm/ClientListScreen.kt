@@ -48,6 +48,7 @@ fun ClientListScreen(
     // Filters State
     var searchQuery by remember { mutableStateOf("") }
     var filterType by remember { mutableStateOf<String?>(null) }
+    var showImportMenu by remember { mutableStateOf(false) }
     
     LaunchedEffect(searchQuery) { viewModel.setSearchQuery(searchQuery) }
     LaunchedEffect(filterType) { viewModel.setFilterType(filterType) }
@@ -64,12 +65,22 @@ fun ClientListScreen(
     // Handling States
     when (val state = transferState) {
         is CrmViewModel.TransferState.Success -> {
-            Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
-            viewModel.resetTransferState()
+            val message = if (state.resId != null) {
+                if (state.arg != null) stringResource(state.resId, state.arg)
+                else stringResource(state.resId)
+            } else state.message ?: ""
+            
+            LaunchedEffect(state) {
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                viewModel.resetTransferState()
+            }
         }
         is CrmViewModel.TransferState.Error -> {
-            Toast.makeText(context, context.getString(R.string.general_error_prefix, state.message), Toast.LENGTH_LONG).show()
-             viewModel.resetTransferState()
+            val message = if (state.resId != null) stringResource(state.resId) else state.message ?: "Error"
+            LaunchedEffect(state) {
+                Toast.makeText(context, context.getString(R.string.general_error_prefix, message), Toast.LENGTH_LONG).show()
+                viewModel.resetTransferState()
+            }
         }
         is CrmViewModel.TransferState.ValidationError -> {
              AlertDialog(
@@ -80,15 +91,23 @@ fun ClientListScreen(
             )
         }
         is CrmViewModel.TransferState.ValidationSuccess -> {
-            ImportConfirmationDialog(
+            ClientImportConfirmDialog(
                 onConfirm = { wipe -> viewModel.confirmImport(state.uri, wipe) },
-                onCancel = { viewModel.resetTransferState() }
+                onDismiss = { viewModel.resetTransferState() }
             )
         }
         is CrmViewModel.TransferState.Loading -> {
-             // Show simple loading
+             // Optional: LinearProgressIndicator() or similar
         }
         else -> {}
+    }
+
+    if (showImportMenu) {
+        ClientImportDialog(
+            onDismiss = { showImportMenu = false },
+            onDownloadTemplate = { viewModel.downloadTemplate() },
+            onUploadFile = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }
+        )
     }
 
     Scaffold(
@@ -96,10 +115,10 @@ fun ClientListScreen(
             AegisTopAppBar(
                 actions = {
                     IconButton(onClick = { viewModel.exportClients() }) {
-                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.data_export_csv))
+                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.crm_clients_mass_export_btn))
                     }
-                    IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.data_import_csv))
+                    IconButton(onClick = { showImportMenu = true }) {
+                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.crm_clients_mass_import_btn))
                     }
                 }
             )

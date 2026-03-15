@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.antigravity.aegis.domain.transfer.DataTransferManager
+import com.antigravity.aegis.domain.util.Result
 import com.antigravity.aegis.domain.util.getOrNull
 import com.antigravity.aegis.domain.util.onSuccess
 import com.antigravity.aegis.domain.util.onError
@@ -62,7 +63,7 @@ class QuoteKanbanViewModel @Inject constructor(
             val result = transferManager.exportData(DataTransferManager.EntityType.QUOTES)
             result.onSuccess { file ->
                  _transferState.value = TransferState.Success("Exported to ${file.absolutePath}")
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(it.message ?: "Export failed")
             }
         }
@@ -86,7 +87,7 @@ class QuoteKanbanViewModel @Inject constructor(
             val result = transferManager.importData(DataTransferManager.EntityType.QUOTES, uri, wipe)
             result.onSuccess {
                  _transferState.value = TransferState.Success("Import Successful")
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(it.message ?: "Import failed")
             }
         }

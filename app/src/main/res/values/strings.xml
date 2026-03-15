@@ -155,6 +155,16 @@
     <string name="crm_import_client_success">Clients imported successfully</string>
     <string name="crm_template_export_success">Template exported successfully</string>
     <string name="crm_template_import_success">Template imported successfully</string>
+    <string name="crm_clients_mass_export_btn">Export Clients (CSV)</string>
+    <string name="crm_clients_mass_import_btn">Import Clients (CSV)</string>
+    <string name="crm_clients_import_option_template">Download Template</string>
+    <string name="crm_clients_import_option_upload">Upload File</string>
+    <string name="crm_clients_import_dialog_title">Import Clients</string>
+    <string name="crm_clients_import_mode_add">Add new records</string>
+    <string name="crm_clients_import_mode_replace">Delete existing and replace</string>
+    <string name="crm_clients_import_warning_replace">WARNING: This will delete all current clients. A safety backup will be created automatically.</string>
+    <string name="crm_clients_backup_name_prefix">clients_</string>
+    <string name="crm_clients_import_success_with_backup">Import successful. Safety backup created: %1$s</string>
     
     <!-- Feature: Search and Filters -->
     <string name="action_search_hint_min_3">Search (min 3 letters)</string>
@@ -261,6 +271,8 @@
     <string name="backup_dialog_desc_main">Before you start working, it is important to configure a location for your automatic backups.</string>
     <string name="backup_dialog_desc_recommend">Select a folder on your device for daily local backups. Use \'Upload to Cloud / Share\' in Settings to send to Google Drive.</string>
     <string name="backup_dialog_select_button">Select Local Folder</string>
+    <string name="backup_dialog_error_title">Backup Location Error</string>
+    <string name="backup_dialog_error_desc">The previously configured backup location is no longer accessible. Please select a new folder to ensure your data remains safe.</string>
 
     <!-- Feature: Field Service -->
     <string name="field_service_title">Field Service Console</string>

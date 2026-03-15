@@ -158,6 +158,16 @@
     <string name="crm_import_client_success">Clientes importados con éxito</string>
     <string name="crm_template_export_success">Plantilla exportada con éxito</string>
     <string name="crm_template_import_success">Plantilla importada con éxito</string>
+    <string name="crm_clients_mass_export_btn">Exportar Clientes (CSV)</string>
+    <string name="crm_clients_mass_import_btn">Subida de Clientes</string>
+    <string name="crm_clients_import_option_template">Bajar plantilla</string>
+    <string name="crm_clients_import_option_upload">Subida de clientes</string>
+    <string name="crm_clients_import_dialog_title">Importar Clientes</string>
+    <string name="crm_clients_import_mode_add">Agregar los nuevos</string>
+    <string name="crm_clients_import_mode_replace">Borrar base de datos y cambiar</string>
+    <string name="crm_clients_import_warning_replace">ADVERTENCIA: Se borrarán todos los clientes actuales. Se generará una copia de seguridad automáticamente.</string>
+    <string name="crm_clients_backup_name_prefix">clientes_</string>
+    <string name="crm_clients_import_success_with_backup">Importación exitosa. Copia de seguridad creada: %1$s</string>
     <string name="crm_client_not_found">Cliente no encontrado o cargando...</string>
     
     <!-- Feature: CRM/Projects -->
@@ -256,6 +266,8 @@
     <string name="backup_dialog_desc_main">Antes de empezar a trabajar, es importante configurar una ubicación para tus copias de seguridad automáticas.</string>
     <string name="backup_dialog_desc_recommend">Selecciona una carpeta en tu dispositivo para la copia local diaria. Usa \'Subir a la Nube / Compartir\' en Ajustes para enviar a Google Drive.</string>
     <string name="backup_dialog_select_button">Seleccionar Carpeta Local</string>
+    <string name="backup_dialog_error_title">Error de Ubicación de Backup</string>
+    <string name="backup_dialog_error_desc">La ubicación de copia de seguridad configurada previamente ya no es accesible. Por favor, selecciona una nueva carpeta para asegurar tus datos.</string>
 
     <!-- Feature: Field Service -->
     <string name="field_service_title">Consola de Servicio de Campo</string>

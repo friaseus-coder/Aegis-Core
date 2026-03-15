@@ -34,6 +34,9 @@ class DashboardViewModel @Inject constructor(
     private val _autoBackupStatus = MutableStateFlow<BackupStatus?>(null)
     val autoBackupStatus = _autoBackupStatus.asStateFlow()
 
+    private val _isBackupLocationError = MutableStateFlow(false)
+    val isBackupLocationError = _isBackupLocationError.asStateFlow()
+
     init {
         checkBackupConfiguration()
     }
@@ -64,6 +67,7 @@ class DashboardViewModel @Inject constructor(
             when (val persistResult = settingsRepository.persistBackupUri(uri)) {
                 is DomainResult.Success -> {
                     _showBackupDialog.value = false
+                    _isBackupLocationError.value = false
                     val config = settingsRepository.getUserConfig().firstOrNull()
                     if (config != null) performBackup(config)
                 }
@@ -87,8 +91,19 @@ class DashboardViewModel @Inject constructor(
     
     private suspend fun performBackup(userConfig: com.antigravity.aegis.data.local.entity.UserConfig) {
         when (val result = settingsRepository.performAutoBackup(userConfig)) {
-            is DomainResult.Success -> _autoBackupStatus.value = BackupStatus.Success(result.data)
-            is DomainResult.Error -> _autoBackupStatus.value = BackupStatus.Error(result.exception.message)
+            is DomainResult.Success -> {
+                _autoBackupStatus.value = BackupStatus.Success(result.data)
+                _isBackupLocationError.value = false
+            }
+            is DomainResult.Error -> {
+                _autoBackupStatus.value = BackupStatus.Error(result.exception.message)
+                // Check if error is related to location/permissions
+                val msg = result.exception.message?.lowercase() ?: ""
+                if (msg.contains("uri") || msg.contains("directory") || msg.contains("stream") || msg.contains("permission")) {
+                    _isBackupLocationError.value = true
+                    _showBackupDialog.value = true
+                }
+            }
         }
     }
 

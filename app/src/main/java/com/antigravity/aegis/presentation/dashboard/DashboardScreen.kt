@@ -89,7 +89,9 @@ fun DashboardScreen(
     }
     
     if (showBackupDialog) {
+        val isLocationError by viewModel.isBackupLocationError.collectAsState()
         com.antigravity.aegis.presentation.components.BackupCheckDialog(
+            isLocationError = isLocationError,
             onBackupLocationSelected = { uri ->
                 viewModel.onBackupLocationSelected(uri)
             }

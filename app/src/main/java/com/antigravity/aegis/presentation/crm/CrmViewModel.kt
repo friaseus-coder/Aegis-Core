@@ -23,6 +23,7 @@ import com.antigravity.aegis.domain.util.onSuccess
 import com.antigravity.aegis.domain.util.getOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.antigravity.aegis.domain.transfer.DataTransferManager
+import com.antigravity.aegis.domain.util.Result
 import com.antigravity.aegis.data.repository.AttachmentRepository
 import com.antigravity.aegis.data.local.entity.DocumentEntity
 import android.provider.OpenableColumns
@@ -40,6 +41,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -177,7 +182,7 @@ class CrmViewModel @Inject constructor(
             val result = transferManager.exportData(DataTransferManager.EntityType.CLIENTS)
             result.onSuccess { file ->
                  _transferState.value = TransferState.Success(resId = R.string.crm_export_client_success, arg = file.absolutePath)
-            }.onFailure {
+            }.onError {
                  _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
@@ -198,11 +203,43 @@ class CrmViewModel @Inject constructor(
     fun confirmImport(uri: android.net.Uri, wipe: Boolean) {
         viewModelScope.launch {
             _transferState.value = TransferState.Loading
-            val result = transferManager.importData(DataTransferManager.EntityType.CLIENTS, uri, wipe)
-            result.onSuccess {
-                 _transferState.value = TransferState.Success(resId = R.string.crm_import_client_success)
-            }.onFailure {
+            
+            val backupName = if (wipe) {
+                val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                val dateStr = sdf.format(Date())
+                context.getString(R.string.crm_clients_backup_name_prefix) + dateStr
+            } else null
+
+            val result = transferManager.importData(
+                type = DataTransferManager.EntityType.CLIENTS, 
+                uri = uri, 
+                wipeExisting = wipe,
+                backupName = backupName
+            )
+            
+            result.onSuccess { backupGenerated ->
+                if (backupGenerated != null) {
+                    _transferState.value = TransferState.Success(
+                        resId = R.string.crm_clients_import_success_with_backup,
+                        arg = backupGenerated
+                    )
+                } else {
+                    _transferState.value = TransferState.Success(resId = R.string.crm_import_client_success)
+                }
+            }.onError {
                  _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
+            }
+        }
+    }
+
+    fun downloadTemplate() {
+        viewModelScope.launch {
+            _transferState.value = TransferState.Loading
+            val result = transferManager.generateTemplate(DataTransferManager.EntityType.CLIENTS)
+            result.onSuccess { file ->
+                _transferState.value = TransferState.Success(resId = R.string.crm_template_export_success, arg = file.absolutePath)
+            }.onError {
+                _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
     }
