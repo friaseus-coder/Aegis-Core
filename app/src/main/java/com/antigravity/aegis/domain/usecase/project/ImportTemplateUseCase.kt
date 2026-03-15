@@ -54,6 +54,7 @@ class ImportTemplateUseCase @Inject constructor(
             status = CrmStatus.ACTIVE,
             startDate = System.currentTimeMillis(),
             isTemplate = true,
+            category = dto.category,
             materials = dto.materials,
             price = dto.price,
             estimatedTime = dto.estimatedTime,
