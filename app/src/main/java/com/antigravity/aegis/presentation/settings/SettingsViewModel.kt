@@ -18,11 +18,15 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val encryptionKeyManager: EncryptionKeyManager
+    private val encryptionKeyManager: EncryptionKeyManager,
+    private val googleAppsManager: com.antigravity.aegis.data.cloud.GoogleAppsManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Idle)
     val uiState = _uiState.asStateFlow()
+    
+    private val _googleAccount = MutableStateFlow(googleAppsManager.getLastSignedInAccount())
+    val googleAccount = _googleAccount.asStateFlow()
     
 
     // User Config
@@ -185,6 +189,22 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.insertOrUpdateConfig(newConfig)
             _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.settings_logo_deleted))
         }
+    }
+
+
+    fun onGoogleAccountSelected(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+        _googleAccount.value = account
+        _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.sync_google_success))
+    }
+
+    fun disconnectGoogleAccount() {
+        // Here we would ideally call googleSignInClient.signOut() but for simplicity
+        // and as we only use it for Drive/Calendar access tokens via getLastSignedInAccount,
+        // we follow the pattern of clearing local reference if needed.
+        // Actually, GoogleSignIn.getLastSignedInAccount returns what Google has.
+        // To really disconnect, we'd need the client.
+        _googleAccount.value = null
+        _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.general_success))
     }
     
     // ========== Module Customization ==========

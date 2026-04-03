@@ -22,6 +22,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.antigravity.aegis.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +53,20 @@ fun SettingsScreen(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let { viewModel.importDatabase(it) }
+    }
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                viewModel.onGoogleAccountSelected(account)
+            } catch (e: ApiException) {
+                Toast.makeText(context, "Google Sign-In failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // Effect for UI State
@@ -89,24 +108,6 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            
-            // Handle UI State Feedback (Redundant? Lines 82-93 also handle it?)
-            // The previous block (80-93) uses `context` from `LocalContext.current` at line 39.
-            // This block (122-137) used a new `context`.
-            // I will remove this duplicate block and just keep the Loading indicator logic which is unique here, or better yet, verify logic.
-            // Lines 80-93 handle the Toast.
-            // Lines 122-137 seem to be a duplicate added during previous edits or original code? 
-            // Ah, I see in original file lines 80-93 and 122-137. I should probably clean it up.
-            // But for now, let's just make sure it compiles.
-            // The `uiState` collection in 122 seems to shadow/copy.
-            
-            // Actually, let's just update the duplicate block inside Column if I can't remove it safely without viewing.
-            // Wait, looking at file content:
-            // Line 39: val context = LocalContext.current
-            // Line 80: LaunchedEffect(uiState) ... Toast ...
-            // Line 121: val context = androidx.compose.ui.platform.LocalContext.current
-            // Line 122: LaunchedEffect... 
-            // It IS duplicated. I should remove the second one.
             
             // Loading Indicator
             if (uiState is SettingsUiState.Loading) {
@@ -236,7 +237,6 @@ fun SettingsScreen(
             }
 
 
-
             // Database Section
             SettingsSection(title = stringResource(R.string.settings_section_database)) {
                 Button(
@@ -255,6 +255,59 @@ fun SettingsScreen(
                 }
             }
 
+            // Google Sync Section
+            val googleAccount = viewModel.googleAccount.collectAsState().value
+            
+            SettingsSection(title = stringResource(R.string.settings_section_google_sync)) {
+                if (googleAccount != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(Icons.Default.Person, contentDescription = null)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = googleAccount.displayName ?: "Google User",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = googleAccount.email ?: "",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            TextButton(onClick = { viewModel.disconnectGoogleAccount() }) {
+                                Text(stringResource(R.string.settings_google_sync_disconnect))
+                            }
+                        }
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = {
+                            try {
+                                if (viewModel.isGoogleConfigured()) {
+                                    val options = viewModel.getGoogleSignInOptions()
+                                    val client = GoogleSignIn.getClient(context, options)
+                                    googleSignInLauncher.launch(client.signInIntent)
+                                } else {
+                                    Toast.makeText(context, "Configura GOOGLE_CLIENT_ID en el .env", Toast.LENGTH_LONG).show()
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                Toast.makeText(context, "Error fatal: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.sync_google_btn_connect))
+                    }
+                }
+            }
 
 
             // Company Details Section
@@ -420,4 +473,3 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
         content()
     }
 }
-

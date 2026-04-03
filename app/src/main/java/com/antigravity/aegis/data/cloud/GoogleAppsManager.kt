@@ -57,4 +57,12 @@ class GoogleAppsManager @Inject constructor(
             .setApplicationName("Aegis Core")
             .build()
     }
+
+    /**
+     * Verifica si la clave GOOGLE_CLIENT_ID ha sido configurada en el .env
+     */
+    fun isConfigured(): Boolean {
+        return BuildConfig.GOOGLE_CLIENT_ID.isNotBlank() && 
+               !BuildConfig.GOOGLE_CLIENT_ID.contains("YOUR_")
+    }
 }
