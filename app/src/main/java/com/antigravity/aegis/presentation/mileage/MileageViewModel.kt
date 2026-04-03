@@ -32,7 +32,8 @@ class MileageViewModel @Inject constructor(
     private val crmDao: CrmDao,
     private val userConfigDao: UserConfigDao,
     @ApplicationContext private val context: Context,
-    private val transferManager: DataTransferManager
+    private val transferManager: DataTransferManager,
+    private val googleCalendarSyncManager: com.antigravity.aegis.data.cloud.GoogleCalendarSyncManager
 ) : ViewModel() {
 
     // Transfer Logic
@@ -104,6 +105,27 @@ class MileageViewModel @Inject constructor(
     private val _exportStatus = MutableStateFlow<String?>(null)
     val exportStatus: StateFlow<String?> = _exportStatus
 
+    val pendingSyncCount: StateFlow<Int> = logs
+        .map { it.count { log -> !log.isSynced } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    private val _isSyncingCalendar = MutableStateFlow(false)
+    val isSyncingCalendar: StateFlow<Boolean> = _isSyncingCalendar.asStateFlow()
+
+    fun syncToCalendar() {
+        viewModelScope.launch {
+            _isSyncingCalendar.value = true
+            val pending = logs.value.filter { !it.isSynced }
+            pending.forEach { log ->
+                val eventId = googleCalendarSyncManager.syncMileage(log)
+                if (eventId != null) {
+                    crmDao.insertMileageLog(log.copy(isSynced = true, googleCalendarEventId = eventId))
+                }
+            }
+            _isSyncingCalendar.value = false
+        }
+    }
+
     fun updatePricePerKm(price: Double) {
         viewModelScope.launch {
             userConfigDao.updatePricePerKm(price)
@@ -136,7 +158,16 @@ class MileageViewModel @Inject constructor(
                 pricePerKmSnapshot = currentPrice,
                 calculatedCost = cost
             )
-            crmDao.insertMileageLog(log)
+            val insertedId = crmDao.insertMileageLog(log)
+            
+            // AUTOMATIC SYNC: Google Calendar
+            viewModelScope.launch {
+                val savedLog = log.copy(id = insertedId.toInt())
+                val eventId = googleCalendarSyncManager.syncMileage(savedLog)
+                if (eventId != null) {
+                    crmDao.insertMileageLog(savedLog.copy(isSynced = true, googleCalendarEventId = eventId))
+                }
+            }
         }
     }
 

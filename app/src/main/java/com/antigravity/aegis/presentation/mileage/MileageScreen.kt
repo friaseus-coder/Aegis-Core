@@ -31,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
+import com.antigravity.aegis.presentation.components.SyncBanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +44,8 @@ fun MileageScreen(
     val exportStatus by viewModel.exportStatus.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
+    val pendingSyncCount by viewModel.pendingSyncCount.collectAsState()
+    val isSyncing by viewModel.isSyncingCalendar.collectAsState()
     val context = LocalContext.current
 
     // Import Picker
@@ -250,12 +253,19 @@ fun MileageScreen(
             
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.weight(1f)
             ) {
                 items(logs) { log ->
                     MileageItem(log, currencySymbol)
                 }
             }
+
+            SyncBanner(
+                pendingCount = pendingSyncCount,
+                isSyncing = isSyncing,
+                onSyncNow = { viewModel.syncToCalendar() }
+            )
         }
     }
 }

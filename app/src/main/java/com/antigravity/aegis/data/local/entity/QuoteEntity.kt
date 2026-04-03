@@ -15,5 +15,6 @@ data class QuoteEntity(
     val title: String, // A brief title for the quote
     val calculatedTotal: Long = 0,
     val version: Int = 1,
+    val isSynced: Boolean = false,
     val googleCalendarEventId: String? = null
 )

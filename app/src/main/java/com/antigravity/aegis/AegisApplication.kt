@@ -32,5 +32,20 @@ class AegisApplication : Application(), Configuration.Provider {
             ExistingPeriodicWorkPolicy.KEEP,
             workRequest
         )
+
+        // Configurar backup diario a Google Drive
+        val syncWorkRequest = PeriodicWorkRequestBuilder<com.antigravity.aegis.data.worker.FileSyncWorker>(1, TimeUnit.DAYS)
+            .setConstraints(
+                androidx.work.Constraints.Builder()
+                    .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+                    .build()
+            )
+            .build()
+            
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "FileSync",
+            ExistingPeriodicWorkPolicy.KEEP,
+            syncWorkRequest
+        )
     }
 }

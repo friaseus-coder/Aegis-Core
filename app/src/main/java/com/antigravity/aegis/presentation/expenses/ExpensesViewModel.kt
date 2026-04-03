@@ -39,7 +39,9 @@ class ExpensesViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val transferManager: DataTransferManager,
     private val settingsRepository: com.antigravity.aegis.domain.repository.SettingsRepository,
-    private val pdfGenerator: com.antigravity.aegis.domain.reports.PdfGenerator
+    private val pdfGenerator: com.antigravity.aegis.domain.reports.PdfGenerator,
+    private val googleCalendarSyncManager: com.antigravity.aegis.data.cloud.GoogleCalendarSyncManager,
+    private val googleDriveSyncManager: com.antigravity.aegis.data.cloud.GoogleDriveSyncManager
 ) : ViewModel() {
 
     val currencySymbol = settingsRepository.getUserConfig()
@@ -122,6 +124,27 @@ class ExpensesViewModel @Inject constructor(
     private val _exportStatus = MutableStateFlow<String?>(null)
     val exportStatus: StateFlow<String?> = _exportStatus
 
+    val pendingSyncCount: StateFlow<Int> = allExpenses
+        .map { it.count { e -> !e.isSynced } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    private val _isSyncingCalendar = MutableStateFlow(false)
+    val isSyncingCalendar: StateFlow<Boolean> = _isSyncingCalendar.asStateFlow()
+
+    fun syncToCalendar() {
+        viewModelScope.launch {
+            _isSyncingCalendar.value = true
+            val pending = allExpenses.value.filter { !it.isSynced }
+            pending.forEach { expense ->
+                val eventId = googleCalendarSyncManager.syncExpense(expense, expense.merchantName ?: "Gasto")
+                if (eventId != null) {
+                    expenseRepository.updateExpense(expense.copy(isSynced = true, googleCalendarEventId = eventId))
+                }
+            }
+            _isSyncingCalendar.value = false
+        }
+    }
+
     fun processImage(uri: Uri) {
         viewModelScope.launch {
              val data = ocrManager.analyzeTicket(context, uri)
@@ -174,7 +197,25 @@ class ExpensesViewModel @Inject constructor(
                 category = category,
                 projectId = projectId
             )
-            expenseRepository.insertExpense(expense)
+            val insertedId = expenseRepository.insertExpense(expense)
+            val savedExpense = expense.copy(id = insertedId.toInt())
+            
+            // AUTOMATIC SYNC: Google Drive (Attachments)
+            if (imagePath != null && imageUri != null) {
+                viewModelScope.launch {
+                    val fileName = imagePath.substringAfterLast("/")
+                    googleDriveSyncManager.uploadAttachment(imageUri, fileName)
+                }
+            }
+            
+            // AUTOMATIC SYNC: Google Calendar
+            viewModelScope.launch {
+                val eventId = googleCalendarSyncManager.syncExpense(savedExpense, merchant)
+                if (eventId != null) {
+                    expenseRepository.updateExpense(savedExpense.copy(isSynced = true, googleCalendarEventId = eventId))
+                }
+            }
+            
             clearScannedData()
         }
     }

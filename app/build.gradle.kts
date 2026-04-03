@@ -1,8 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+}
+
+val envFile = rootProject.file(".env")
+val envProperties = Properties()
+if (envFile.exists()) {
+    envProperties.load(envFile.inputStream())
 }
 
 android {
@@ -20,6 +28,13 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Inyectar variables de entorno para privacidad
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${envProperties.getProperty("GOOGLE_CLIENT_ID", "")}\"")
+        buildConfigField("String", "GOOGLE_API_KEY", "\"${envProperties.getProperty("GOOGLE_API_KEY", "")}\"")
+        buildConfigField("int", "BACKUP_FREQUENCY_DAYS", envProperties.getProperty("BACKUP_FREQUENCY_DAYS", "1"))
+        buildConfigField("boolean", "KEEP_LOCAL_ATTACHMENTS", envProperties.getProperty("KEEP_LOCAL_ATTACHMENTS", "true"))
+        buildConfigField("boolean", "ENABLE_SYNC_NOTIFICATIONS", envProperties.getProperty("ENABLE_SYNC_NOTIFICATIONS", "true"))
     }
 
     buildTypes {
@@ -40,6 +55,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8" // Compatible with Kotlin 1.9.22

@@ -8,6 +8,7 @@ import com.antigravity.aegis.data.local.entity.ClientEntity
 import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
+import com.antigravity.aegis.data.local.entity.MileageLogEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -119,6 +120,38 @@ class GoogleCalendarSyncManager @Inject constructor(
         return Event()
             .setSummary("[Aegis CRM] ${quote.title} — $clientName")
             .setDescription("Estado: ${quote.status}\nTotal: ${quote.calculatedTotal / 100.0}€\n${quote.description}")
+            .setStart(EventDateTime().setDate(DateTime(dateStr)))
+            .setEnd(EventDateTime().setDate(DateTime(dateStr)))
+    }
+
+    // ─── Mileage ─────────────────────────────────────────────────────────────
+
+    /**
+     * Inserta un registro de kilometraje como evento en Google Calendar.
+     * @return eventId del evento creado, o null si falla.
+     */
+    suspend fun syncMileage(log: MileageLogEntity): String? {
+        val account = googleAppsManager.getLastSignedInAccount() ?: return null
+        return try {
+            val service = googleAppsManager.getCalendarService(account)
+            val event = buildMileageEvent(log)
+            if (log.googleCalendarEventId != null) {
+                service.events().update("primary", log.googleCalendarEventId, event).execute()
+                log.googleCalendarEventId
+            } else {
+                val created = service.events().insert("primary", event).execute()
+                created.id
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun buildMileageEvent(log: MileageLogEntity): Event {
+        val dateStr = dateFormat.format(Date(log.date))
+        return Event()
+            .setSummary("[Aegis Km] ${log.origin} -> ${log.destination} — ${log.distanceKm}km")
+            .setDescription("Vehículo: ${log.vehicle}\nCoste: ${log.calculatedCost}€\nOdometer: ${log.startOdometer} -> ${log.endOdometer}")
             .setStart(EventDateTime().setDate(DateTime(dateStr)))
             .setEnd(EventDateTime().setDate(DateTime(dateStr)))
     }

@@ -60,6 +60,9 @@ abstract class AegisDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE tasks ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
                 database.execSQL("ALTER TABLE expenses ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
                 database.execSQL("ALTER TABLE quotes ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE quotes ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE mileage_logs ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE mileage_logs ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
             }
         }
 

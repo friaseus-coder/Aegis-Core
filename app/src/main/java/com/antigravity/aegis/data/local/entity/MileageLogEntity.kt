@@ -14,5 +14,7 @@ data class MileageLogEntity(
     val endOdometer: Double,
     val distanceKm: Double, // Calculated: End - Start
     val pricePerKmSnapshot: Double, // Price at time of creation
-    val calculatedCost: Double // Calculated: Distance * Price
+    val calculatedCost: Double, // Calculated: Distance * Price
+    val isSynced: Boolean = false,
+    val googleCalendarEventId: String? = null
 )

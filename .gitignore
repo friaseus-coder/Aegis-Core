@@ -23,6 +23,7 @@ build/
 
 # Local configuration file
 local.properties
+.env
 
 # Android Studio Navigation editor temp files
 .navigation/

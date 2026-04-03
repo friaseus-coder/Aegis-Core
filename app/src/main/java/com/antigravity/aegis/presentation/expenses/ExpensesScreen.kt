@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
 package com.antigravity.aegis.presentation.expenses
 
 import android.net.Uri
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,12 +35,12 @@ import coil.compose.rememberAsyncImagePainter
 import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.common.ImportConfirmationDialog
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
+import com.antigravity.aegis.presentation.components.SyncBanner
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpensesScreen(
     viewModel: ExpensesViewModel = hiltViewModel(),
@@ -50,6 +52,8 @@ fun ExpensesScreen(
     val exportStatus by viewModel.exportStatus.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
+    val pendingSyncCount by viewModel.pendingSyncCount.collectAsState()
+    val isSyncing by viewModel.isSyncingCalendar.collectAsState()
     
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
@@ -264,7 +268,8 @@ fun ExpensesScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.weight(1f)
             ) {
                 items(expenses, key = { it.id }) { expense ->
                     ExpenseCard(
@@ -277,6 +282,12 @@ fun ExpensesScreen(
                     )
                 }
             }
+
+            SyncBanner(
+                pendingCount = pendingSyncCount,
+                isSyncing = isSyncing,
+                onSyncNow = { viewModel.syncToCalendar() }
+            )
         }
     }
 }
@@ -309,7 +320,7 @@ fun AddExpenseDialog(
     // Initial calculation if we have total and it's a new scan
     LaunchedEffect(scannedData, defaultTax) {
         if (scannedData != null && baseAmount.isEmpty()) {
-            val t = scannedData.totalAmount
+            val t = scannedData.totalAmount ?: 0.0
             val p = defaultTax
             val b = t / (1 + (p / 100.0))
             baseAmount = String.format("%.2f", b)

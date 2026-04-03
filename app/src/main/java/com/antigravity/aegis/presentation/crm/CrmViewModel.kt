@@ -29,6 +29,7 @@ import com.antigravity.aegis.data.local.entity.DocumentEntity
 import android.provider.OpenableColumns
 import android.net.Uri
 import androidx.core.content.FileProvider
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,7 +39,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
@@ -68,10 +68,11 @@ class CrmViewModel @Inject constructor(
     private val createProjectFromTemplateUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectFromTemplateUseCase,
     private val exportTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ExportTemplateUseCase,
     private val importTemplateUseCase: com.antigravity.aegis.domain.usecase.project.ImportTemplateUseCase,
-    // Nuevos casos de uso: sincronización Proyectos ↔ CRM
     private val createProjectWithDraftQuoteUseCase: com.antigravity.aegis.domain.usecase.project.CreateProjectWithDraftQuoteUseCase,
     private val generateQuotePdfUseCase: com.antigravity.aegis.domain.usecase.crm.GenerateQuotePdfUseCase,
-    private val deleteProjectWithQuotesUseCase: com.antigravity.aegis.domain.usecase.project.DeleteProjectWithQuotesUseCase
+    private val deleteProjectWithQuotesUseCase: com.antigravity.aegis.domain.usecase.project.DeleteProjectWithQuotesUseCase,
+    private val googleCalendarSyncManager: com.antigravity.aegis.data.cloud.GoogleCalendarSyncManager,
+    private val googleDriveSyncManager: com.antigravity.aegis.data.cloud.GoogleDriveSyncManager
 ) : ViewModel() {
 
 
@@ -171,6 +172,45 @@ class CrmViewModel @Inject constructor(
     // --- Budgets ---
     private val _projectBudgets = MutableStateFlow<List<QuoteEntity>>(emptyList())
     val projectBudgets: StateFlow<List<QuoteEntity>> = _projectBudgets
+
+    val allQuotes: StateFlow<List<QuoteEntity>> = budgetRepository.getAllQuotes()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val pendingSyncCount: StateFlow<Int> = combine(activeProjects, allQuotes) { projs, quotes ->
+        projs.count { !it.isSynced } + quotes.count { !it.isSynced }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    private val _isSyncingCalendar = MutableStateFlow(false)
+    val isSyncingCalendar: StateFlow<Boolean> = _isSyncingCalendar.asStateFlow()
+
+    fun syncToCalendar() {
+        viewModelScope.launch {
+            _isSyncingCalendar.value = true
+            
+            // Sync Projects
+            activeProjects.value.filter { !it.isSynced }.forEach { project ->
+                val eventId = googleCalendarSyncManager.syncProject(project)
+                if (eventId != null) {
+                    projectRepository.updateProject(project.copy(isSynced = true, googleCalendarEventId = eventId))
+                }
+            }
+
+            // Sync Quotes (Avisos CRM)
+            allQuotes.value.filter { !it.isSynced }.forEach { quote ->
+                val client = clientRepository.getClientById(quote.clientId).firstOrNull()
+                val clientName = if (client != null) {
+                    if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName
+                } else "Cliente desconocido"
+                
+                val eventId = googleCalendarSyncManager.syncQuote(quote, clientName)
+                if (eventId != null) {
+                    budgetRepository.updateQuote(quote.copy(isSynced = true, googleCalendarEventId = eventId))
+                }
+            }
+
+            _isSyncingCalendar.value = false
+        }
+    }
 
     // Transfer Logic
     private val _transferState = MutableStateFlow<TransferState>(TransferState.Idle)
@@ -303,6 +343,8 @@ class CrmViewModel @Inject constructor(
             )
             clientRepository.insertClient(client)
 
+            // AUTOMATIC SYNC: Calendar (As a CRM marker if needed, but usually clients aren't calendar events)
+            // If the user wants "everything", maybe we skip clients for now as there's no date.
         }
     }
 
@@ -349,6 +391,11 @@ class CrmViewModel @Inject constructor(
                     dateAdded = System.currentTimeMillis()
                 )
                 documentRepository.addDocument(doc)
+                
+                // AUTOMATIC SYNC: Google Drive (Documents)
+                viewModelScope.launch {
+                    googleDriveSyncManager.uploadAttachment(uri, fileName)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 // Handle error
@@ -385,6 +432,17 @@ class CrmViewModel @Inject constructor(
                 // Ensure the status matches what was requested if it's not ACTIVE
                 if (validStatus != CrmStatus.ACTIVE) {
                     projectRepository.updateProjectStatus(projectId.toInt(), validStatus)
+                }
+                
+                // AUTOMATIC SYNC: Google Calendar
+                viewModelScope.launch {
+                    val project = projectRepository.getProjectById(projectId.toInt())
+                    if (project != null) {
+                        val eventId = googleCalendarSyncManager.syncProject(project)
+                        if (eventId != null) {
+                            projectRepository.updateProject(project.copy(isSynced = true, googleCalendarEventId = eventId))
+                        }
+                    }
                 }
             }.onError { e -> 
                 android.util.Log.e("CrmViewModel", "Error al crear proyecto: ${e.message}") 

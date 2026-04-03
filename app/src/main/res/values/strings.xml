@@ -309,6 +309,7 @@
     <string name="expenses_title">Expenses &amp; Tickets</string>
     <string name="expenses_export_quarter_button">Share Quarter Summary</string>
     <string name="expenses_review_ticket_title">Review Ticket Data</string>
+    <string name="expenses_edit_expense_title">Edit Expense</string>
     <string name="expenses_merchant_label">Merchant/Concept</string>
     <string name="expenses_amount_label">Total Amount</string>
     <string name="expense_cat_material">Material</string>
@@ -620,4 +621,11 @@
     <string name="settings_google_sync_account_label">Connected account: %1$s</string>
     <string name="settings_google_sync_not_connected">Not connected</string>
     <string name="settings_google_sync_disconnect">Disconnect Account</string>
+
+    <!-- Feature: Auto Sync & Notifications -->
+    <string name="sync_auto_notification_title">Aegis Sync</string>
+    <string name="sync_auto_notification_success">Backup completed successfully in Google Drive.</string>
+    <string name="sync_auto_notification_file_success">File "%1$s" uploaded to Google Drive.</string>
+    <string name="sync_auto_error_auth">Google authentication error.</string>
+    <string name="sync_auto_error_network">Network error while syncing.</string>
 </resources>

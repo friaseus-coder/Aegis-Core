@@ -11,6 +11,7 @@ import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.CalendarScopes
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
+import com.antigravity.aegis.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Arrays
 import javax.inject.Inject
@@ -22,7 +23,7 @@ class GoogleAppsManager @Inject constructor(
 ) {
     // Scopes combinados: Drive + Calendar
     private val scopes = Arrays.asList(
-        DriveScopes.DRIVE_APPDATA,
+        DriveScopes.DRIVE_FILE,
         CalendarScopes.CALENDAR_EVENTS
     )
 
@@ -30,9 +31,10 @@ class GoogleAppsManager @Inject constructor(
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
             .requestScopes(
-                com.google.android.gms.common.api.Scope(DriveScopes.DRIVE_APPDATA),
+                com.google.android.gms.common.api.Scope(DriveScopes.DRIVE_FILE),
                 com.google.android.gms.common.api.Scope(CalendarScopes.CALENDAR_EVENTS)
             )
+            .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
             .build()
     }
 

@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.antigravity.aegis.R
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
+import com.antigravity.aegis.presentation.components.SyncBanner
 import com.antigravity.aegis.domain.model.Client
 import com.antigravity.aegis.domain.model.ClientType
 import androidx.compose.foundation.clickable
@@ -39,6 +40,8 @@ fun DashboardScreen(
     val templates by viewModel.templates.collectAsState()
     val categories by viewModel.templateCategories.collectAsState()
     val selectedStatuses by viewModel.selectedProjectStatuses.collectAsState()
+    val pendingSyncCount by viewModel.pendingSyncCount.collectAsState()
+    val isSyncing by viewModel.isSyncingCalendar.collectAsState()
 
     var showCreateDialog by remember { mutableStateOf(false) }
     var projectToDelete by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
@@ -148,7 +151,14 @@ fun DashboardScreen(
                     }
                 }
             }
+
+            SyncBanner(
+                pendingCount = pendingSyncCount,
+                isSyncing = isSyncing,
+                onSyncNow = { viewModel.syncToCalendar() }
+            )
         }
+    }
 
         if (showCreateDialog) {
             CreateProjectWizard(
@@ -213,7 +223,6 @@ fun DashboardScreen(
             )
         }
     }
-}
 
 @Composable
 fun CreateProjectWizard(

@@ -304,6 +304,7 @@
     <string name="expenses_title">Gastos y Tickets</string>
     <string name="expenses_export_quarter_button">Compartir Resumen Trimestral</string>
     <string name="expenses_review_ticket_title">Revisar Datos del Ticket</string>
+    <string name="expenses_edit_expense_title">Editar Gasto</string>
     <string name="expenses_merchant_label">Comercio/Concepto</string>
     <string name="expenses_amount_label">Importe Total</string>
     <string name="expense_cat_material">Material</string>
@@ -607,4 +608,11 @@
     <string name="settings_google_sync_account_label">Cuenta conectada: %1$s</string>
     <string name="settings_google_sync_not_connected">No conectado</string>
     <string name="settings_google_sync_disconnect">Desconectar cuenta</string>
+
+    <!-- Feature: Auto Sync & Notifications -->
+    <string name="sync_auto_notification_title">Sincronización Aegis</string>
+    <string name="sync_auto_notification_success">Copia de seguridad realizada correctamente en Google Drive.</string>
+    <string name="sync_auto_notification_file_success">Archivo "%1$s" subido correctamente.</string>
+    <string name="sync_auto_error_auth">Error de autenticación con Google.</string>
+    <string name="sync_auto_error_network">Error de red al sincronizar.</string>
 </resources>
