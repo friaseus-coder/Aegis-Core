@@ -176,24 +176,28 @@ class CrmViewModel @Inject constructor(
     private val _transferState = MutableStateFlow<TransferState>(TransferState.Idle)
     val transferState = _transferState.asStateFlow()
 
-    fun exportClients() {
+    fun exportClientsToUri(uri: android.net.Uri) {
         viewModelScope.launch {
             _transferState.value = TransferState.Loading
-            val result = transferManager.exportData(DataTransferManager.EntityType.CLIENTS)
-            result.onSuccess { file ->
-                 _transferState.value = TransferState.Success(resId = R.string.crm_export_client_success, arg = file.absolutePath)
+            val result = transferManager.exportDataToUri(DataTransferManager.EntityType.CLIENTS, uri)
+            result.onSuccess {
+                 _transferState.value = TransferState.Success(resId = R.string.data_export_db_success)
             }.onError {
                  _transferState.value = TransferState.Error(resId = R.string.general_unknown_error)
             }
         }
     }
 
-    fun validateImport(uri: android.net.Uri) {
+    fun validateImport(uri: android.net.Uri, isReplace: Boolean) {
          viewModelScope.launch {
             _transferState.value = TransferState.Loading
-            val errors = transferManager.validateImport(DataTransferManager.EntityType.CLIENTS, uri)
+            val (count, errors) = transferManager.validateImport(DataTransferManager.EntityType.CLIENTS, uri)
             if (errors.isEmpty()) {
-                _transferState.value = TransferState.ValidationSuccess(uri)
+                if (isReplace) {
+                    _transferState.value = TransferState.ValidationSuccessReplace(uri)
+                } else {
+                    _transferState.value = TransferState.ValidationSuccessAppend(uri, count)
+                }
             } else {
                 _transferState.value = TransferState.ValidationError(errors)
             }
@@ -254,7 +258,8 @@ class CrmViewModel @Inject constructor(
         data class Success(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
         data class Error(val message: String? = null, val resId: Int? = null, val arg: String? = null) : TransferState()
         data class ValidationError(val errors: List<String>) : TransferState()
-        data class ValidationSuccess(val uri: android.net.Uri) : TransferState()
+        data class ValidationSuccessReplace(val uri: android.net.Uri) : TransferState()
+        data class ValidationSuccessAppend(val uri: android.net.Uri, val validCount: Int) : TransferState()
     }
 
     // Create new objects

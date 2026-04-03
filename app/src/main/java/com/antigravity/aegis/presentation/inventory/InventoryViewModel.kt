@@ -44,7 +44,7 @@ class InventoryViewModel @Inject constructor(
     fun validateImport(uri: Uri) {
          viewModelScope.launch {
             _transferState.value = TransferState.Loading
-            val errors = transferManager.validateImport(DataTransferManager.EntityType.INVENTORY, uri)
+            val (_, errors) = transferManager.validateImport(DataTransferManager.EntityType.INVENTORY, uri)
             if (errors.isEmpty()) {
                 _transferState.value = TransferState.ValidationSuccess(uri)
             } else {

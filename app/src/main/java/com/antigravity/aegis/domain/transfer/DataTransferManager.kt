@@ -28,13 +28,15 @@ class DataTransferManager @Inject constructor(
         CLIENTS, PROJECTS, INVENTORY, EXPENSES, MILEAGE, QUOTES
     }
 
-    suspend fun validateImport(type: EntityType, uri: Uri): List<String> = withContext(Dispatchers.IO) {
+    suspend fun validateImport(type: EntityType, uri: Uri): Pair<Int, List<String>> = withContext(Dispatchers.IO) {
         val errors = mutableListOf<String>()
+        var validCount = 0
         try {
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val rows = CsvHelper.parse(inputStream)
-                if (rows.isEmpty()) return@withContext listOf("File is empty")
+                if (rows.isEmpty()) return@withContext Pair(0, listOf("File is empty"))
 
+                validCount = rows.size
                 // Validation Logic
                 val header = if (rows.isNotEmpty()) rows[0].keys.toList() else emptyList()
                 
@@ -55,11 +57,11 @@ class DataTransferManager @Inject constructor(
                     // Add other validaters...
                     else -> {}
                 }
-            } ?: return@withContext listOf("Could not open file")
+            } ?: return@withContext Pair(0, listOf("Could not open file"))
         } catch (e: Exception) {
             errors.add("Parse error: ${e.message}")
         }
-        errors
+        Pair(validCount, errors)
     }
 
     suspend fun importData(
@@ -204,50 +206,66 @@ class DataTransferManager @Inject constructor(
             val file = File(exportDir, "${type.name.lowercase()}_export_${System.currentTimeMillis()}.csv")
 
             FileWriter(file).use { writer ->
-                 when (type) {
-                    EntityType.CLIENTS -> {
-                        writer.append("firstName,lastName,type,companyName,nif,email,phone,address,notes\n")
-                        val data = crmDao.getAllClients().first()
-                        data.forEach { 
-                            val address = listOfNotNull(it.calle, it.numero, it.poblacion).joinToString(" ")
-                            writer.append("\"${it.firstName}\",\"${it.lastName}\",\"${it.tipoCliente}\",\"${it.razonSocial ?: ""}\",\"${it.nifCif ?: ""}\",\"${it.email ?: ""}\",\"${it.phone ?: ""}\",\"$address\",\"${it.notas ?: ""}\"\n") 
-                        }
-                    }
-                    EntityType.INVENTORY -> {
-                        writer.append("barcode,name,price,quantity,minQuantity,description\n")
-                        val data = crmDao.getAllProducts().first()
-                        data.forEach {
-                             writer.append("\"${it.barcode}\",\"${it.name}\",${it.price},${it.quantity},${it.minQuantity},\"${it.description}\"\n")
-                        }
-                    }
-                    EntityType.EXPENSES -> {
-                        writer.append("date,totalAmount,merchantName,status\n")
-                        val data = crmDao.getAllExpenses().first()
-                        data.forEach {
-                            writer.append("${it.date},${it.totalAmount},\"${it.merchantName}\",\"${it.status}\"\n")
-                        }
-                    }
-                    EntityType.MILEAGE -> {
-                        writer.append("date,origin,destination,vehicle,distance,cost\n")
-                        val data = crmDao.getAllMileageLogs().first()
-                        data.forEach {
-                            writer.append("${it.date},\"${it.origin}\",\"${it.destination}\",\"${it.vehicle}\",${it.distanceKm},${it.calculatedCost}\n")
-                        }
-                    }
-                    EntityType.QUOTES -> {
-                        writer.append("date,title,totalAmount,status,description\n")
-                        val data = crmDao.getAllQuotes().first()
-                        data.forEach {
-                            writer.append("${it.date},\"${it.title}\",${it.totalAmount},\"${it.status}\",\"${it.description}\"\n")
-                        }
-                    }
-                     // Add others...
-                    else -> {}
-                }
+                 writeCsvDataToWriter(type, writer)
             }
             Result.Success(file)
         } catch (e: Exception) {
             Result.Error(e)
+        }
+    }
+
+    suspend fun exportDataToUri(type: EntityType, uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                val writer = outputStream.bufferedWriter()
+                writeCsvDataToWriter(type, writer)
+                writer.flush()
+            }
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    private suspend fun writeCsvDataToWriter(type: EntityType, writer: java.io.Writer) {
+        when (type) {
+            EntityType.CLIENTS -> {
+                writer.append("firstName,lastName,type,companyName,nif,email,phone,address,notes\n")
+                val data = crmDao.getAllClients().first()
+                data.forEach { 
+                    val address = listOfNotNull(it.calle, it.numero, it.poblacion).joinToString(" ")
+                    writer.append("\"${it.firstName}\",\"${it.lastName}\",\"${it.tipoCliente}\",\"${it.razonSocial ?: ""}\",\"${it.nifCif ?: ""}\",\"${it.email ?: ""}\",\"${it.phone ?: ""}\",\"$address\",\"${it.notas ?: ""}\"\n") 
+                }
+            }
+            EntityType.INVENTORY -> {
+                writer.append("barcode,name,price,quantity,minQuantity,description\n")
+                val data = crmDao.getAllProducts().first()
+                data.forEach {
+                     writer.append("\"${it.barcode}\",\"${it.name}\",${it.price},${it.quantity},${it.minQuantity},\"${it.description}\"\n")
+                }
+            }
+            EntityType.EXPENSES -> {
+                writer.append("date,totalAmount,merchantName,status\n")
+                val data = crmDao.getAllExpenses().first()
+                data.forEach {
+                    writer.append("${it.date},${it.totalAmount},\"${it.merchantName}\",\"${it.status}\"\n")
+                }
+            }
+            EntityType.MILEAGE -> {
+                writer.append("date,origin,destination,vehicle,distance,cost\n")
+                val data = crmDao.getAllMileageLogs().first()
+                data.forEach {
+                    writer.append("${it.date},\"${it.origin}\",\"${it.destination}\",\"${it.vehicle}\",${it.distanceKm},${it.calculatedCost}\n")
+                }
+            }
+            EntityType.QUOTES -> {
+                writer.append("date,title,totalAmount,status,description\n")
+                val data = crmDao.getAllQuotes().first()
+                data.forEach {
+                    writer.append("${it.date},\"${it.title}\",${it.totalAmount},\"${it.status}\",\"${it.description}\"\n")
+                }
+            }
+            else -> {}
         }
     }
 }

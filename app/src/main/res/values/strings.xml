@@ -165,6 +165,11 @@
     <string name="crm_clients_import_warning_replace">WARNING: This will delete all current clients. A safety backup will be created automatically.</string>
     <string name="crm_clients_backup_name_prefix">clients_</string>
     <string name="crm_clients_import_success_with_backup">Import successful. Safety backup created: %1$s</string>
+    <string name="crm_export_confirm_title">Export Database</string>
+    <string name="crm_export_confirm_text">Do you want to download the entire client database?</string>
+    <string name="crm_import_option_replace">Upload and Replace Database</string>
+    <string name="crm_import_option_append">Upload and Add to Existing</string>
+    <string name="crm_import_append_summary">The file has been validated correctly. %1$d new clients will be added to your current database. Do you wish to continue?</string>
     
     <!-- Feature: Search and Filters -->
     <string name="action_search_hint_min_3">Search (min 3 letters)</string>
@@ -586,4 +591,33 @@
     <string name="reminder_cancel_title">Cancel Reminder</string>
     <string name="reminder_cancel_desc">When moving the quote out of "Sent", do you want to cancel its active reminder if any?</string>
     <string name="reminder_cancel_yes">Yes, Cancel</string>
+
+    <!-- Expenses Report & Tax Settings -->
+    <string name="expenses_report_share_btn">Share Report</string>
+    <string name="expenses_report_date_range_title">Select Date Range</string>
+    <string name="expenses_label_base_amount">Base Amount</string>
+    <string name="expenses_label_tax_amount">VAT</string>
+    <string name="expenses_label_tax_percent">VAT %</string>
+    <string name="settings_pref_default_iva">Default VAT</string>
+    <string name="settings_pref_default_iva_desc">Base value for expense calculations</string>
+    <string name="expenses_pdf_header_provider">Provider</string>
+    <string name="expenses_pdf_header_date">Date</string>
+    <string name="expenses_pdf_header_base">Base</string>
+    <string name="expenses_pdf_header_tax">VAT</string>
+    <string name="expenses_pdf_header_total">Total</string>
+    <string name="expenses_pdf_header_material">Material</string>
+    <string name="expenses_pdf_header_project">Project</string>
+
+    <!-- Feature: Google Apps Sync (Drive + Calendar) -->
+    <string name="sync_banner_pending">%1$d item(s) pending sync with Google</string>
+    <string name="sync_banner_action">Sync now ›</string>
+    <string name="sync_banner_syncing">Syncing with Google…</string>
+    <string name="sync_google_sign_in_required">Sign in with Google to sync</string>
+    <string name="sync_google_btn_connect">Connect Google Account</string>
+    <string name="sync_google_success">Successfully synced with Google</string>
+    <string name="sync_google_error">Sync error: %1$s</string>
+    <string name="settings_section_google_sync">Google Sync (Drive &amp; Calendar)</string>
+    <string name="settings_google_sync_account_label">Connected account: %1$s</string>
+    <string name="settings_google_sync_not_connected">Not connected</string>
+    <string name="settings_google_sync_disconnect">Disconnect Account</string>
 </resources>

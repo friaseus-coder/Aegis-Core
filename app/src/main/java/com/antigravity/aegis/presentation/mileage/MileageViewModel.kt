@@ -54,7 +54,7 @@ class MileageViewModel @Inject constructor(
     fun validateImport(uri: Uri) {
          viewModelScope.launch {
             _transferState.value = TransferState.Loading
-            val errors = transferManager.validateImport(DataTransferManager.EntityType.MILEAGE, uri)
+            val (_, errors) = transferManager.validateImport(DataTransferManager.EntityType.MILEAGE, uri)
             if (errors.isEmpty()) {
                 _transferState.value = TransferState.ValidationSuccess(uri)
             } else {

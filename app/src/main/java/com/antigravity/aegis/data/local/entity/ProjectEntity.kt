@@ -43,6 +43,7 @@ data class ProjectEntity(
     val materials: String? = null,
     val price: Double? = null,
     val estimatedTime: Double? = null,
-    val estimatedTimeUnit: String? = null
+    val estimatedTimeUnit: String? = null,
+    val googleCalendarEventId: String? = null
 )
 

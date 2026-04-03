@@ -12,14 +12,15 @@ import com.antigravity.aegis.R
 fun ClientImportDialog(
     onDismiss: () -> Unit,
     onDownloadTemplate: () -> Unit,
-    onUploadFile: () -> Unit
+    onUploadReplace: () -> Unit,
+    onUploadAppend: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.crm_clients_import_dialog_title)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Button(
+                OutlinedButton(
                     onClick = {
                         onDownloadTemplate()
                         onDismiss()
@@ -31,12 +32,23 @@ fun ClientImportDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        onUploadFile()
+                        onUploadReplace()
+                        onDismiss()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.crm_import_option_replace))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        onUploadAppend()
                         onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.crm_clients_import_option_upload))
+                    Text(stringResource(R.string.crm_import_option_append))
                 }
             }
         },
@@ -49,40 +61,18 @@ fun ClientImportDialog(
 }
 
 @Composable
-fun ClientImportConfirmDialog(
+fun ClientImportSummaryDialog(
+    isReplace: Boolean,
+    validCount: Int,
     onDismiss: () -> Unit,
-    onConfirm: (Boolean) -> Unit
+    onConfirm: () -> Unit
 ) {
-    var selectedModeReplace by remember { mutableStateOf(false) }
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.crm_clients_import_dialog_title)) },
         text = {
             Column {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = !selectedModeReplace,
-                        onClick = { selectedModeReplace = false }
-                    )
-                    Text(
-                        stringResource(R.string.crm_clients_import_mode_add),
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = selectedModeReplace,
-                        onClick = { selectedModeReplace = true }
-                    )
-                    Text(
-                        stringResource(R.string.crm_clients_import_mode_replace),
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-                
-                if (selectedModeReplace) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                if (isReplace) {
                     Surface(
                         color = MaterialTheme.colorScheme.errorContainer,
                         shape = MaterialTheme.shapes.small
@@ -94,11 +84,19 @@ fun ClientImportConfirmDialog(
                             modifier = Modifier.padding(8.dp)
                         )
                     }
+                } else {
+                    Text(
+                        text = stringResource(R.string.crm_import_append_summary, validCount),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(selectedModeReplace) }) {
+            Button(
+                onClick = onConfirm,
+                colors = if (isReplace) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) else ButtonDefaults.buttonColors()
+            ) {
                 Text(stringResource(R.string.general_ok))
             }
         },

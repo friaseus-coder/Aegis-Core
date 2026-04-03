@@ -23,6 +23,7 @@ data class ClientEntity(
     // Categoría auto-calculada (Activo si tiene proyectos/presupuestos, Potencial si no)
     val categoria: String = "Potencial",
     val notas: String? = null,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    val googleCalendarEventId: String? = null
 )
 

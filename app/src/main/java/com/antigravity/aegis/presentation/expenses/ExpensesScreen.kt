@@ -53,6 +53,7 @@ fun ExpensesScreen(
     
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
+    var selectedExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
     
     // Import Picker
     val importLauncher = rememberLauncherForActivityResult(
@@ -120,18 +121,77 @@ fun ExpensesScreen(
         }
     }
 
-    if (scannedData != null || showAddDialog) {
+    // PDF Share Effect
+    val pdfShareUri by viewModel.pdfShareUri.collectAsState()
+    LaunchedEffect(pdfShareUri) {
+        pdfShareUri?.let { uri ->
+            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "application/pdf"
+                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(android.content.Intent.createChooser(intent, context.getString(R.string.settings_share_pdf_title)))
+            viewModel.clearPdfShareUri()
+        }
+    }
+
+    var showDateRangePicker by remember { mutableStateOf(false) }
+    if (showDateRangePicker) {
+        val dateRangePickerState = rememberDateRangePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showDateRangePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val start = dateRangePickerState.selectedStartDateMillis
+                        val end = dateRangePickerState.selectedEndDateMillis
+                        if (start != null && end != null) {
+                            viewModel.shareExpensesReport(start, end)
+                            showDateRangePicker = false
+                        }
+                    }
+                ) { Text(stringResource(R.string.general_ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDateRangePicker = false }) { Text(stringResource(R.string.general_cancel)) }
+            }
+        ) {
+            DateRangePicker(
+                state = dateRangePickerState,
+                title = { Text(stringResource(R.string.expenses_report_date_range_title), modifier = Modifier.padding(16.dp)) },
+                showModeToggle = false,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    if (scannedData != null || showAddDialog || selectedExpense != null) {
         AddExpenseDialog(
             projects = projects,
             scannedData = scannedData,
+            existingExpense = selectedExpense,
             imageUri = if (scannedData != null) tempImageUri else null,
-            onSave = { date, amount, merchant, category, projectId ->
-                 viewModel.saveExpense(date, amount, merchant, if (scannedData != null) tempImageUri else null, category, projectId)
+            onSave = { date, total, base, tax, merchant, category, projectId ->
+                 if (selectedExpense != null) {
+                     viewModel.updateExpense(selectedExpense!!.copy(
+                         date = date,
+                         totalAmount = total,
+                         baseAmount = base,
+                         taxAmount = tax,
+                         merchantName = merchant,
+                         category = category,
+                         projectId = projectId
+                     ))
+                 } else {
+                     viewModel.saveExpense(date, total, base, tax, merchant, if (scannedData != null) tempImageUri else null, category, projectId)
+                 }
                  showAddDialog = false
+                 selectedExpense = null
             },
             onDismiss = { 
                 viewModel.clearScannedData() 
                 showAddDialog = false
+                selectedExpense = null
             }
         )
     }
@@ -172,12 +232,12 @@ fun ExpensesScreen(
             // Quick Actions Row
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
-                    onClick = { viewModel.exportQuarter() },
+                    onClick = { showDateRangePicker = true },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.expenses_export_quarter_button))
+                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.expenses_report_share_btn))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.expenses_export_quarter_button))
+                    Text(stringResource(R.string.expenses_report_share_btn))
                 }
                 
                 Button(
@@ -210,6 +270,7 @@ fun ExpensesScreen(
                     ExpenseCard(
                         expense = expense,
                         currencySymbol = currencySymbol,
+                        onClick = { selectedExpense = expense },
                         onDistribute = {
                             viewModel.distributeExpense(expense, projects.map { it.id })
                         }
@@ -224,13 +285,54 @@ fun ExpensesScreen(
 fun AddExpenseDialog(
     projects: List<com.antigravity.aegis.data.local.entity.ProjectEntity>,
     scannedData: com.antigravity.aegis.domain.expenses.OcrManager.ExtractedData?,
+    existingExpense: com.antigravity.aegis.data.local.entity.ExpenseEntity? = null,
     imageUri: Uri?,
-    onSave: (Long, Double, String, String, Int?) -> Unit,
+    onSave: (Long, Double, Double, Double, String, String, Int?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var merchant by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf(scannedData?.totalAmount?.toString() ?: "") }
+    val viewModel: ExpensesViewModel = hiltViewModel()
+    val defaultTax by viewModel.defaultTaxPercent.collectAsState()
     
+    var merchant by remember { mutableStateOf(existingExpense?.merchantName ?: "") }
+    var totalAmount by remember { mutableStateOf(existingExpense?.totalAmount?.let { String.format("%.2f", it) } ?: scannedData?.totalAmount?.let { String.format("%.2f", it) } ?: "") }
+    var baseAmount by remember { mutableStateOf(existingExpense?.baseAmount?.let { String.format("%.2f", it) } ?: "") }
+    var taxPercent by remember { mutableStateOf(String.format("%.1f", defaultTax)) }
+    var taxAmount by remember { mutableStateOf(existingExpense?.taxAmount?.let { String.format("%.2f", it) } ?: "") }
+    
+    val merchantSuggestions by viewModel.merchantSuggestions.collectAsState()
+    var merchantExpanded by remember { mutableStateOf(false) }
+    val filteredSuggestions = remember(merchant, merchantSuggestions) {
+        if (merchant.isBlank()) emptyList()
+        else merchantSuggestions.filter { it.contains(merchant, ignoreCase = true) && it != merchant }
+    }
+    
+    // Initial calculation if we have total and it's a new scan
+    LaunchedEffect(scannedData, defaultTax) {
+        if (scannedData != null && baseAmount.isEmpty()) {
+            val t = scannedData.totalAmount
+            val p = defaultTax
+            val b = t / (1 + (p / 100.0))
+            baseAmount = String.format("%.2f", b)
+            taxAmount = String.format("%.2f", t - b)
+        }
+    }
+
+    fun updateFromTotal(total: String) {
+        val t = total.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val p = taxPercent.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val b = t / (1 + (p / 100.0))
+        baseAmount = String.format("%.2f", b)
+        taxAmount = String.format("%.2f", t - b)
+    }
+    
+    fun updateFromBase(base: String) {
+        val b = base.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val p = taxPercent.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val t = b * (1 + (p / 100.0))
+        totalAmount = String.format("%.2f", t)
+        taxAmount = String.format("%.2f", t - b)
+    }
+
     val categories = listOf(
         stringResource(R.string.expense_cat_material),
         stringResource(R.string.expense_cat_transport),
@@ -238,68 +340,150 @@ fun AddExpenseDialog(
         stringResource(R.string.expense_cat_food),
         stringResource(R.string.expense_cat_other)
     )
-    var category by remember { mutableStateOf(categories[0]) }
-    var selectedProject by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
-    var date by remember { mutableStateOf(scannedData?.date ?: System.currentTimeMillis()) }
+    var category by remember { mutableStateOf(existingExpense?.category ?: categories[0]) }
+    var selectedProject by remember { mutableStateOf(projects.find { it.id == existingExpense?.projectId }) }
+    var date by remember { mutableStateOf(existingExpense?.date ?: scannedData?.date ?: System.currentTimeMillis()) }
     var expandedCat by remember { mutableStateOf(false) }
     var expandedProj by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (scannedData != null) stringResource(R.string.expenses_review_ticket_title) else stringResource(R.string.ui_new_entry)) },
-        text = {
-            Column {
-                if (imageUri != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(imageUri),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentScale = ContentScale.Crop
-                    )
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+        title = { 
+            Text(
+                when {
+                    existingExpense != null -> stringResource(R.string.expenses_edit_expense_title)
+                    scannedData != null -> stringResource(R.string.expenses_review_ticket_title)
+                    else -> stringResource(R.string.ui_new_entry)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                OutlinedTextField(
-                    value = merchant,
-                    onValueChange = { merchant = it },
-                    label = { Text(stringResource(R.string.expenses_merchant_label)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
-                    label = { Text(stringResource(R.string.expenses_amount_label)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                // Category Dropdown
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedButton(onClick = { expandedCat = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text(category)
+            )
+        },
+        text = {
+            androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                item {
+                    if (imageUri != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(imageUri),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
-                    DropdownMenu(expanded = expandedCat, onDismissRequest = { expandedCat = false }) {
-                        categories.forEach { cat ->
-                            DropdownMenuItem(text = { Text(cat) }, onClick = { category = cat; expandedCat = false })
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    ExposedDropdownMenuBox(
+                        expanded = merchantExpanded && filteredSuggestions.isNotEmpty(),
+                        onExpandedChange = { merchantExpanded = it },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = merchant,
+                            onValueChange = { 
+                                merchant = it
+                                merchantExpanded = true
+                            },
+                            label = { Text(stringResource(R.string.expenses_merchant_label)) },
+                            modifier = Modifier.fillMaxWidth().menuAnchor(),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = merchantExpanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = merchantExpanded && filteredSuggestions.isNotEmpty(),
+                            onDismissRequest = { merchantExpanded = false }
+                        ) {
+                            filteredSuggestions.forEach { suggestion ->
+                                DropdownMenuItem(
+                                    text = { Text(suggestion) },
+                                    onClick = {
+                                        merchant = suggestion
+                                        merchantExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Project Dropdown
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedButton(onClick = { expandedProj = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text(selectedProject?.name ?: stringResource(R.string.expense_general_no_project))
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = baseAmount,
+                            onValueChange = { 
+                                baseAmount = it
+                                updateFromBase(it)
+                            },
+                            label = { Text(stringResource(R.string.expenses_label_base_amount)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = taxPercent,
+                            onValueChange = { 
+                                taxPercent = it
+                                updateFromTotal(totalAmount) 
+                            },
+                            label = { Text("%") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.width(80.dp)
+                        )
                     }
-                    DropdownMenu(expanded = expandedProj, onDismissRequest = { expandedProj = false }) {
-                        DropdownMenuItem(text = { Text(stringResource(R.string.expense_general_no_project)) }, onClick = { selectedProject = null; expandedProj = false })
-                        projects.forEach { proj ->
-                            DropdownMenuItem(text = { Text(proj.name) }, onClick = { selectedProject = proj; expandedProj = false })
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = taxAmount,
+                            onValueChange = { taxAmount = it },
+                            label = { Text(stringResource(R.string.expenses_label_tax_amount)) },
+                            readOnly = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = totalAmount,
+                            onValueChange = { 
+                                totalAmount = it
+                                updateFromTotal(it)
+                            },
+                            label = { Text(stringResource(R.string.expenses_amount_label)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.weight(1f),
+                            colors = TextFieldDefaults.colors(focusedTextColor = MaterialTheme.colorScheme.primary)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Category Dropdown
+                    Text(stringResource(R.string.expenses_merchant_label), style = MaterialTheme.typography.labelSmall)
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = { expandedCat = true }, modifier = Modifier.fillMaxWidth()) {
+                            Text(category)
+                        }
+                        DropdownMenu(expanded = expandedCat, onDismissRequest = { expandedCat = false }) {
+                            categories.forEach { cat ->
+                                DropdownMenuItem(text = { Text(cat) }, onClick = { category = cat; expandedCat = false })
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Project Dropdown
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = { expandedProj = true }, modifier = Modifier.fillMaxWidth()) {
+                            Text(selectedProject?.name ?: stringResource(R.string.expense_general_no_project))
+                        }
+                        DropdownMenu(expanded = expandedProj, onDismissRequest = { expandedProj = false }) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.expense_general_no_project)) }, onClick = { selectedProject = null; expandedProj = false })
+                            projects.forEach { proj ->
+                                DropdownMenuItem(text = { Text(proj.name) }, onClick = { selectedProject = proj; expandedProj = false })
+                            }
                         }
                     }
                 }
@@ -308,7 +492,15 @@ fun AddExpenseDialog(
         confirmButton = {
             Button(
                  onClick = {
-                     onSave(date, amount.toDoubleOrNull() ?: 0.0, merchant, category, selectedProject?.id)
+                     onSave(
+                         date, 
+                         totalAmount.replace(",", ".").toDoubleOrNull() ?: 0.0,
+                         baseAmount.replace(",", ".").toDoubleOrNull() ?: 0.0,
+                         taxAmount.replace(",", ".").toDoubleOrNull() ?: 0.0,
+                         merchant, 
+                         category, 
+                         selectedProject?.id
+                     )
                  }
             ) { Text(stringResource(R.string.general_save)) }
         },
@@ -322,11 +514,14 @@ fun AddExpenseDialog(
 fun ExpenseCard(
     expense: com.antigravity.aegis.data.local.entity.ExpenseEntity, 
     currencySymbol: String,
+    onClick: () -> Unit,
     onDistribute: () -> Unit = {}
 ) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-         modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(

@@ -168,6 +168,11 @@
     <string name="crm_clients_import_warning_replace">ADVERTÈNCIA: S\'esborraran tots els clients actuals. Es generarà una còpia de seguretat automàticament.</string>
     <string name="crm_clients_backup_name_prefix">clients_</string>
     <string name="crm_clients_import_success_with_backup">Importació amb èxit. Còpia de seguretat creada: %1$s</string>
+    <string name="crm_export_confirm_title">Exportar Base de Dades</string>
+    <string name="crm_export_confirm_text">Vols descarregar tota la base de dades de clients?</string>
+    <string name="crm_import_option_replace">Pujar i Reemplaçar base de dades</string>
+    <string name="crm_import_option_append">Pujar i Afegir als existents</string>
+    <string name="crm_import_append_summary">El fitxer ha estat validat correctament. S\'afegiran %1$d clients nous a la teva base de dades actual. Vols continuar?</string>
     <string name="crm_client_email_placeholder">Sense email</string>
     <string name="crm_client_detail_email">Email: %1$s</string>
     <string name="crm_client_detail_phone">Tel: %1$s</string>

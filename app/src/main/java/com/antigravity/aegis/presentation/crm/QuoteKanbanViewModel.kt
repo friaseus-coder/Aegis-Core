@@ -72,7 +72,7 @@ class QuoteKanbanViewModel @Inject constructor(
     fun validateImport(uri: Uri) {
          viewModelScope.launch {
             _transferState.value = TransferState.Loading
-            val errors = transferManager.validateImport(DataTransferManager.EntityType.QUOTES, uri)
+            val (_, errors) = transferManager.validateImport(DataTransferManager.EntityType.QUOTES, uri)
             if (errors.isEmpty()) {
                 _transferState.value = TransferState.ValidationSuccess(uri)
             } else {

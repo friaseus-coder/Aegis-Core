@@ -49,6 +49,8 @@ fun ClientListScreen(
     var searchQuery by remember { mutableStateOf("") }
     var filterType by remember { mutableStateOf<String?>(null) }
     var showImportMenu by remember { mutableStateOf(false) }
+    var showExportConfirmDialog by remember { mutableStateOf(false) }
+    var isReplaceMode by remember { mutableStateOf(false) }
     
     LaunchedEffect(searchQuery) { viewModel.setSearchQuery(searchQuery) }
     LaunchedEffect(filterType) { viewModel.setFilterType(filterType) }
@@ -58,7 +60,16 @@ fun ClientListScreen(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            viewModel.validateImport(uri)
+            viewModel.validateImport(uri, isReplaceMode)
+        }
+    }
+
+    // Export Picker
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri != null) {
+            viewModel.exportClientsToUri(uri)
         }
     }
 
@@ -90,9 +101,19 @@ fun ClientListScreen(
                 confirmButton = { TextButton(onClick = { viewModel.resetTransferState() }) { Text(stringResource(R.string.general_ok)) } }
             )
         }
-        is CrmViewModel.TransferState.ValidationSuccess -> {
-            ClientImportConfirmDialog(
-                onConfirm = { wipe -> viewModel.confirmImport(state.uri, wipe) },
+        is CrmViewModel.TransferState.ValidationSuccessReplace -> {
+            ClientImportSummaryDialog(
+                isReplace = true,
+                validCount = 0,
+                onConfirm = { viewModel.confirmImport(state.uri, true) },
+                onDismiss = { viewModel.resetTransferState() }
+            )
+        }
+        is CrmViewModel.TransferState.ValidationSuccessAppend -> {
+            ClientImportSummaryDialog(
+                isReplace = false,
+                validCount = state.validCount,
+                onConfirm = { viewModel.confirmImport(state.uri, false) },
                 onDismiss = { viewModel.resetTransferState() }
             )
         }
@@ -106,7 +127,35 @@ fun ClientListScreen(
         ClientImportDialog(
             onDismiss = { showImportMenu = false },
             onDownloadTemplate = { viewModel.downloadTemplate() },
-            onUploadFile = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }
+            onUploadReplace = { 
+                isReplaceMode = true
+                importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) 
+            },
+            onUploadAppend = {
+                isReplaceMode = false
+                importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
+            }
+        )
+    }
+
+    if (showExportConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showExportConfirmDialog = false },
+            title = { Text(stringResource(R.string.crm_export_confirm_title)) },
+            text = { Text(stringResource(R.string.crm_export_confirm_text)) },
+            confirmButton = {
+                Button(onClick = {
+                    showExportConfirmDialog = false
+                    exportLauncher.launch("clients_export_${System.currentTimeMillis()}.csv")
+                }) {
+                    Text(stringResource(R.string.general_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExportConfirmDialog = false }) {
+                    Text(stringResource(R.string.general_cancel))
+                }
+            }
         )
     }
 
@@ -114,7 +163,7 @@ fun ClientListScreen(
         topBar = {
             AegisTopAppBar(
                 actions = {
-                    IconButton(onClick = { viewModel.exportClients() }) {
+                    IconButton(onClick = { showExportConfirmDialog = true }) {
                         Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.crm_clients_mass_export_btn))
                     }
                     IconButton(onClick = { showImportMenu = true }) {

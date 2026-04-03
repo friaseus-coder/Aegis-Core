@@ -208,6 +208,22 @@ fun SettingsScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // IVA por defecto
+                Text(stringResource(R.string.settings_pref_default_iva), style = MaterialTheme.typography.bodyMedium)
+                OutlinedTextField(
+                    value = (config?.defaultTaxPercent ?: 21.0).toString(),
+                    onValueChange = { 
+                        it.toDoubleOrNull()?.let { percent -> viewModel.updateDefaultTaxPercent(percent) }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    suffix = { Text("%") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                    )
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Module Customization Button

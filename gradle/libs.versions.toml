@@ -25,6 +25,7 @@ work = "2.9.0"
 hilt-work = "1.2.0"
 google-api-client = "2.2.0"
 google-drive = "v3-rev20230822-2.0.0"
+google-calendar = "v3-rev20240111-2.0.0"
 play-services-auth = "21.0.0"
 google-http-client = "1.43.3"
 
@@ -85,6 +86,7 @@ camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "
 # Google Drive & Auth
 google-api-client-android = { group = "com.google.api-client", name = "google-api-client-android", version.ref = "google-api-client" }
 google-api-services-drive = { group = "com.google.apis", name = "google-api-services-drive", version.ref = "google-drive" }
+google-api-services-calendar = { group = "com.google.apis", name = "google-api-services-calendar", version.ref = "google-calendar" }
 google-http-client-gson = { group = "com.google.http-client", name = "google-http-client-gson", version.ref = "google-http-client" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 

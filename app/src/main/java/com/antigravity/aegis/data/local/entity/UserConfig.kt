@@ -34,7 +34,8 @@ data class UserConfig(
     
     // Module Customization
     val moduleOrder: String = "", // JSON array de IDs de módulos en orden personalizado
-    val hiddenModules: String = "" // JSON array de IDs de módulos ocultos
+    val hiddenModules: String = "", // JSON array de IDs de módulos ocultos
+    val defaultTaxPercent: Double = 21.0
 )
 
 enum class EntityType {

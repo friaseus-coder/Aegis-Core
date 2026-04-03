@@ -168,6 +168,11 @@
     <string name="crm_clients_import_warning_replace">ADVERTENCIA: Se borrarán todos los clientes actuales. Se generará una copia de seguridad automáticamente.</string>
     <string name="crm_clients_backup_name_prefix">clientes_</string>
     <string name="crm_clients_import_success_with_backup">Importación exitosa. Copia de seguridad creada: %1$s</string>
+    <string name="crm_export_confirm_title">Exportar Base de Datos</string>
+    <string name="crm_export_confirm_text">¿Deseas descargar toda la base de datos de clientes?</string>
+    <string name="crm_import_option_replace">Subir y Reemplazar base de datos</string>
+    <string name="crm_import_option_append">Subir y Añadir a existentes</string>
+    <string name="crm_import_append_summary">El archivo ha sido validado correctamente. Se van a añadir %1$d clientes nuevos a tu base de datos actual. ¿Deseas continuar?</string>
     <string name="crm_client_not_found">Cliente no encontrado o cargando...</string>
     
     <!-- Feature: CRM/Projects -->
@@ -573,4 +578,33 @@
     <string name="reminder_cancel_title">Cancelar Recordatorio</string>
     <string name="reminder_cancel_desc">Al mover el presupuesto fuera de "Enviado", ¿deseas cancelar su recordatorio activo si lo hubiera?</string>
     <string name="reminder_cancel_yes">Sí, Cancelar</string>
+
+    <!-- Expenses Report & Tax Settings -->
+    <string name="expenses_report_share_btn">Compartir Informe</string>
+    <string name="expenses_report_date_range_title">Seleccionar Rango de Fechas</string>
+    <string name="expenses_label_base_amount">Base Imponible</string>
+    <string name="expenses_label_tax_amount">IVA</string>
+    <string name="expenses_label_tax_percent">% IVA</string>
+    <string name="settings_pref_default_iva">IVA por Defecto</string>
+    <string name="settings_pref_default_iva_desc">Valor base para el cálculo de gastos</string>
+    <string name="expenses_pdf_header_provider">Proveedor</string>
+    <string name="expenses_pdf_header_date">Fecha</string>
+    <string name="expenses_pdf_header_base">Base</string>
+    <string name="expenses_pdf_header_tax">IVA</string>
+    <string name="expenses_pdf_header_total">Total</string>
+    <string name="expenses_pdf_header_material">Material</string>
+    <string name="expenses_pdf_header_project">Proyecto</string>
+
+    <!-- Feature: Google Apps Sync (Drive + Calendar) -->
+    <string name="sync_banner_pending">%1$d elemento(s) pendiente(s) de sincronizar</string>
+    <string name="sync_banner_action">Sincronizar ahora ›</string>
+    <string name="sync_banner_syncing">Sincronizando con Google…</string>
+    <string name="sync_google_sign_in_required">Inicia sesión con Google para sincronizar</string>
+    <string name="sync_google_btn_connect">Conectar cuenta de Google</string>
+    <string name="sync_google_success">Sincronización con Google completada</string>
+    <string name="sync_google_error">Error de sincronización: %1$s</string>
+    <string name="settings_section_google_sync">Sincronización Google (Drive y Calendario)</string>
+    <string name="settings_google_sync_account_label">Cuenta conectada: %1$s</string>
+    <string name="settings_google_sync_not_connected">No conectado</string>
+    <string name="settings_google_sync_disconnect">Desconectar cuenta</string>
 </resources>

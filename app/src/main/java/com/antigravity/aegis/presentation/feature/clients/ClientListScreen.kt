@@ -41,12 +41,25 @@ fun ClientListScreen(
     val transferState by crmViewModel.transferState.collectAsState()
     val context = LocalContext.current
 
+    var showImportMenu by remember { mutableStateOf(false) }
+    var showExportConfirmDialog by remember { mutableStateOf(false) }
+    var isReplaceMode by remember { mutableStateOf(false) }
+
     // Import Picker
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            crmViewModel.validateImport(uri)
+            crmViewModel.validateImport(uri, isReplaceMode)
+        }
+    }
+
+    // Export Picker
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri != null) {
+            crmViewModel.exportClientsToUri(uri)
         }
     }
 
@@ -70,10 +83,20 @@ fun ClientListScreen(
                 confirmButton = { TextButton(onClick = { crmViewModel.resetTransferState() }) { Text(stringResource(R.string.general_ok)) } }
             )
         }
-        is CrmViewModel.TransferState.ValidationSuccess -> {
-            ImportConfirmationDialog(
-                onConfirm = { wipe -> crmViewModel.confirmImport(state.uri, wipe) },
-                onCancel = { crmViewModel.resetTransferState() }
+        is CrmViewModel.TransferState.ValidationSuccessReplace -> {
+            com.antigravity.aegis.presentation.crm.ClientImportSummaryDialog(
+                isReplace = true,
+                validCount = 0,
+                onConfirm = { crmViewModel.confirmImport(state.uri, true) },
+                onDismiss = { crmViewModel.resetTransferState() }
+            )
+        }
+        is CrmViewModel.TransferState.ValidationSuccessAppend -> {
+            com.antigravity.aegis.presentation.crm.ClientImportSummaryDialog(
+                isReplace = false,
+                validCount = state.validCount,
+                onConfirm = { crmViewModel.confirmImport(state.uri, false) },
+                onDismiss = { crmViewModel.resetTransferState() }
             )
         }
         is CrmViewModel.TransferState.Loading -> {
@@ -82,15 +105,51 @@ fun ClientListScreen(
         else -> {}
     }
 
+    if (showImportMenu) {
+        com.antigravity.aegis.presentation.crm.ClientImportDialog(
+            onDismiss = { showImportMenu = false },
+            onDownloadTemplate = { crmViewModel.downloadTemplate() },
+            onUploadReplace = { 
+                isReplaceMode = true
+                importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) 
+            },
+            onUploadAppend = {
+                isReplaceMode = false
+                importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
+            }
+        )
+    }
+
+    if (showExportConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showExportConfirmDialog = false },
+            title = { Text(stringResource(R.string.crm_export_confirm_title)) },
+            text = { Text(stringResource(R.string.crm_export_confirm_text)) },
+            confirmButton = {
+                Button(onClick = {
+                    showExportConfirmDialog = false
+                    exportLauncher.launch("clients_export_${System.currentTimeMillis()}.csv")
+                }) {
+                    Text(stringResource(R.string.general_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExportConfirmDialog = false }) {
+                    Text(stringResource(R.string.general_cancel))
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             AegisTopAppBar(
                 title = stringResource(R.string.crm_clients_title), // Changed title to be correct
                 actions = {
-                    IconButton(onClick = { crmViewModel.exportClients() }) {
+                    IconButton(onClick = { showExportConfirmDialog = true }) {
                         Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.data_export_csv))
                     }
-                    IconButton(onClick = { importLauncher.launch(arrayOf("text/comma-separated-values", "text/csv")) }) {
+                    IconButton(onClick = { showImportMenu = true }) {
                         Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.data_import_csv))
                     }
                 }

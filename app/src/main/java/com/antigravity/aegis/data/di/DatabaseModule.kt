@@ -61,7 +61,9 @@ object DatabaseModule {
                 AegisDatabase.MIGRATION_27_28,
                 AegisDatabase.MIGRATION_28_29,
                 AegisDatabase.MIGRATION_29_30,
-                AegisDatabase.MIGRATION_30_31
+                AegisDatabase.MIGRATION_30_31,
+                AegisDatabase.MIGRATION_31_32,
+                AegisDatabase.MIGRATION_32_33
             )
             .addCallback(com.antigravity.aegis.data.local.AegisDatabaseCallback(context, importTemplateUseCaseProvider))
             .build()

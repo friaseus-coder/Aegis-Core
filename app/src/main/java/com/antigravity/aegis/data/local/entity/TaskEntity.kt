@@ -26,5 +26,6 @@ data class TaskEntity(
     val isSynced: Boolean = false,
     val isActive: Boolean = true,
     val status: String = "Pending", // "Pending", "InProgress", "Completed", "Cancelled"
-    val estimatedDuration: Long? = null
+    val estimatedDuration: Long? = null,
+    val googleCalendarEventId: String? = null
 )

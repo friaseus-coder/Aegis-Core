@@ -37,7 +37,7 @@ import com.antigravity.aegis.data.local.entity.PasswordEntity
         BudgetLogEntity::class,
         PasswordEntity::class
     ],
-    version = 31,
+    version = 33,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -51,7 +51,26 @@ abstract class AegisDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
     abstract fun taskDao(): TaskDao
     abstract fun passwordDao(): com.antigravity.aegis.data.local.dao.PasswordDao
+    
     companion object {
+        val MIGRATION_32_33 = object : androidx.room.migration.Migration(32, 33) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE clients ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE projects ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE tasks ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE expenses ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE quotes ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")
+            }
+        }
+
+        val MIGRATION_31_32 = object : androidx.room.migration.Migration(31, 32) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE expenses ADD COLUMN baseAmount REAL NOT NULL DEFAULT 0.0")
+                database.execSQL("ALTER TABLE expenses ADD COLUMN taxAmount REAL NOT NULL DEFAULT 0.0")
+                database.execSQL("ALTER TABLE user_config ADD COLUMN defaultTaxPercent REAL NOT NULL DEFAULT 21.0")
+            }
+        }
+
         val MIGRATION_30_31 = object : androidx.room.migration.Migration(30, 31) {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE user_config ADD COLUMN currency TEXT NOT NULL DEFAULT 'EUR'")

@@ -1,7 +1,8 @@
 package com.antigravity.aegis.data.di
 
 import android.content.Context
-import com.antigravity.aegis.data.cloud.GoogleDriveSyncManager
+import com.antigravity.aegis.data.cloud.GoogleAppsManager
+import com.antigravity.aegis.data.cloud.GoogleCalendarSyncManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,9 +16,19 @@ object CloudSyncModule {
 
     @Provides
     @Singleton
-    fun provideGoogleDriveSyncManager(
+    fun provideGoogleAppsManager(
         @ApplicationContext context: Context
-    ): GoogleDriveSyncManager {
-        return GoogleDriveSyncManager(context)
+    ): GoogleAppsManager {
+        return GoogleAppsManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGoogleCalendarSyncManager(
+        @ApplicationContext context: Context,
+        googleAppsManager: GoogleAppsManager
+    ): GoogleCalendarSyncManager {
+        return GoogleCalendarSyncManager(context, googleAppsManager)
     }
 }
+

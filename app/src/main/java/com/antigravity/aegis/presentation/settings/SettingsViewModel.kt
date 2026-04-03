@@ -54,6 +54,15 @@ class SettingsViewModel @Inject constructor(
             _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.msg_theme_changed))
         }
     }
+
+    fun updateDefaultTaxPercent(percent: Double) {
+        viewModelScope.launch {
+            val currentConfig = userConfig.value ?: com.antigravity.aegis.data.local.entity.UserConfig()
+            val newConfig = currentConfig.copy(id = 1, defaultTaxPercent = percent)
+            settingsRepository.insertOrUpdateConfig(newConfig)
+            _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.general_success))
+        }
+    }
     
 
     fun exportDatabase(uri: Uri) {
