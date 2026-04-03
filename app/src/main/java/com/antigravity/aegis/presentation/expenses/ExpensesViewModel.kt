@@ -28,6 +28,7 @@ import com.antigravity.aegis.domain.transfer.DataTransferManager
 import com.antigravity.aegis.domain.util.Result
 import com.antigravity.aegis.domain.util.onSuccess
 import com.antigravity.aegis.domain.util.onError
+import com.antigravity.aegis.domain.util.getOrNull
 
 @HiltViewModel
 class ExpensesViewModel @Inject constructor(
@@ -197,7 +198,8 @@ class ExpensesViewModel @Inject constructor(
                 category = category,
                 projectId = projectId
             )
-            val insertedId = expenseRepository.insertExpense(expense)
+            val result = expenseRepository.insertExpense(expense)
+            val insertedId = result.getOrNull() ?: 0L
             val savedExpense = expense.copy(id = insertedId.toInt())
             
             // AUTOMATIC SYNC: Google Drive (Attachments)
