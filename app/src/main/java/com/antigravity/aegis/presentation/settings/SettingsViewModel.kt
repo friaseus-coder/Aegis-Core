@@ -206,6 +206,10 @@ class SettingsViewModel @Inject constructor(
         _googleAccount.value = null
         _uiState.value = SettingsUiState.Success(UiText.StringResource(R.string.general_success))
     }
+
+    fun isGoogleConfigured() = googleAppsManager.isConfigured()
+
+    fun getGoogleSignInOptions() = googleAppsManager.getGoogleSignInOptions()
     
     // ========== Module Customization ==========
     
