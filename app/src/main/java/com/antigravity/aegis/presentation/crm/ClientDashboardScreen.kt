@@ -37,6 +37,7 @@ fun ClientDashboardScreen(
 ) {
     val client by viewModel.selectedClient.collectAsState()
     val projects by viewModel.clientProjects.collectAsState()
+    val sessions by viewModel.clientSessions.collectAsState()
     val documents by viewModel.clientDocuments.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
     val context = LocalContext.current
@@ -129,6 +130,20 @@ fun ClientDashboardScreen(
             // 3. Action Buttons
             item {
                 ActionButtonsRow(client!!, context)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // 3.5 PDF Report Button
+            item {
+                OutlinedButton(
+                    onClick = { viewModel.generateClientReport(client!!.id) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(Icons.Default.PictureAsPdf, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.crm_client_btn_download_full_report))
+                }
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
@@ -162,7 +177,66 @@ fun ClientDashboardScreen(
                     HorizontalDivider()
                 }
             
-            // 5. Documents Section
+            // 5. Sessions Section (Global for Client)
+            if (sessions.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = stringResource(R.string.crm_session_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
+                items(sessions) { session ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(session.date)),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(session.duration, style = MaterialTheme.typography.labelMedium)
+                            }
+                            // Mostrar el nombre del proyecto al que pertenece la sesión si se encuentra
+                            val projectName = projects.find { it.id == session.projectId }?.name ?: stringResource(R.string.general_na)
+                            Text("${session.location} | $projectName", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(stringResource(R.string.crm_session_notes) + ":", style = MaterialTheme.typography.labelSmall)
+                            Text(session.notes, style = MaterialTheme.typography.bodyMedium)
+                            if (session.exercises.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(stringResource(R.string.crm_session_exercises) + ":", style = MaterialTheme.typography.labelSmall)
+                                Text(session.exercises, style = MaterialTheme.typography.bodyMedium)
+                            }
+                            if (session.nextSessionDate != null) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Surface(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                    shape = MaterialTheme.shapes.extraSmall
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.crm_session_next_date) + ": " + 
+                                            java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date(session.nextSessionDate)),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 6. Documents Section
             item {
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

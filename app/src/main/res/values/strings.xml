@@ -646,4 +646,5 @@
     <string name="crm_client_report_pdf">Generate Client Report (PDF)</string>
     <string name="crm_session_empty">No sessions registered for this project.</string>
     <string name="crm_session_created_success">Session saved and scheduled.</string>
+    <string name="crm_client_btn_download_full_report">Download Full Report (Projects &amp; Sessions)</string>
 </resources>

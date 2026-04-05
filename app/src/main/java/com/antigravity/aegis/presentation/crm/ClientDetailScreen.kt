@@ -47,6 +47,7 @@ fun ClientDetailScreen(
 ) {
     val client by viewModel.selectedClient.collectAsState()
     val projects by viewModel.clientProjects.collectAsState()
+    val sessions by viewModel.clientSessions.collectAsState()
     val templates by viewModel.templates.collectAsState()
     var showAddProjectDialog by remember { mutableStateOf(false) }
 
@@ -96,6 +97,7 @@ fun ClientDetailScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn {
+                // Section: Projects
                 items(projects, key = { it.id }) { project ->
                     ListItem(
                         headlineContent = { Text(project.name) },
@@ -103,6 +105,48 @@ fun ClientDetailScreen(
                         modifier = Modifier.clickable { onNavigateToProject(project.id) }
                     )
                     HorizontalDivider()
+                }
+
+                // Section: Sessions
+                if (sessions.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(stringResource(R.string.crm_session_title), style = MaterialTheme.typography.titleLarge)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    items(sessions, key = { "session_${it.id}" }) { session ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(session.date)),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(session.duration, style = MaterialTheme.typography.labelMedium)
+                                }
+                                Text("${session.location} (Proyecto: ${projects.find { it.id == session.projectId }?.name ?: "Desconocido"})", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(stringResource(R.string.crm_session_notes) + ":", style = MaterialTheme.typography.labelSmall)
+                                Text(session.notes, style = MaterialTheme.typography.bodyMedium)
+                                if (session.nextSessionDate != null) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.crm_session_next_date) + ": " + 
+                                            java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date(session.nextSessionDate)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

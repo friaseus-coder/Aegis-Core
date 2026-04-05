@@ -166,7 +166,7 @@ fun QuoteKanbanScreen(
         LazyRow(
             contentPadding = PaddingValues(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.weight(1f).fillMaxWidth()
         ) {
             items(statuses, key = { it }) { status ->
                 KanbanColumn(

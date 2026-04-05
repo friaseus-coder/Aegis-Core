@@ -633,4 +633,5 @@
     <string name="crm_client_report_pdf">Generar Informe de Cliente (PDF)</string>
     <string name="crm_session_empty">No hay sesiones registradas en este proyecto.</string>
     <string name="crm_session_created_success">Sesión guardada y programada correctamente.</string>
+    <string name="crm_client_btn_download_full_report">Descargar Informe (Proyectos y Sesiones)</string>
 </resources>
