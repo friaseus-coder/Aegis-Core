@@ -20,8 +20,9 @@ Permite crear **Partes de Trabajo** in situ con:
 #### Base de Datos
 | Componente | Descripción |
 |------------|-------------|
-| **AegisDatabase** | Versión 3+ |
+| **AegisDatabase** | Versión 34 |
 | **WorkReportEntity** | Vinculado a ProjectEntity |
+| **SessionEntity** | Registro de intervenciones (ver CRM) |
 
 #### Entidad
 
@@ -73,6 +74,16 @@ document.finishPage(page)
 document.writeTo(outputStream)
 document.close()
 ```
+
+#### Informe Integral de Cliente (v1.2.1)
+
+Nuevo flujo en `PdfGenerator` que consolida toda la actividad de un cliente:
+
+| Método | `generateClientReportPdf` |
+|--------|---------------------------|
+| **Input** | `Client`, `List<Project>`, `Map<Int, List<Session>>` |
+| **Output** | `Uri` (FileProvider) |
+| **Lógica** | Iteración sobre proyectos → Dibujado de sesiones asociadas → Saltos de página automáticos |
 
 #### Cámara
 
@@ -145,4 +156,4 @@ sequenceDiagram
 
 ---
 
-*Documentación Técnica Reportes v1.0 - Aegis Core*
+*Documentación Técnica Reportes v1.2.1 - Aegis Core - Abril 2026*

@@ -1,12 +1,14 @@
 package com.antigravity.aegis.presentation.crm
 
 import com.antigravity.aegis.R
+import com.antigravity.aegis.presentation.util.UiText
 import com.antigravity.aegis.domain.model.CrmStatus
 
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.TaskEntity
 import com.antigravity.aegis.data.local.entity.BudgetLineEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
+import com.antigravity.aegis.data.local.entity.SessionEntity
 import com.antigravity.aegis.domain.model.Client
 import com.antigravity.aegis.domain.model.ClientType
 import com.antigravity.aegis.domain.model.Address
@@ -57,6 +59,7 @@ class CrmViewModel @Inject constructor(
     private val projectRepository: ProjectRepository,
     private val budgetRepository: BudgetRepository,
     private val expenseRepository: ExpenseRepository,
+    private val sessionRepository: com.antigravity.aegis.domain.repository.SessionRepository,
     private val getProjectRealProfitUseCase: com.antigravity.aegis.domain.usecase.GetProjectRealProfitUseCase,
     private val pdfGenerator: PdfGenerator,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
@@ -164,6 +167,10 @@ class CrmViewModel @Inject constructor(
     // --- Derived State for Selected Client's Documents ---
     private val _clientDocuments = MutableStateFlow<List<DocumentEntity>>(emptyList())
     val clientDocuments: StateFlow<List<DocumentEntity>> = _clientDocuments
+
+    // --- Derived State for Selected Client's Sessions ---
+    private val _clientSessions = MutableStateFlow<List<SessionEntity>>(emptyList())
+    val clientSessions: StateFlow<List<SessionEntity>> = _clientSessions
 
     // --- Derived State for Selected Project's Tasks ---
     private val _projectTasks = MutableStateFlow<List<TaskEntity>>(emptyList())
@@ -342,6 +349,7 @@ class CrmViewModel @Inject constructor(
                 categoria = ClientCategory.POTENTIAL
             )
             clientRepository.insertClient(client)
+            settingsRepository.triggerAutoBackup()
 
             // AUTOMATIC SYNC: Calendar (As a CRM marker if needed, but usually clients aren't calendar events)
             // If the user wants "everything", maybe we skip clients for now as there's no date.
@@ -351,6 +359,7 @@ class CrmViewModel @Inject constructor(
     fun updateClient(client: Client) {
         viewModelScope.launch {
             clientRepository.insertClient(client) // Room Insert(OnConflictStrategy.REPLACE) acts as update
+            settingsRepository.triggerAutoBackup()
         }
     }
 
@@ -444,6 +453,7 @@ class CrmViewModel @Inject constructor(
                         }
                     }
                 }
+                settingsRepository.triggerAutoBackup()
             }.onError { e -> 
                 android.util.Log.e("CrmViewModel", "Error al crear proyecto: ${e.message}") 
             }
@@ -484,7 +494,7 @@ class CrmViewModel @Inject constructor(
             
             launch {
                 projectRepository.getProjectsByClient(clientId).collect { projects ->
-                    _clientProjects.value = projects
+                    _clientProjects.value = projects.filter { it.parentProjectId == null }
                 }
             }
             
@@ -494,12 +504,21 @@ class CrmViewModel @Inject constructor(
                 }
             }
 
+            launch {
+                sessionRepository.getSessionsByClient(clientId).collect { sessions ->
+                    _clientSessions.value = sessions
+                }
+            }
+
         }
     }
 
     // --- Derived State for Selected Project's Expenses ---
     private val _projectExpenses = MutableStateFlow<List<com.antigravity.aegis.data.local.entity.ExpenseEntity>>(emptyList())
     val projectExpenses: StateFlow<List<com.antigravity.aegis.data.local.entity.ExpenseEntity>> = _projectExpenses
+
+    private val _projectSessions = MutableStateFlow<List<com.antigravity.aegis.data.local.entity.SessionEntity>>(emptyList())
+    val projectSessions: StateFlow<List<com.antigravity.aegis.data.local.entity.SessionEntity>> = _projectSessions
 
     data class FinancialSummary(
         val totalIncome: Double = 0.0,
@@ -579,6 +598,12 @@ class CrmViewModel @Inject constructor(
                     _subProjects.value = subs
                 }
             }
+            // Fetch sessions for project
+            launch {
+                sessionRepository.getSessionsByProject(projectId).collect { sessions ->
+                    _projectSessions.value = sessions
+                }
+            }
         }
     }
     
@@ -586,6 +611,36 @@ class CrmViewModel @Inject constructor(
         _selectedClient.value = null
         _selectedProject.value = null
         _subProjects.value = emptyList()
+    }
+
+    /**
+     * Cierra un proyecto, cambiando su estado de WON a PROJECT_CLOSED.
+     * Solo se permite el cierre si el proyecto está en estado WON.
+     */
+    fun closeProject(projectId: Int, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val project = projectRepository.getProjectById(projectId)
+            if (project == null) {
+                onResult(Result.Error(Exception("Project not found")))
+                return@launch
+            }
+
+            if (project.status != CrmStatus.WON) {
+                // Not using android.content.Context here as per rule, but project.status is string.
+                // We emit the error via callback or a flow if we had one.
+                onResult(Result.Error(Exception("Solo se pueden cerrar proyectos en estado Ganado")))
+                return@launch
+            }
+
+            val result = projectRepository.updateProjectStatus(projectId, CrmStatus.PROJECT_CLOSED)
+            settingsRepository.triggerAutoBackup()
+            onResult(result)
+            
+            // Si el proyecto cerrado es el seleccionado, actualizarlo en el estado del VM
+            if (_selectedProject.value?.id == projectId) {
+                _selectedProject.value = projectRepository.getProjectById(projectId)
+            }
+        }
     }
 
     // --- SubProjects & Conversions ---
@@ -616,6 +671,7 @@ class CrmViewModel @Inject constructor(
             )
             projectRepository.insertProject(subProject)
                 .onSuccess {
+                    settingsRepository.triggerAutoBackup()
                     // Sincronizar subproyecto como nueva línea en el presupuesto DRAFT
                     val quote = budgetRepository.getQuoteByProjectId(parentProjectId)
                     if (quote != null && quote.status == CrmStatus.DRAFT) {
@@ -653,6 +709,7 @@ class CrmViewModel @Inject constructor(
         viewModelScope.launch {
             val entity = projectRepository.getProjectById(subProjectId) ?: return@launch
             projectRepository.deleteProject(entity)
+            settingsRepository.triggerAutoBackup()
         }
     }
 
@@ -674,6 +731,7 @@ class CrmViewModel @Inject constructor(
                 estimatedTimeUnit = estimatedTimeUnit
             )
             projectRepository.updateProject(updated)
+            settingsRepository.triggerAutoBackup()
         }
     }
 
@@ -720,7 +778,10 @@ class CrmViewModel @Inject constructor(
                 endDate = endDate,
                 subProjects = subProjects
             )
-            result.onSuccess { projectId -> onResult(projectId) }
+            result.onSuccess { projectId -> 
+                settingsRepository.triggerAutoBackup()
+                onResult(projectId) 
+            }
                   .onError { e -> onError(e.message ?: "Error al crear proyecto") }
         }
     }
@@ -760,7 +821,10 @@ class CrmViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val result = deleteProjectWithQuotesUseCase(projectId)
-            result.onSuccess { onSuccess() }
+            result.onSuccess { 
+                settingsRepository.triggerAutoBackup()
+                onSuccess() 
+            }
                   .onError { e -> onError(e.message ?: "Error al borrar el proyecto") }
         }
     }
@@ -839,6 +903,71 @@ class CrmViewModel @Inject constructor(
             } catch (e: Exception) {
                 android.util.Log.e("CrmViewModel", "Error sharing sample template", e)
                 _transferState.value = TransferState.Error(message = "Error: ${e.message}")
+            }
+        }
+    }
+    // --- Session Management ---
+
+    fun createSession(
+        projectId: Int,
+        date: Long,
+        location: String,
+        duration: String,
+        notes: String,
+        exercises: String,
+        nextSessionDate: Long? = null
+    ) {
+        viewModelScope.launch {
+            val session = com.antigravity.aegis.data.local.entity.SessionEntity(
+                projectId = projectId,
+                date = date,
+                location = location,
+                duration = duration,
+                notes = notes,
+                exercises = exercises,
+                nextSessionDate = nextSessionDate
+            )
+            
+            val result = sessionRepository.insertSession(session)
+            settingsRepository.triggerAutoBackup()
+            result.onSuccess { sessionId ->
+                // Sincronizar próxima cita con Calendar
+                if (nextSessionDate != null) {
+                    val client = _selectedClient.value
+                    val project = projectRepository.getProjectById(projectId)
+                    if (client != null && project != null) {
+                        val clientName = if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName
+                        val eventId = googleCalendarSyncManager.syncSessionNextAppointment(
+                            session.copy(id = sessionId.toInt()), 
+                            clientName, 
+                            project.name
+                        )
+                        if (eventId != null) {
+                            sessionRepository.updateSession(session.copy(id = sessionId.toInt(), googleCalendarEventId = eventId))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun generateClientReport(clientId: Int) {
+        viewModelScope.launch {
+            val client = clientRepository.getClientById(clientId).firstOrNull() ?: return@launch
+            val projects = projectRepository.getProjectsByClient(clientId).firstOrNull() ?: emptyList()
+            val userConfig = settingsRepository.getUserConfig().firstOrNull()
+            
+            val projectsWithSessions = projects.map { project ->
+                val sessions = sessionRepository.getSessionsByProject(project.id).firstOrNull() ?: emptyList()
+                project to sessions
+            }
+            
+            val file = pdfGenerator.generateClientReportPdf(context, client, projectsWithSessions, userConfig)
+            try {
+                val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+                _pdfShareEvent.emit(uri)
+            } catch (e: Exception) {
+                android.util.Log.e("CrmViewModel", "Error sharing client report", e)
             }
         }
     }

@@ -10,9 +10,10 @@ object CrmStatus {
     // Antiguos estados de proyecto para compatibilidad o filtrado interno temporal
     const val ACTIVE = "Active"
     const val CLOSED = "Closed"
+    const val PROJECT_CLOSED = "Project Closed"
 
     // Helper method para asegurar que un valor recae en este pool
     fun isValid(status: String): Boolean {
-        return listOf(DRAFT, SENT, WON, LOST, ARCHIVED, ACTIVE, CLOSED).contains(status)
+        return listOf(DRAFT, SENT, WON, LOST, ARCHIVED, ACTIVE, CLOSED, PROJECT_CLOSED).contains(status)
     }
 }

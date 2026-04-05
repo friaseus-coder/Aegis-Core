@@ -12,12 +12,34 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import javax.inject.Inject
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
 class SettingsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: AegisDatabase,
     private val backupRepository: com.antigravity.aegis.domain.repository.BackupRepository
 ) : SettingsRepository {
+
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val _backupTrigger = MutableSharedFlow<Unit>(replay = 0)
+
+    init {
+        repositoryScope.launch {
+            _backupTrigger
+                .debounce(5000) // Esperar 5 segundos tras el último cambio
+                .collect {
+                    val config = database.userConfigDao().getUserConfigOneShot()
+                    if (config?.backupLocationUri != null) {
+                        performAutoBackup(config)
+                    }
+                }
+        }
+    }
+
+    override fun triggerAutoBackup() {
+        _backupTrigger.tryEmit(Unit)
+    }
 
     override suspend fun exportDatabase(destinationUri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -185,10 +207,19 @@ class SettingsRepositoryImpl @Inject constructor(
             val docFile = androidx.documentfile.provider.DocumentFile.fromTreeUri(context, treeUri)
             if (docFile == null || !docFile.isDirectory) return@withContext Result.Error(Exception("Invalid directory URI"))
 
-            val dateFormat = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
-            val timestamp = dateFormat.format(java.util.Date())
-            val fileName = "aegis_backup_$timestamp.json"
-            val newFile = docFile.createFile("application/json", fileName)
+            val MASTER_FILE = "aegis_core_backup.json"
+            val PREV_FILE = "aegis_core_backup_prev.json"
+
+            // 1. Rotación de seguridad: aegis_core_backup.json -> aegis_core_backup_prev.json
+            val existingMaster = docFile.findFile(MASTER_FILE)
+            if (existingMaster != null) {
+                val existingPrev = docFile.findFile(PREV_FILE)
+                existingPrev?.delete()
+                existingMaster.renameTo(PREV_FILE)
+            }
+
+            // 2. Crear nuevo archivo maestro
+            val newFile = docFile.createFile("application/json", MASTER_FILE)
                 ?: return@withContext Result.Error(Exception("Could not create file in directory"))
 
             context.contentResolver.openOutputStream(newFile.uri)?.use { output ->

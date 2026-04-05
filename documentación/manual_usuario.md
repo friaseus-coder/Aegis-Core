@@ -77,10 +77,32 @@ Gestione clientes y proyectos activos.
 | **Crear Proyecto** | Dentro de Cliente → Botón **+** |
 | **Añadir Tareas** | Dentro de Proyecto → Botón **+** |
 | **Completar Tarea** | Marcar checkbox ☑️ |
+| **Cerrar Proyecto** | Estado "Ganado" → Botón **Cerrar Proyecto** |
+
+> [!TIP]
+> **Cierre de Proyecto**: Al cerrar un proyecto, el sistema deja de imputarle costes generales compartidos. Si intenta añadir costes a un proyecto cerrado, recibirá un aviso de seguridad.
 
 ---
 
-## 4. 📋 Partes de Trabajo (Field Service)
+## 4. 📅 Sesiones de Seguimiento
+
+Gestione las intervenciones directas con el cliente desde la ficha del proyecto.
+
+### Cómo registrar una sesión:
+1. Acceda al **Proyecto**.
+2. Deslice hasta la sección **Sesiones**.
+3. Pulse **Añadir Sesión**:
+   - **Fecha y Lugar**: Dónde y cuándo ocurrió.
+   - **Notas**: Resumen de lo tratado.
+   - **Ejercicios**: Tareas asignadas al cliente.
+   - **Próxima Cita**: Fecha de la siguiente intervención.
+
+> [!IMPORTANT]
+> **Sincronización con Google Calendar**: Si selecciona una "Próxima Cita", Aegis Core agendará automáticamente el evento en su calendario de Google para que no olvide el compromiso.
+
+---
+
+## 5. 📋 Partes de Trabajo (Field Service)
 
 Herramienta para técnicos en campo.
 
@@ -99,7 +121,7 @@ Herramienta para técnicos en campo.
 
 ---
 
-## 5. 📊 Presupuestos (Kanban)
+## 6. 📊 Presupuestos (Kanban)
 
 Vista visual de oportunidades de venta.
 
@@ -114,7 +136,7 @@ Vista visual de oportunidades de venta.
 
 ---
 
-## 6. 🧾 Gastos y Tickets (OCR)
+## 7. 🧾 Gastos y Tickets (OCR)
 
 Digitalice gastos automáticamente.
 
@@ -124,21 +146,6 @@ Digitalice gastos automáticamente.
 3. **Revisión IA**: La app lee Fecha y Total automáticamente
 4. **Verificar**: Confirme los datos extraídos
 5. **Exportar**: "Exportar Trimestre" → ZIP con Excel + fotos
-
----
-
-## 7. 📦 Inventario (Scanner)
-
-Control de stock con códigos de barras.
-
-### Pestaña Scan
-- Apunte la cámara al código de barras
-- **Producto nuevo**: Rellene formulario de alta
-- **Producto existente**: Botones **+1** / **-1** para ajustar stock
-
-### Pestaña Lista
-- Ver todo el inventario
-- ⚠️ Productos con stock bajo aparecen en **ROJO**
 
 ---
 
@@ -180,10 +187,23 @@ Configure los datos que aparecerán en la cabecera de sus Informes y Presupuesto
 
 ---
 
+## 10. 📄 Informes y PDF
+
+Aegis Core permite exportar varios tipos de documentos profesionales:
+
+1. **Partes de Trabajo**: Firma del cliente y fotos del servicio.
+2. **Presupuestos**: Ofertas comerciales con su logo.
+3. **Informe Integral de Cliente**:
+   - Pulse en el icono de PDF (📄) en el **Dashboard del Cliente**.
+   - Se genera un documento que resume **todos los proyectos** y **todas las sesiones** realizadas.
+   - Ideal para revisiones trimestrales o cierre de ciclos de servicio.
+
+---
+
 ## ❓ Soporte
 
 ¿Necesita ayuda? Consulte la documentación técnica o contacte con soporte.
 
 ---
 
-*Manual de Usuario v1.1 - Aegis Core - Enero 2026*
+*Manual de Usuario v1.2.1 - Aegis Core - Abril 2026*

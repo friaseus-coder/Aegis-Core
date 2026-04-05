@@ -18,9 +18,9 @@ El módulo "Hub de Proyectos" actúa como un **CRM ligero** integrado en Aegis. 
 
 | Componente | Descripción |
 |------------|-------------|
-| **AegisDatabase** | Versión 2+ |
-| **Entities** | ClientEntity, ProjectEntity, TaskEntity |
-| **DAO** | CrmDao con operaciones CRUD y consultas Flow |
+| **AegisDatabase** | Versión 34 |
+| **Entities** | ClientEntity, ProjectEntity, TaskEntity, SessionEntity |
+| **DAO** | CrmDao, SessionDao con operaciones CRUD y consultas Flow |
 
 #### Entidades
 
@@ -50,12 +50,25 @@ data class TaskEntity(
     val description: String,
     val isCompleted: Boolean
 )
+
+@Entity(tableName = "sessions", foreignKeys = [...])
+data class SessionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int,
+    val projectId: Int, // FK → ProjectEntity
+    val date: Long,
+    val location: String,
+    val duration: String,
+    val notes: String,
+    val exercises: String,
+    val nextSessionDate: Long?,
+    val googleCalendarEventId: String?
+)
 ```
 
 #### Repositorio
-- **Interface**: `CrmRepository`
-- **Implementación**: `CrmRepositoryImpl`
-- **Inyección**: `CrmModule` (Hilt)
+- **Interface**: `CrmRepository`, `SessionRepository`
+- **Implementación**: `CrmRepositoryImpl`, `SessionRepositoryImpl`
+- **Inyección**: `CrmModule`, `SessionModule` (Hilt)
 
 ---
 
@@ -77,8 +90,8 @@ dashboard → clients → client_detail/{id} → project_detail/{id}
 |--------|---------|
 | `DashboardScreen` | Vista principal con proyectos activos |
 | `ClientListScreen` | Listado con FAB para añadir |
-| `ClientDetailScreen` | Info cliente + lista proyectos |
-| `ProjectDetailScreen` | Info proyecto + checklist tareas |
+| `ClientDetailScreen` | Info cliente + lista proyectos (filtrado raíz) |
+| `ProjectDetailScreen` | Info proyecto + checklist tareas + Sesiones |
 
 ---
 
@@ -94,8 +107,8 @@ Todos los datos persisten en `aegis_core.db`:
 
 ```mermaid
 erDiagram
-    CLIENT ||--o{ PROJECT : "tiene"
     PROJECT ||--o{ TASK : "contiene"
+    PROJECT ||--o{ SESSION : "detalla"
     
     CLIENT {
         int id PK
@@ -111,6 +124,11 @@ erDiagram
         int id PK
         int projectId FK
         boolean isCompleted
+    }
+    SESSION {
+        int id PK
+        int projectId FK
+        string notes
     }
 ```
 
@@ -128,4 +146,4 @@ flowchart LR
 
 ---
 
-*Documentación Técnica CRM v1.0 - Aegis Core*
+*Documentación Técnica CRM v1.2.1 - Aegis Core - Abril 2026*

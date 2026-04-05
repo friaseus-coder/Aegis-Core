@@ -69,7 +69,10 @@ class DashboardViewModel @Inject constructor(
                     _showBackupDialog.value = false
                     _isBackupLocationError.value = false
                     val config = settingsRepository.getUserConfig().firstOrNull()
-                    if (config != null) performBackup(config)
+                    if (config != null) {
+                        performBackup(config)
+                        settingsRepository.triggerAutoBackup()
+                    }
                 }
                 is DomainResult.Error -> {
                     _autoBackupStatus.value = BackupStatus.PermissionError(persistResult.exception.message)

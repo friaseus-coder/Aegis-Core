@@ -26,6 +26,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
 import com.antigravity.aegis.domain.model.CrmStatus
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +62,23 @@ fun ClientDashboardScreen(
         }
     }
 
+    // Observar el evento de compartir PDF del informe de cliente
+    LaunchedEffect(Unit) {
+        viewModel.pdfShareEvent.collectLatest { pdfUri ->
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_STREAM, pdfUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(
+                Intent.createChooser(intent, context.getString(R.string.crm_client_report_pdf)).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            )
+        }
+    }
+
     if (client == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(stringResource(R.string.crm_client_not_found))
@@ -72,6 +90,13 @@ fun ClientDashboardScreen(
         topBar = {
             AegisTopAppBar(
                 actions = {
+                    IconButton(onClick = { viewModel.generateClientReport(client!!.id) }) {
+                        Icon(
+                            Icons.Default.PictureAsPdf, 
+                            contentDescription = stringResource(R.string.crm_client_report_pdf),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     IconButton(onClick = onEditClient) {
                          Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.crm_client_edit_button))
                     }
@@ -119,7 +144,18 @@ fun ClientDashboardScreen(
                 items(projects) { project ->
                     ListItem(
                         headlineContent = { Text(project.name) },
-                        supportingContent = { Text(project.status.toString()) },
+                        supportingContent = { 
+                            Column {
+                                Text(project.status)
+                                if (project.price != null && project.price!! > 0.0) {
+                                     Text(
+                                         text = "$currencySymbol${"%.2f".format(project.price)}",
+                                         style = MaterialTheme.typography.bodySmall,
+                                         color = MaterialTheme.colorScheme.secondary
+                                     )
+                                }
+                            }
+                        },
                         leadingContent = { Icon(Icons.Default.Work, contentDescription = null) },
                         modifier = Modifier.clickable { onNavigateToProject(project.id) }
                     )

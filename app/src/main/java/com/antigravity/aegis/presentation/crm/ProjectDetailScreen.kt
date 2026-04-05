@@ -25,7 +25,13 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.platform.LocalContext
 import com.antigravity.aegis.presentation.components.AegisTopAppBar
+import com.antigravity.aegis.domain.model.CrmStatus
+import com.antigravity.aegis.data.local.entity.SessionEntity
 import kotlinx.coroutines.flow.collectLatest
+import com.antigravity.aegis.presentation.util.UiText
+import com.antigravity.aegis.domain.util.onSuccess
+import com.antigravity.aegis.domain.util.onError
+import androidx.compose.foundation.rememberScrollState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +51,8 @@ fun ProjectDetailScreen(
     var subProjectToDelete by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
     var subProjectToEdit by remember { mutableStateOf<com.antigravity.aegis.data.local.entity.ProjectEntity?>(null) }
     val context = LocalContext.current
+
+    var showCloseConfirmDialog by remember { mutableStateOf(false) }
 
     // Observar el evento de compartir PDF
     LaunchedEffect(Unit) {
@@ -142,6 +150,31 @@ fun ProjectDetailScreen(
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
+                        }
+                    }
+
+                    // --- BOTÓN CERRAR PROYECTO ---
+                    if (project!!.status == CrmStatus.WON) {
+                        Button(
+                            onClick = { showCloseConfirmDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Text(stringResource(R.string.crm_project_detail_btn_close), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        }
+                    } else if (project!!.status == CrmStatus.PROJECT_CLOSED) {
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.crm_project_status_closed),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
                         }
                     }
                 }
@@ -358,7 +391,88 @@ fun ProjectDetailScreen(
                             HorizontalDivider()
                         }
                     }
-                    Spacer(modifier = Modifier.height(80.dp)) // espacio para el FAB
+                }
+            }
+
+            // ─ SESIONES ─
+            item {
+                val sessions by viewModel.projectSessions.collectAsState()
+                var showAddSessionDialog by remember { mutableStateOf(false) }
+
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(R.string.crm_session_title), style = MaterialTheme.typography.titleLarge)
+                        TextButton(onClick = { showAddSessionDialog = true }) {
+                            Text(stringResource(R.string.crm_session_add_btn))
+                        }
+                    }
+
+                    if (sessions.isEmpty()) {
+                        Text(
+                            stringResource(R.string.crm_session_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        sessions.forEach { session ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(session.date)),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(session.duration, style = MaterialTheme.typography.labelMedium)
+                                    }
+                                    Text(session.location, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(stringResource(R.string.crm_session_notes) + ":", style = MaterialTheme.typography.labelSmall)
+                                    Text(session.notes, style = MaterialTheme.typography.bodyMedium)
+                                    if (session.exercises.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(stringResource(R.string.crm_session_exercises) + ":", style = MaterialTheme.typography.labelSmall)
+                                        Text(session.exercises, style = MaterialTheme.typography.bodyMedium)
+                                    }
+                                    if (session.nextSessionDate != null) {
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Surface(
+                                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                                            shape = MaterialTheme.shapes.extraSmall
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.crm_session_next_date) + ": " + 
+                                                    java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date(session.nextSessionDate)),
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (showAddSessionDialog) {
+                        AddSessionDialog(
+                            onDismiss = { showAddSessionDialog = false },
+                            onConfirm = { date, loc, dur, notes, exercises, nextDate ->
+                                viewModel.createSession(project!!.id, date, loc, dur, notes, exercises, nextDate)
+                                showAddSessionDialog = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -476,6 +590,31 @@ fun ProjectDetailScreen(
                 dismissButton = {
                     TextButton(onClick = { showDeleteConfirmDialog = false }) {
                         Text("Cancelar")
+                    }
+                }
+            )
+        }
+
+        // Diálogo de confirmación de CIERRE DE PROYECTO
+        if (showCloseConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { showCloseConfirmDialog = false },
+                title = { Text(stringResource(R.string.crm_project_detail_btn_close)) },
+                text = { Text("¿Estás seguro de que deseas cerrar permanentemente el proyecto \"${project!!.name}\"? Ya no podrá participar en el reparto de costes generales.") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.closeProject(project!!.id) { result ->
+                                result.onSuccess {
+                                    showCloseConfirmDialog = false
+                                }
+                            }
+                        }
+                    ) { Text(stringResource(R.string.general_ok)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCloseConfirmDialog = false }) {
+                        Text(stringResource(R.string.general_cancel))
                     }
                 }
             )
@@ -667,4 +806,138 @@ fun SaveTemplateDialog(currentName: String, onDismiss: () -> Unit, onConfirm: (S
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddSessionDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (Long, String, String, String, String, Long?) -> Unit
+) {
+    var date by remember { mutableStateOf(System.currentTimeMillis()) }
+    var location by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
+    var exercises by remember { mutableStateOf("") }
+    var nextSessionDate by remember { mutableStateOf<Long?>(null) }
+    
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showNextDatePicker by remember { mutableStateOf(false) }
+    
+    val dateFormatter = remember { java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.crm_session_add_btn)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                OutlinedButton(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.crm_session_date) + ": " + dateFormatter.format(java.util.Date(date)))
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = location,
+                    onValueChange = { location = it },
+                    label = { Text(stringResource(R.string.crm_session_location)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = duration,
+                    onValueChange = { duration = it },
+                    label = { Text(stringResource(R.string.crm_session_duration)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text(stringResource(R.string.crm_session_notes)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = exercises,
+                    onValueChange = { exercises = it },
+                    label = { Text(stringResource(R.string.crm_session_exercises)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = nextSessionDate != null,
+                        onCheckedChange = { 
+                            if (it) nextSessionDate = System.currentTimeMillis() + 86400000 * 7 // +1 semana
+                            else nextSessionDate = null 
+                        }
+                    )
+                    Text(stringResource(R.string.crm_session_next_date))
+                }
+                
+                if (nextSessionDate != null) {
+                    OutlinedButton(
+                        onClick = { showNextDatePicker = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(dateFormatter.format(java.util.Date(nextSessionDate!!)))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = { 
+                onConfirm(date, location, duration, notes, exercises, nextSessionDate) 
+            }) {
+                Text(stringResource(R.string.general_add))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.general_cancel)) }
+        }
+    )
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { date = it }
+                    showDatePicker = false
+                }) { Text("OK") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    if (showNextDatePicker) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = nextSessionDate ?: System.currentTimeMillis())
+        DatePickerDialog(
+            onDismissRequest = { showNextDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { nextSessionDate = it }
+                    showNextDatePicker = false
+                }) { Text("OK") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 }

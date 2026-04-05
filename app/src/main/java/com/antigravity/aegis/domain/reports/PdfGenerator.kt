@@ -11,6 +11,7 @@ import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.data.local.entity.UserConfig
+import com.antigravity.aegis.data.local.entity.SessionEntity
 import com.antigravity.aegis.domain.model.Client
 import com.antigravity.aegis.domain.model.ClientType
 import android.graphics.BitmapFactory
@@ -463,6 +464,137 @@ class PdfGenerator @Inject constructor() {
             pdfDocument.close()
         }
 
+        return file
+    }
+
+    /**
+     * Genera un informe completo de un cliente con todos sus proyectos y sesiones.
+     */
+    fun generateClientReportPdf(
+        context: Context,
+        client: Client,
+        projectsWithSessions: List<Pair<ProjectEntity, List<SessionEntity>>>,
+        config: UserConfig? = null
+    ): File {
+        val pdfDocument = PdfDocument()
+        val pageInfo = PdfDocument.PageInfo.Builder(PAGE_WIDTH.toInt(), PAGE_HEIGHT.toInt(), 1).create()
+        var page = pdfDocument.startPage(pageInfo)
+        var canvas = page.canvas
+        var yPos = MARGIN
+        val paint = Paint().apply { isAntiAlias = true }
+
+        // --- CABECERA (Proveedor) ---
+        paint.textSize = 10f
+        paint.color = Color.BLACK
+        var leftY = yPos
+        if (config != null) {
+            paint.isFakeBoldText = true
+            canvas.drawText(config.companyName, MARGIN, leftY + 10f, paint)
+            leftY += 14f
+            paint.isFakeBoldText = false
+            paint.textSize = 8f
+            canvas.drawText("CIF: ${config.companyDniCif}", MARGIN, leftY + 8f, paint)
+            leftY += 12f
+        }
+
+        // --- CABECERA (Cliente) ---
+        var rightY = yPos
+        paint.textSize = 10f
+        paint.color = Color.GRAY
+        canvas.drawText("INFORME DE CLIENTE", COL_RIGHT_START, rightY + 10f, paint)
+        rightY += 14f
+        paint.color = Color.BLACK
+        paint.isFakeBoldText = true
+        val clientName = if (client.tipoCliente == ClientType.PARTICULAR) "${client.firstName} ${client.lastName}" else client.firstName
+        canvas.drawText(clientName, COL_RIGHT_START, rightY + 10f, paint)
+        rightY += 16f
+        paint.isFakeBoldText = false
+        paint.textSize = 8f
+        canvas.drawText("Fecha informe: ${DATE_FORMAT.format(Date())}", COL_RIGHT_START, rightY + 8f, paint)
+        
+        yPos = maxOf(leftY, rightY) + 30f
+
+        // --- TÍTULO SECCIÓN ---
+        paint.textSize = 14f
+        paint.isFakeBoldText = true
+        paint.color = Color.parseColor("#1A3A5C")
+        canvas.drawText("HISTORIAL DE PROYECTOS Y SESIONES", MARGIN, yPos, paint)
+        yPos += 20f
+        canvas.drawLine(MARGIN, yPos, PAGE_WIDTH - MARGIN, yPos, paint.apply { strokeWidth = 1f })
+        yPos += 20f
+
+        // --- LISTADO ---
+        for ((project, sessions) in projectsWithSessions) {
+            // Verificar espacio antes de cada proyecto
+            if (yPos > PAGE_HEIGHT - 100f) {
+                pdfDocument.finishPage(page)
+                page = pdfDocument.startPage(pageInfo)
+                canvas = page.canvas
+                yPos = MARGIN
+            }
+
+            // Nombre Proyecto
+            paint.textSize = 12f
+            paint.isFakeBoldText = true
+            paint.color = Color.BLACK
+            canvas.drawText("PROYECTO: ${project.name}", MARGIN, yPos, paint)
+            paint.textSize = 9f
+            paint.isFakeBoldText = false
+            paint.color = Color.GRAY
+            canvas.drawText("Estado: ${project.status}", PAGE_WIDTH - MARGIN - 100f, yPos, paint)
+            yPos += 15f
+            
+            if (sessions.isEmpty()) {
+                paint.color = Color.LTGRAY
+                canvas.drawText("  (No hay sesiones registradas)", MARGIN + 10f, yPos, paint)
+                yPos += 20f
+            } else {
+                for (session in sessions) {
+                    if (yPos > PAGE_HEIGHT - 80f) {
+                        pdfDocument.finishPage(page)
+                        page = pdfDocument.startPage(pageInfo)
+                        canvas = page.canvas
+                        yPos = MARGIN
+                    }
+
+                    // Detalle Sesión
+                    paint.color = Color.parseColor("#F5F5F5")
+                    canvas.drawRect(MARGIN, yPos - 10f, PAGE_WIDTH - MARGIN, yPos + 50f, paint)
+                    
+                    paint.color = Color.BLACK
+                    paint.isFakeBoldText = true
+                    canvas.drawText("Sesión: ${DATE_FORMAT.format(Date(session.date))} | ${session.location} (${session.duration})", MARGIN + 5f, yPos + 5f, paint)
+                    
+                    paint.isFakeBoldText = false
+                    paint.textSize = 8f
+                    canvas.drawText("Notas: ${session.notes.take(90)}", MARGIN + 5f, yPos + 18f, paint)
+                    canvas.drawText("Ejercicios: ${session.exercises.take(90)}", MARGIN + 5f, yPos + 28f, paint)
+                    
+                    if (session.nextSessionDate != null) {
+                        paint.color = Color.parseColor("#E67E22")
+                        canvas.drawText("Próxima cita: ${DATE_FORMAT.format(Date(session.nextSessionDate))}", MARGIN + 5f, yPos + 38f, paint)
+                    }
+                    
+                    yPos += 70f
+                }
+            }
+            yPos += 10f
+        }
+
+        drawLegalFooter(canvas, PAGE_WIDTH, PAGE_HEIGHT)
+        pdfDocument.finishPage(page)
+
+        val directory = File(context.filesDir, "reports")
+        if (!directory.exists()) directory.mkdirs()
+        val file = File(directory, "Informe_Cliente_${client.id}_${System.currentTimeMillis()}.pdf")
+
+        try {
+            pdfDocument.writeTo(FileOutputStream(file))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            pdfDocument.close()
+        }
         return file
     }
 

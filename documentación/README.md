@@ -62,16 +62,26 @@
 | **Partes de Trabajo** | ✅ Implementado | Firma digital y generación de PDF |
 | **Presupuestos** | ✅ Implementado | Kanban de ofertas comerciales |
 | **Gastos** | ✅ Implementado | OCR para digitalizar tickets |
-| **Inventario** | ✅ Implementado | Scanner de códigos de barras |
 | **Kilometraje** | ✅ Implementado | Registro de viajes con cálculo de costes |
-| **Control Horario** | 🔄 Placeholder | Próximamente |
-| **Bóveda de Contraseñas** | 🔄 Placeholder | Próximamente |
+| **Inventario** | ❌ No disponible | Módulo en desarrollo / No accesible |
+| **Control Horario** | ❌ No disponible | Módulo en desarrollo / No accesible |
 
 ---
 
-## Versión
+# Aegis Core v1.2.1 - Abril 2026
 
-**Aegis Core v1.1.0** - Enero 2026
+### Changelog v1.2.1
+- ✅ **Gestión de Sesiones**: Control de intervenciones integrado en cada proyecto (Notas, Duración, Ejercicios).
+- ✅ **Sincronización Calendar**: Agenda automática de próximas citas en Google Calendar.
+- ✅ **Informe de Cliente**: Generación de PDF integral con historial de proyectos y sesiones.
+- ✅ **Cierre de Proyectos**: Nuevo estado "Proyecto Cerrado" con restricción inteligente de costes.
+- ✅ **UX CRM**: Filtrado selectivo de proyectos raíz en la vista de cliente.
+
+### Changelog v1.2.0
+- ✅ Alineación de documentación con funcionalidades reales
+- ✅ Mejora de i18n en todos los módulos operativos
+- ✅ Depuración de referencias a módulos residuales (Bóveda)
+- ✅ Consolidación de CRM y Partes de Trabajo
 
 ### Changelog v1.1.0
 - ✅ Sistema multi-usuario implementado

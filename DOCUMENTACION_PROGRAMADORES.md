@@ -1,7 +1,7 @@
 # 📘 AEGIS CORE - Documentación Técnica para Programadores
 
-> **Versión:** 2.0  
-> **Última actualización:** Febrero 2026  
+> **Versión:** 2.1  
+> **Última actualización:** Abril 2026  
 > **Arquitectura:** Clean Architecture + MVVM + Jetpack Compose
 
 ---
@@ -38,13 +38,13 @@ Aegis Core es una aplicación Android de gestión empresarial integral diseñada
 
 | Tecnología | Versión | Propósito |
 |------------|---------|-----------|
-| Kotlin | 1.9+ | Lenguaje principal |
-| Jetpack Compose | 1.5+ | UI declarativa |
-| Room | 2.6+ | Base de datos local |
-| Hilt | 2.48+ | Inyección de dependencias |
-| Coroutines/Flow | Latest | Programación asíncrona |
-| Material Design 3 | Latest | Sistema de diseño |
-| SQLCipher | 4.5+ | Cifrado de base de datos |
+| Kotlin | 1.9.22 | Lenguaje principal |
+| Jetpack Compose | 1.5.8 | UI declarativa |
+| Room | 2.6.1 | Base de datos local |
+| Hilt | 2.50 | Inyección de dependencias |
+| Coroutines/Flow | 1.7.3 | Programación asíncrona |
+| Material Design 3 | 1.2.0 | Sistema de diseño |
+| SQLCipher | 4.5.4 | Cifrado de base de datos |
 
 ### Principios Arquitectónicos
 
@@ -170,10 +170,9 @@ abstract class AegisDatabase : RoomDatabase()
 | `BudgetDao.kt` | Presupuestos y líneas | Líneas detalladas, logs |
 | `ExpenseDao.kt` | Gastos | CRUD + filtros por fecha |
 | `DocumentDao.kt` | Documentos adjuntos | Archivos por cliente |
-| `UserConfigDao.kt` | Configuración usuario | Preferencias, idioma, tema |
-| `UserEntityDao.kt` | Usuarios del sistema | Multi-usuario |
+| `PasswordDao.kt` | **Residual** | Gestión de contraseñas (Módulo retirado) |
 
-> **Nota:** `CrmDao.kt` es el DAO legacy monolítico. Los nuevos DAOs segregados (`ClientDao`, `ProjectDao`, etc.) se están implementando gradualmente.
+> **Nota:** La mayoría de DAOs ya están segregados. `CrmDao.kt` se mantiene por compatibilidad legacy pero su uso está siendo deprecado a favor de los DAOs específicos.
 
 ### 3.2 Entidades (`data/model/` y `data/local/entity/`)
 
@@ -785,19 +784,33 @@ app/src/androidTest/    # Instrumentation tests
 - 2 Servicios PDF
 - 2 Transfer managers
 
-### Presentation Layer (~49 archivos)
-- 7 Auth screens
-- 13 CRM screens/viewmodels
-- 2 Dashboard files
-- 2 Expenses files
-- 2 Inventory files
-- 2 Mileage files
-- 3 Reports files
-- 3 Settings files
-- 2 Backup files
-- 2 Navigation files
-- 4 Components
-- 2 Feature/Clients (refactorizado)
+### 5.7 Protocolo i18n Strict Mode (Obligatorio)
+
+Está terminantemente prohibido el uso de cadenas de texto literales (hardcoded strings) en la capa de presentación. 
+
+#### Reglas:
+1. **XML Dual**: Cada nuevo string debe añadirse simultáneamente en `res/values/strings.xml` (EN) y `res/values-es/strings.xml` (ES).
+2. **ViewModel**: No usar `Context` ni `R.string` directamente. Usar la clase `UiText` para emitir mensajes.
+3. **Compose**: Usar `stringResource(id)`. Solo se permiten literales en `@Preview` con datos de prueba.
+4. **Naming**: Usar prefijos semánticos: `[modulo]_[pantalla]_[elemento]_[accion]`. Ejemplo: `crm_client_edit_btn_save`.
+
+---
+
+## 11. Módulos Residuales y Mantenimiento
+
+Los siguientes componentes forman parte de funcionalidades retiradas o en pausa. **No deben ser integrados en el menú principal** sin una revisión previa del Negocio:
+
+- **Bóveda de Contraseñas** (`presentation/vault/`, `PasswordDao`, `PasswordEntity`): Módulo retirado.
+- **Control Horario** (`presentation/timecontrol/`, `TimeControlScreen`): No activo en la versión actual.
+- **Inventario** (`presentation/inventory/`): No activo en la versión actual.
+
+---
+
+## Apéndice A: Resumen de Estado v1.2
+
+- **Módulos Activos**: CRM (Clientes, Proyectos, Presupuestos), Gastos, Kilometraje, Partes de Trabajo.
+- **Seguridad**: SQLCipher con AES-256 activo.
+- **Arquitectura**: Clean Architecture aplicada al 80% del código.
 
 ---
 

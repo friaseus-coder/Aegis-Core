@@ -40,6 +40,9 @@ class TimeControlViewModel @Inject constructor(
 
     private val _showStatusDialog = MutableStateFlow(false)
     val showStatusDialog: StateFlow<Boolean> = _showStatusDialog
+
+    private val _showClosedDialog = MutableStateFlow(false)
+    val showClosedDialog: StateFlow<Boolean> = _showClosedDialog
     
     private val _pendingSaveAction = MutableStateFlow<(() -> Unit)?>(null)
 
@@ -91,7 +94,10 @@ class TimeControlViewModel @Inject constructor(
             }
 
             // Check Status
-            if (project.status != CrmStatus.ACTIVE) {
+            if (project.status == CrmStatus.PROJECT_CLOSED) {
+                _pendingSaveAction.value = { saveAction() }
+                _showClosedDialog.value = true
+            } else if (project.status != CrmStatus.ACTIVE) {
                 _pendingSaveAction.value = { saveAction() } // Using invoke wrapper
                 _showStatusDialog.value = true
             } else {
@@ -110,8 +116,15 @@ class TimeControlViewModel @Inject constructor(
         }
     }
 
+    fun onConfirmClosedUsage() {
+        _showClosedDialog.value = false
+        _pendingSaveAction.value?.invoke()
+        _pendingSaveAction.value = null
+    }
+
     fun onDismissStatusDialog() {
         _showStatusDialog.value = false
+        _showClosedDialog.value = false
         _pendingSaveAction.value = null
     }
 

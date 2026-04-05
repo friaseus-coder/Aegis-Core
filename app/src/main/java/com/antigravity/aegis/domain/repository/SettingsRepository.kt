@@ -21,5 +21,10 @@ interface SettingsRepository {
     suspend fun persistBackupUri(uri: Uri): Result<Unit>
     suspend fun performAutoBackup(userConfig: UserConfig): Result<String>
     suspend fun createTemporaryBackupFile(): Result<java.io.File>
+    
+    /**
+     * Lanza una actualización del backup maestro de forma automática y controlada (debounce).
+     */
+    fun triggerAutoBackup()
 }
 

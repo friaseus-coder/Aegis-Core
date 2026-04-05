@@ -525,6 +525,11 @@
     <string name="time_control_inactive_project_title">Inactive Project</string>
     <string name="time_control_inactive_project_desc">The selected project is not Active. Do you want to activate it to log hours?</string>
     <string name="time_control_activate_save_button">Activate &amp; Save</string>
+    <string name="crm_project_status_closed">Project Closed</string>
+    <string name="crm_project_close_warning_title">Warning: Project Closed</string>
+    <string name="crm_project_close_warning_message">This project is already closed. Are you sure you want to add costs or hours?</string>
+    <string name="crm_project_transition_error_won_required">Projects can only be closed from Won status.</string>
+    <string name="crm_project_detail_btn_close">Close Project</string>
 
     <!-- Feature: Profile Config -->
     <string name="profile_edit_title">Edit Profile</string>
@@ -628,4 +633,17 @@
     <string name="sync_auto_notification_file_success">File "%1$s" uploaded to Google Drive.</string>
     <string name="sync_auto_error_auth">Google authentication error.</string>
     <string name="sync_auto_error_network">Network error while syncing.</string>
+
+    <!-- Feature: CRM/Sessions -->
+    <string name="crm_session_title">Sessions</string>
+    <string name="crm_session_date">Session Date</string>
+    <string name="crm_session_location">Location</string>
+    <string name="crm_session_duration">Duration</string>
+    <string name="crm_session_notes">Session Notes</string>
+    <string name="crm_session_exercises">Homework / Exercises</string>
+    <string name="crm_session_next_date">Next Session</string>
+    <string name="crm_session_add_btn">Add Session</string>
+    <string name="crm_client_report_pdf">Generate Client Report (PDF)</string>
+    <string name="crm_session_empty">No sessions registered for this project.</string>
+    <string name="crm_session_created_success">Session saved and scheduled.</string>
 </resources>

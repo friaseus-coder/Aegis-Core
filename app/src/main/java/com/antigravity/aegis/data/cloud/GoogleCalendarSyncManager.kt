@@ -9,6 +9,7 @@ import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.data.local.entity.ProjectEntity
 import com.antigravity.aegis.data.local.entity.QuoteEntity
 import com.antigravity.aegis.data.local.entity.MileageLogEntity
+import com.antigravity.aegis.data.local.entity.SessionEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -152,6 +153,41 @@ class GoogleCalendarSyncManager @Inject constructor(
         return Event()
             .setSummary("[Aegis Km] ${log.origin} -> ${log.destination} — ${log.distanceKm}km")
             .setDescription("Vehículo: ${log.vehicle}\nCoste: ${log.calculatedCost}€\nOdometer: ${log.startOdometer} -> ${log.endOdometer}")
+            .setStart(EventDateTime().setDate(DateTime(dateStr)))
+            .setEnd(EventDateTime().setDate(DateTime(dateStr)))
+    }
+
+    // ─── Sessions ─────────────────────────────────────────────────────────────
+
+    /**
+     * Sincroniza la próxima cita de una sesión en Google Calendar.
+     * @return eventId del evento creado/actualizado, o null si falla.
+     */
+    suspend fun syncSessionNextAppointment(session: SessionEntity, clientName: String, projectName: String): String? {
+        val account = googleAppsManager.getLastSignedInAccount() ?: return null
+        val nextDate = session.nextSessionDate ?: return null
+        
+        return try {
+            val service = googleAppsManager.getCalendarService(account)
+            val event = buildSessionEvent(session, clientName, projectName)
+            if (session.googleCalendarEventId != null) {
+                service.events().update("primary", session.googleCalendarEventId, event).execute()
+                session.googleCalendarEventId
+            } else {
+                val created = service.events().insert("primary", event).execute()
+                created.id
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun buildSessionEvent(session: SessionEntity, clientName: String, projectName: String): Event {
+        val dateStr = dateFormat.format(Date(session.nextSessionDate!!))
+        return Event()
+            .setSummary("[Aegis Cita] $clientName — $projectName")
+            .setDescription("Próxima sesión programada.\nNotas previas: ${session.notes}\nEjercicios: ${session.exercises}")
+            .setLocation(session.location)
             .setStart(EventDateTime().setDate(DateTime(dateStr)))
             .setEnd(EventDateTime().setDate(DateTime(dateStr)))
     }

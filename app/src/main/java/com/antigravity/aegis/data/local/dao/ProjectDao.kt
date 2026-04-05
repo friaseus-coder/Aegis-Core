@@ -68,7 +68,7 @@ interface ProjectDao {
     @Query("UPDATE projects SET status = :status WHERE id = :projectId")
     suspend fun updateProjectStatus(projectId: Int, status: String)
 
-    @Query("SELECT * FROM projects WHERE startDate <= :periodEnd AND (endDate IS NULL OR endDate >= :periodStart)")
+    @Query("SELECT * FROM projects WHERE status NOT IN ('${com.antigravity.aegis.domain.model.CrmStatus.ARCHIVED}', '${com.antigravity.aegis.domain.model.CrmStatus.PROJECT_CLOSED}', '${com.antigravity.aegis.domain.model.CrmStatus.CLOSED}') AND isTemplate = 0 AND startDate <= :periodEnd AND (endDate IS NULL OR endDate >= :periodStart)")
     suspend fun getProjectsActiveInPeriod(periodStart: Long, periodEnd: Long): List<ProjectEntity>
 
     @Delete

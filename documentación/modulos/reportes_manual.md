@@ -60,6 +60,23 @@ En la pantalla del proyecto, sección **"Work Reports"**:
 
 ---
 
+### 6. Informe Integral de Cliente (Nuevo v1.2.1)
+
+A diferencia de los partes de trabajo, que son para una intervención única, el **Informe Integral** consolida toda la relación con el cliente.
+
+#### Cómo generarlo:
+1. Vaya al **Dashboard del Cliente**.
+2. Pulse el botón de **PDF** (📄) en la barra superior.
+3. El sistema generará un documento con:
+   - Resumen de estado de **todos los proyectos**.
+   - Historial de todas las **sesiones de seguimiento**.
+   - Notas y ejercicios acumulados.
+
+> [!TIP]
+> Use este informe para reuniones de cierre de mes o revisiones de objetivos con su cliente.
+
+---
+
 ## Flujo Visual
 
 ```
@@ -86,4 +103,4 @@ En la pantalla del proyecto, sección **"Work Reports"**:
 
 ---
 
-*Manual Reportes v1.0 - Aegis Core*
+*Manual Reportes v1.2.1 - Aegis Core - Abril 2026*

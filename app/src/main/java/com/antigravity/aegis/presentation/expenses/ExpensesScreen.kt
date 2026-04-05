@@ -54,6 +54,7 @@ fun ExpensesScreen(
     val currencySymbol by viewModel.currencySymbol.collectAsState()
     val pendingSyncCount by viewModel.pendingSyncCount.collectAsState()
     val isSyncing by viewModel.isSyncingCalendar.collectAsState()
+    val showClosedDialog by viewModel.showClosedDialog.collectAsState()
     
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
@@ -95,6 +96,24 @@ fun ExpensesScreen(
             )
         }
         else -> {}
+    }
+
+    if (showClosedDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDismissClosedDialog() },
+            title = { Text(stringResource(R.string.crm_project_close_warning_title)) },
+            text = { Text(stringResource(R.string.crm_project_close_warning_message)) },
+            confirmButton = {
+                Button(onClick = { viewModel.onConfirmClosedUsage() }) {
+                    Text(stringResource(R.string.general_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onDismissClosedDialog() }) {
+                    Text(stringResource(R.string.general_cancel))
+                }
+            }
+        )
     }
 
     // Camera Logic

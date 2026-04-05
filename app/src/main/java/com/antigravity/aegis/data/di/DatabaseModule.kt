@@ -63,7 +63,8 @@ object DatabaseModule {
                 AegisDatabase.MIGRATION_29_30,
                 AegisDatabase.MIGRATION_30_31,
                 AegisDatabase.MIGRATION_31_32,
-                AegisDatabase.MIGRATION_32_33
+                AegisDatabase.MIGRATION_32_33,
+                AegisDatabase.MIGRATION_33_34
             )
             .addCallback(com.antigravity.aegis.data.local.AegisDatabaseCallback(context, importTemplateUseCaseProvider))
             .build()
@@ -112,5 +113,10 @@ object DatabaseModule {
     @Provides
     fun provideClientDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.ClientDao {
         return database.clientDao()
+    }
+
+    @Provides
+    fun provideSessionDao(database: AegisDatabase): com.antigravity.aegis.data.local.dao.SessionDao {
+        return database.sessionDao()
     }
 }

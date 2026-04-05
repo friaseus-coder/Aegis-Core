@@ -35,9 +35,10 @@ import com.antigravity.aegis.data.local.entity.PasswordEntity
         DocumentEntity::class,
         BudgetLineEntity::class,
         BudgetLogEntity::class,
-        PasswordEntity::class
+        PasswordEntity::class,
+        com.antigravity.aegis.data.local.entity.SessionEntity::class
     ],
-    version = 33,
+    version = 34,
     exportSchema = false
 )
 @androidx.room.TypeConverters(Converters::class)
@@ -51,8 +52,16 @@ abstract class AegisDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
     abstract fun taskDao(): TaskDao
     abstract fun passwordDao(): com.antigravity.aegis.data.local.dao.PasswordDao
+    abstract fun sessionDao(): com.antigravity.aegis.data.local.dao.SessionDao
     
     companion object {
+        val MIGRATION_33_34 = object : androidx.room.migration.Migration(33, 34) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, projectId INTEGER NOT NULL, date INTEGER NOT NULL, location TEXT NOT NULL, duration TEXT NOT NULL, notes TEXT NOT NULL, exercises TEXT NOT NULL, nextSessionDate INTEGER, googleCalendarEventId TEXT, FOREIGN KEY (projectId) REFERENCES projects(id) ON DELETE CASCADE)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_sessions_projectId ON sessions(projectId)")
+            }
+        }
+
         val MIGRATION_32_33 = object : androidx.room.migration.Migration(32, 33) {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE clients ADD COLUMN googleCalendarEventId TEXT DEFAULT NULL")

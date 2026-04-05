@@ -153,6 +153,7 @@ erDiagram
     PROJECT ||--o{ TASK : "contiene"
     PROJECT ||--o{ WORK_REPORT : "genera"
     PROJECT ||--o{ QUOTE : "presupuesta"
+    PROJECT ||--o{ SESSION : "detalla"
     
     USER {
         int id PK
@@ -195,6 +196,16 @@ erDiagram
         float distance
         float cost
     }
+    SESSION {
+        int id PK
+        int projectId FK
+        date date
+        string location
+        string notes
+        string exercises
+        date nextSessionDate
+        string googleCalendarEventId
+    }
 ```
 
 ---
@@ -203,17 +214,19 @@ erDiagram
 
 ### Módulo 1: Hub de Proyectos (CRM)
 | Componente | Descripción |
-|------------|-------------|
-| **Entidades** | Client, Project, Task |
-| **Pantallas** | Dashboard, ClientList, ClientDetail, ProjectDetail |
-| **ViewModel** | CrmViewModel (compartido) |
+206: |------------|-------------|
+207: | **Entidades** | Client, Project, Task, Session |
+208: | **Pantallas** | Dashboard, ClientList, ClientDetail, ProjectDetail (con Sesiones) |
+209: | **Integración** | Google Calendar Sync (API v3) |
+210: | **Estados** | CRM: Won, Lost, Sent, Project Closed |
 
-### Módulo 2: Partes de Trabajo
+### Módulo 2: Partes de Trabajo / Sesiones
 | Componente | Descripción |
 |------------|-------------|
 | **Firma Digital** | Canvas en Compose capturando Path del dedo |
-| **PDF** | `android.graphics.pdf.PdfDocument` |
+| **PDF** | `android.graphics.pdf.PdfDocument` (Partes + Informe Cliente) |
 | **Cámara** | `ActivityResultContracts.TakePicture` |
+| **Informes** | Consolidación Cliente (Proyectos + Historial completo) |
 
 ### Módulo 3: Presupuestos
 | Componente | Descripción |
@@ -303,4 +316,4 @@ class ThemeViewModel : ViewModel() {
 
 ---
 
-*Documentación Técnica v1.1 - Aegis Core - Enero 2026*
+*Documentación Técnica v1.2.1 - Aegis Core - Abril 2026*

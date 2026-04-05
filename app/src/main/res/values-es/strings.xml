@@ -521,6 +521,11 @@
     <string name="time_control_inactive_project_title">Proyecto No Activo</string>
     <string name="time_control_inactive_project_desc">El proyecto seleccionado no está Activo. ¿Deseas activarlo para imputar horas?</string>
     <string name="time_control_activate_save_button">Activar y Guardar</string>
+    <string name="crm_project_status_closed">Proyecto Cerrado</string>
+    <string name="crm_project_close_warning_title">Aviso: Proyecto Cerrado</string>
+    <string name="crm_project_close_warning_message">Este proyecto ya está cerrado. ¿Está seguro de que desea imputar costes u horas?</string>
+    <string name="crm_project_transition_error_won_required">Los proyectos solo pueden cerrarse desde el estado Ganado.</string>
+    <string name="crm_project_detail_btn_close">Cerrar Proyecto</string>
 
     <!-- Feature: Profile Config -->
     <string name="profile_edit_title">Editar Perfil</string>
@@ -615,4 +620,17 @@
     <string name="sync_auto_notification_file_success">Archivo "%1$s" subido correctamente.</string>
     <string name="sync_auto_error_auth">Error de autenticación con Google.</string>
     <string name="sync_auto_error_network">Error de red al sincronizar.</string>
+
+    <!-- Feature: CRM/Sessions -->
+    <string name="crm_session_title">Sesiones</string>
+    <string name="crm_session_date">Fecha de la Sesión</string>
+    <string name="crm_session_location">Lugar</string>
+    <string name="crm_session_duration">Duración</string>
+    <string name="crm_session_notes">Notas de la Sesión</string>
+    <string name="crm_session_exercises">Ejercicios / Tareas</string>
+    <string name="crm_session_next_date">Próxima Sesión</string>
+    <string name="crm_session_add_btn">Añadir Sesión</string>
+    <string name="crm_client_report_pdf">Generar Informe de Cliente (PDF)</string>
+    <string name="crm_session_empty">No hay sesiones registradas en este proyecto.</string>
+    <string name="crm_session_created_success">Sesión guardada y programada correctamente.</string>
 </resources>

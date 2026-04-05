@@ -9,6 +9,7 @@ import com.antigravity.aegis.data.local.entity.ExpenseEntity
 import com.antigravity.aegis.domain.expenses.ExportManager
 import com.antigravity.aegis.domain.expenses.OcrManager
 import com.antigravity.aegis.domain.repository.ExpenseRepository
+import com.antigravity.aegis.domain.model.CrmStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,6 +59,11 @@ class ExpensesViewModel @Inject constructor(
     // ... Transfer Logic (unchanged) ...
     private val _transferState = MutableStateFlow<TransferState>(TransferState.Idle)
     val transferState = _transferState.asStateFlow()
+
+    private val _showClosedDialog = MutableStateFlow(false)
+    val showClosedDialog: StateFlow<Boolean> = _showClosedDialog
+
+    private var pendingExpenseSave: (() -> Unit)? = null
 
     fun exportExpenses() {
         viewModelScope.launch {
@@ -168,6 +174,33 @@ class ExpensesViewModel @Inject constructor(
         category: String,
         projectId: Int?
     ) {
+        if (projectId != null) {
+            viewModelScope.launch {
+                val project = projectRepository.getProjectById(projectId)
+                if (project?.status == CrmStatus.PROJECT_CLOSED) {
+                    pendingExpenseSave = { 
+                        executeSaveExpense(date, totalAmount, baseAmount, taxAmount, merchant, imageUri, category, projectId) 
+                    }
+                    _showClosedDialog.value = true
+                    return@launch
+                }
+                executeSaveExpense(date, totalAmount, baseAmount, taxAmount, merchant, imageUri, category, projectId)
+            }
+        } else {
+            executeSaveExpense(date, totalAmount, baseAmount, taxAmount, merchant, imageUri, category, projectId)
+        }
+    }
+
+    private fun executeSaveExpense(
+        date: Long,
+        totalAmount: Double,
+        baseAmount: Double,
+        taxAmount: Double,
+        merchant: String,
+        imageUri: Uri?,
+        category: String,
+        projectId: Int?
+    ) {
         viewModelScope.launch {
             var imagePath: String? = imageUri?.toString()
             
@@ -218,13 +251,33 @@ class ExpensesViewModel @Inject constructor(
                 }
             }
             
+            settingsRepository.triggerAutoBackup()
             clearScannedData()
         }
     }
 
     fun updateExpense(expense: ExpenseEntity) {
+        if (expense.projectId != null) {
+            viewModelScope.launch {
+                val project = projectRepository.getProjectById(expense.projectId)
+                if (project?.status == CrmStatus.PROJECT_CLOSED) {
+                    pendingExpenseSave = { 
+                        executeUpdateExpense(expense) 
+                    }
+                    _showClosedDialog.value = true
+                    return@launch
+                }
+                executeUpdateExpense(expense)
+            }
+        } else {
+            executeUpdateExpense(expense)
+        }
+    }
+
+    private fun executeUpdateExpense(expense: ExpenseEntity) {
         viewModelScope.launch {
             expenseRepository.updateExpense(expense)
+            settingsRepository.triggerAutoBackup()
         }
     }
 
@@ -263,6 +316,7 @@ class ExpensesViewModel @Inject constructor(
             // 4. Update Original as "Distributed"
             val updatedOriginal = expense.copy(status = "Distributed")
             expenseRepository.updateExpense(updatedOriginal)
+            settingsRepository.triggerAutoBackup()
         }
     }
 
@@ -337,5 +391,16 @@ class ExpensesViewModel @Inject constructor(
 
     fun clearPdfShareUri() {
         _pdfShareUri.value = null
+    }
+
+    fun onConfirmClosedUsage() {
+        _showClosedDialog.value = false
+        pendingExpenseSave?.invoke()
+        pendingExpenseSave = null
+    }
+
+    fun onDismissClosedDialog() {
+        _showClosedDialog.value = false
+        pendingExpenseSave = null
     }
 }

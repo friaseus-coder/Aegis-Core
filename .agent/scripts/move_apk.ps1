@@ -5,7 +5,7 @@ $projectRoot = "c:\Users\Usuario\Documents\Javier Frias\Antigravity\aegis core"
 $buildDir = "$projectRoot\app\build\outputs\apk\debug"
 $targetDir = "$projectRoot\apks"
 $appName = "aegis-core"
-$version = "v1.0.0" # Esto podría leerse dinámicamente si se deseara, hardcoded por ahora para cumplir ejemplo
+$version = "v1.2.2" # Versión actual tras implementar Backup Consolidado y Auto-Sync
 $flavor = "debug"
 
 # Crear directorio de destino si no existe

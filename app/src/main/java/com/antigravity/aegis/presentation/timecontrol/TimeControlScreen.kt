@@ -33,6 +33,7 @@ fun TimeControlScreen(
     val hours by viewModel.hours.collectAsState()
     val description by viewModel.description.collectAsState()
     val showStatusDialog by viewModel.showStatusDialog.collectAsState()
+    val showClosedDialog by viewModel.showClosedDialog.collectAsState()
 
     // Date Utilities
     val calendar = Calendar.getInstance()
@@ -197,6 +198,24 @@ fun TimeControlScreen(
                 confirmButton = {
                     Button(onClick = { viewModel.onConfirmStatusChange() }) {
                         Text(stringResource(R.string.time_control_activate_save_button))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.onDismissStatusDialog() }) {
+                        Text(stringResource(R.string.general_cancel))
+                    }
+                }
+            )
+        }
+
+        if (showClosedDialog) {
+            AlertDialog(
+                onDismissRequest = { viewModel.onDismissStatusDialog() },
+                title = { Text(stringResource(R.string.crm_project_close_warning_title)) },
+                text = { Text(stringResource(R.string.crm_project_close_warning_message)) },
+                confirmButton = {
+                    Button(onClick = { viewModel.onConfirmClosedUsage() }) {
+                        Text(stringResource(R.string.general_ok))
                     }
                 },
                 dismissButton = {

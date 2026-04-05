@@ -124,12 +124,16 @@ data class UserEntity(
 | `es` | Español | `values-es/strings.xml` |
 | `en` | Inglés | `values/strings.xml` |
 
-### Cambio de Idioma Dinámico
+### Cambio de Idioma Dinámico y Protocolo i18n
 
-El cambio de idioma se realiza en tiempo real sin reiniciar la app:
+El cambio de idioma se realiza en tiempo real sin reiniciar la app. Aegis Core sigue un **Protocolo i18n Strict Mode**:
+
+- **Prohibición de Hardcoded Strings**: No se permiten textos literales en la capa de UI o ViewModel.
+- **Dualidad XML**: Todo recurso de texto debe existir en `res/values/strings.xml` (EN) y `res/values-es/strings.xml` (ES).
+- **Abstracción de Texto**: Los ViewModels emiten estados usando `UiText` para evitar dependencias directas con `Context` o recursos de Android.
 
 ```kotlin
-// LoginScreen.kt
+// Ejemplo de implementación de cambio dinámico
 val localizedContext = remember(language) {
     val locale = Locale(language)
     Locale.setDefault(locale)
@@ -137,11 +141,6 @@ val localizedContext = remember(language) {
     config.setLocale(locale)
     context.resources.updateConfiguration(config, context.resources.displayMetrics)
     context.createConfigurationContext(config)
-}
-
-// Forzar recomposición
-key(language) {
-    // UI se reconstruye con nuevos strings
 }
 ```
 
@@ -160,8 +159,6 @@ flowchart TD
     B --> C[Migración Room: +Cliente, +Proyecto, +Tarea]
     C --> D[+ Módulo Gastos]
     D --> E[Migración Room: +Expense, +Categoría]
-    E --> F[+ Módulo Inventario]
-    F --> G[Migración Room: +Producto, +Proveedor]
 ```
 
 **Resultado**: La Bóveda crece con los módulos comprados, manteniendo:
@@ -218,4 +215,4 @@ stateDiagram-v2
 
 ---
 
-*Documento de arquitectura v1.1 - Aegis Core - Enero 2026*
+*Documento de arquitectura v1.2 - Aegis Core - Abril 2026*
